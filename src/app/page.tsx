@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/grocery/product-grid";
 import { CartSheet } from "@/components/grocery/cart-sheet";
 import { CheckoutDialog } from "@/components/grocery/checkout-dialog";
 import { ProductDetailDialog } from "@/components/grocery/product-detail-dialog";
+import { WishlistSheet } from "@/components/grocery/wishlist-sheet";
 import { AdvancedFilter, DEFAULT_FILTER, applyFilter, type FilterState } from "@/components/grocery/advanced-filter";
 import { Footer } from "@/components/grocery/footer";
 import { AboutSection } from "@/components/grocery/about-section";
@@ -198,6 +199,7 @@ export default function HomePage() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
       />
+      <WishlistSheet onProductClick={handleOpenDetail} />
       <BackToTop />
     </div>
   );

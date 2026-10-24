@@ -8,6 +8,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
 import { cn } from "@/lib/utils";
+import { WishlistButton } from "./wishlist-button";
 
 interface ProductCardProps {
   product: Product;
@@ -41,11 +42,17 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all hover:shadow-lg hover:border-primary/40"
     >
       {/* Image area with emoji — clickable to open detail */}
-      <button
-        type="button"
+      <div
+        role={onOpenDetail ? "button" : undefined}
+        tabIndex={onOpenDetail ? 0 : undefined}
         onClick={handleCardClick}
-        disabled={!onOpenDetail}
-        className="relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/10 cursor-pointer disabled:cursor-default"
+        onKeyDown={(e) => {
+          if (onOpenDetail && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
+        className={`relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/10 ${onOpenDetail ? "cursor-pointer" : "cursor-default"}`}
         aria-label={`Lihat detail ${product.name}`}
       >
         {/* Badges */}
@@ -62,9 +69,12 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
           )}
         </div>
 
-        {/* Hover hint */}
+        {/* Wishlist heart button (top-right, always visible) */}
+        <WishlistButton product={product} size="sm" variant="overlay" />
+
+        {/* Hover hint (bottom-right) */}
         {onOpenDetail && !outOfStock && (
-          <div className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-sm">
+          <div className="absolute bottom-2 left-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-sm">
             <Eye className="h-3.5 w-3.5" />
           </div>
         )}
@@ -91,7 +101,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
             </Badge>
           </div>
         )}
-      </button>
+      </div>
 
       {/* Body — clickable to open detail */}
       <div

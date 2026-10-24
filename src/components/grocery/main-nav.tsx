@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Menu, X, Leaf, ShoppingCart, Sun, Moon } from "lucide-react";
+import { Menu, X, Leaf, ShoppingCart, Sun, Moon, Heart } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store/cart";
+import { useWishlistStore } from "@/lib/store/wishlist";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -74,6 +75,8 @@ export function MobileNav({ onNavigate }: MainNavProps) {
   const [open, setOpen] = useState(false);
   const totalItems = useCartStore((s) => s.getTotalItems());
   const openCart = useCartStore((s) => s.openCart);
+  const wishlistCount = useWishlistStore((s) => s.getCount());
+  const openWishlist = useWishlistStore((s) => s.openWishlist);
 
   const handleNavClick = (id: string) => {
     setOpen(false);
@@ -88,6 +91,11 @@ export function MobileNav({ onNavigate }: MainNavProps) {
   const handleCartClick = () => {
     setOpen(false);
     setTimeout(() => openCart(), 100);
+  };
+
+  const handleWishlistClick = () => {
+    setOpen(false);
+    setTimeout(() => openWishlist(), 100);
   };
 
   return (
@@ -148,6 +156,19 @@ export function MobileNav({ onNavigate }: MainNavProps) {
                 {totalItems > 0 && (
                   <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
                     {totalItems}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={handleWishlistClick}
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              >
+                <Heart className={`h-5 w-5 ${wishlistCount > 0 ? "fill-rose-500 text-rose-500" : "text-rose-500"}`} />
+                Wishlist
+                {wishlistCount > 0 && (
+                  <span className="ml-auto rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">
+                    {wishlistCount}
                   </span>
                 )}
               </button>

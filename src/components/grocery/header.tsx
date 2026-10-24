@@ -1,7 +1,8 @@
 "use client";
 
-import { ShoppingCart, Leaf, Search, MapPin, Phone } from "lucide-react";
+import { ShoppingCart, Leaf, Search, MapPin, Phone, Heart } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
+import { useWishlistStore } from "@/lib/store/wishlist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,8 @@ interface HeaderProps {
 export function Header({ searchQuery, onSearchChange }: HeaderProps) {
   const totalItems = useCartStore((s) => s.getTotalItems());
   const openCart = useCartStore((s) => s.openCart);
+  const wishlistCount = useWishlistStore((s) => s.getCount());
+  const openWishlist = useWishlistStore((s) => s.openWishlist);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
@@ -65,9 +68,30 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
           />
         </div>
 
-        {/* Right actions: theme toggle + cart (desktop) + hamburger (mobile) */}
+        {/* Right actions: theme toggle + wishlist + cart (desktop) + hamburger (mobile) */}
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
+
+          {/* Wishlist button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openWishlist}
+            className="relative h-10 w-10 rounded-full hover:bg-accent transition-colors"
+            aria-label={`Wishlist${wishlistCount > 0 ? ` (${wishlistCount} item)` : ""}`}
+            title="Wishlist favorit"
+          >
+            <Heart className={`h-5 w-5 ${wishlistCount > 0 ? "fill-rose-500 text-rose-500" : "text-foreground"}`} />
+            {wishlistCount > 0 && (
+              <Badge
+                variant="secondary"
+                className="absolute -top-1 -right-1 h-4 min-w-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-white text-[9px] font-bold"
+              >
+                {wishlistCount}
+              </Badge>
+            )}
+          </Button>
+
           <Button
             onClick={openCart}
             className="relative h-10 rounded-full px-4 md:px-5 shadow-sm hover:shadow-md transition-shadow"

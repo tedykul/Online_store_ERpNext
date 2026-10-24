@@ -1,0 +1,176 @@
+"use client";
+
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Heart, Trash2, ShoppingCart, Plus } from "lucide-react";
+import { useWishlistStore } from "@/lib/store/wishlist";
+import { useCartStore } from "@/lib/store/cart";
+import { formatIDR } from "@/lib/mock-data";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import type { Product } from "@/types/grocery";
+
+interface WishlistSheetProps {
+  /** Called when user clicks "Move to cart" on an item. Optional. */
+  onProductClick?: (product: Product) => void;
+}
+
+export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
+  const { items, isOpen, closeWishlist, remove, clear } = useWishlistStore();
+  const addItem = useCartStore((s) => s.addItem);
+
+  const handleMoveToCart = (product: Product) => {
+    if (product.stock <= 0) {
+      toast.error(`${product.name} sedang habis`);
+      return;
+    }
+    addItem(product, 1);
+    toast.success(`${product.name} dipindahkan ke keranjang`);
+  };
+
+  const handleRemove = (productId: string, name: string) => {
+    remove(productId);
+    toast.success(`${name} dihapus dari wishlist`);
+  };
+
+  return (
+    <Sheet open={isOpen} onOpenChange={(o) => !o && closeWishlist()}>
+      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+        {/* Header */}
+        <SheetHeader className="border-b border-border/60 px-5 py-4">
+          <SheetTitle className="flex items-center gap-2">
+            <Heart className="h-5 w-5 text-rose-500" />
+            Wishlist Favorit
+            {items.length > 0 && (
+              <span className="ml-auto rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                {items.length} item
+              </span>
+            )}
+          </SheetTitle>
+          <SheetDescription className="sr-only">
+            Daftar produk favorit yang disimpan
+          </SheetDescription>
+        </SheetHeader>
+
+        {/* Items list */}
+        {items.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+            <span className="text-6xl">💚</span>
+            <h3 className="text-base font-semibold">Wishlist masih kosong</h3>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              Simpan produk favoritmu dengan klik ikon hati ♡ di kartu produk.
+              Nanti bisa balik beli kapan saja!
+            </p>
+            <Button variant="outline" onClick={closeWishlist} className="mt-2 rounded-full">
+              Lanjut Belanja
+            </Button>
+          </div>
+        ) : (
+          <ScrollArea className="flex-1 scrollbar-grocery">
+            <div className="flex flex-col gap-3 p-4">
+              <AnimatePresence initial={false}>
+                {items.map((product) => {
+                  const outOfStock = product.stock <= 0;
+                  return (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, x: 30, height: 0, marginBottom: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex gap-3 rounded-xl border border-border/60 bg-card p-3"
+                    >
+                      {/* Thumb emoji */}
+                      <button
+                        onClick={() => {
+                          onProductClick?.(product);
+                          closeWishlist();
+                        }}
+                        className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-secondary/40 to-secondary/10 text-3xl cursor-pointer"
+                        aria-label={`Lihat detail ${product.name}`}
+                      >
+                        {product.emoji}
+                      </button>
+
+                      {/* Info */}
+                      <div className="flex flex-1 flex-col gap-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="line-clamp-1 text-sm font-semibold leading-tight">
+                            {product.name}
+                          </h4>
+                          <button
+                            onClick={() => handleRemove(product.id, product.name)}
+                            className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
+                            aria-label={`Hapus ${product.name} dari wishlist`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {formatIDR(product.price)} / {product.unit}
+                        </span>
+
+                        <div className="mt-1 flex items-center justify-between gap-2">
+                          {outOfStock ? (
+                            <span className="text-xs font-medium text-destructive">
+                              Stok habis
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              Stok: {product.stock} {product.unit}
+                            </span>
+                          )}
+                          <Button
+                            size="sm"
+                            disabled={outOfStock}
+                            onClick={() => handleMoveToCart(product)}
+                            className="h-7 rounded-lg px-2.5 text-xs"
+                          >
+                            <ShoppingCart className="h-3 w-3 mr-1" />
+                            Ke Keranjang
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+
+              <button
+                onClick={clear}
+                className="mx-auto mt-2 text-xs text-muted-foreground underline transition-colors hover:text-destructive"
+              >
+                Kosongkan wishlist
+              </button>
+            </div>
+          </ScrollArea>
+        )}
+
+        {/* Footer */}
+        {items.length > 0 && (
+          <SheetFooter className="border-t border-border/60 p-4">
+            <p className="mb-2 text-center text-xs text-muted-foreground">
+              {items.length} produk tersimpan. Klik <Plus className="inline h-3 w-3" /> untuk pindahkan ke keranjang.
+            </p>
+            <Button
+              onClick={closeWishlist}
+              className="h-11 w-full rounded-xl text-sm shadow-md"
+            >
+              Lanjut Belanja
+            </Button>
+          </SheetFooter>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
