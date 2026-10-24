@@ -64,3 +64,118 @@ model NewsletterSubscriber {
   @@index([status])
   @@index([createdAt])
 }
+
+// ============================================================
+// Admin-editable content models
+// ============================================================
+// SiteSetting: singleton row holding key-value content for Hero,
+// Promo, Contact, About, Footer sections. Fallback to hardcoded
+// defaults if row missing or field null (backward compat).
+// ============================================================
+
+/// Singleton row (id='singleton') holding editable site content.
+/// All fields optional — null means use hardcoded default.
+model SiteSetting {
+  id    String  @id @default("singleton")
+
+  // Hero section
+  heroBadge        String? // "Dipetik pagi, sampai rumah siang"
+  heroTitleA       String? // "Sayur & Buah"
+  heroTitleHighlight String? // "Segar Harian"
+  heroTitleB       String? // "dari Petani Lokal"
+  heroSubtitle     String?
+  heroCtaPrimary   String? // "Mulai Belanja"
+  heroCtaSecondary String? // "Lihat Promo"
+
+  // Promo banner
+  promoId          String? // unique campaign id (changing resets dismiss)
+  promoTitle       String?
+  promoDescription String?
+
+  // Contact section
+  contactPhone     String?
+  contactEmail     String?
+  contactAddress   String?
+  contactHours     String?
+
+  // About section
+  aboutBadge       String?
+  aboutTitleA      String?
+  aboutTitleHighlight String?
+  aboutTitleB      String?
+  aboutSubtitle    String?
+  aboutStoryH3     String?
+  aboutStoryP1     String?
+  aboutStoryP2     String?
+  aboutStat1Value  String?
+  aboutStat1Label  String?
+  aboutStat2Value  String?
+  aboutStat2Label  String?
+  aboutStat3Value  String?
+  aboutStat3Label  String?
+  aboutStat4Value  String?
+  aboutStat4Label  String?
+  aboutValue1Title String?
+  aboutValue1Desc  String?
+  aboutValue2Title String?
+  aboutValue2Desc  String?
+  aboutValue3Title String?
+  aboutValue3Desc  String?
+  aboutValue4Title String?
+  aboutValue4Desc  String?
+
+  // Footer
+  footerBrandText  String?
+  footerTagline    String?
+
+  updatedAt DateTime @updatedAt
+}
+
+/// FAQ items — orderable, publishable.
+model FAQ {
+  id        String  @id @default(cuid())
+  question  String
+  answer    String
+  order     Int     @default(0)
+  published Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+  @@index([order])
+}
+
+/// Testimonials — orderable, publishable.
+model Testimonial {
+  id        String  @id @default(cuid())
+  name      String
+  role      String
+  avatar    String  // emoji
+  rating    Float   // 0-5
+  text      String
+  location  String
+  order     Int     @default(0)
+  published Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published])
+  @@index([order])
+}
+
+/// Categories (Item Group display) — editable emoji, name, description.
+/// Kept separate from ERPNext Item Group to allow custom display config.
+model CategorySetting {
+  id          String  @id @default(cuid())
+  name        String  @unique // matches Product.category
+  emoji       String
+  description String?
+  gradient    String  // tailwind gradient classes
+  order       Int     @default(0)
+  published   Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@index([order])
+}
