@@ -15,6 +15,7 @@ import type { CheckoutResponse } from "@/types/grocery";
 import { toast } from "sonner";
 import { TrustBadges } from "./trust-badges";
 import { CheckoutSteps } from "./checkout-steps";
+import { DeliveryEstimateDisplay } from "./delivery-estimate";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -108,7 +109,11 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
         <CheckoutSteps current={step} />
 
         {step === "success" && result ? (
-          <SuccessView result={result} onClose={() => handleClose(false)} />
+          <SuccessView
+            result={result}
+            deliveryMethod={deliveryMethod}
+            onClose={() => handleClose(false)}
+          />
         ) : step === "loading" ? (
           <LoadingView />
         ) : (
@@ -201,6 +206,8 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
                     desc="Gratis"
                   />
                 </RadioGroup>
+                {/* Estimated delivery time — updates when method changes */}
+                <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
               </div>
 
               {/* Payment method */}
@@ -345,7 +352,15 @@ function LoadingView() {
   );
 }
 
-function SuccessView({ result, onClose }: { result: CheckoutResponse; onClose: () => void }) {
+function SuccessView({
+  result,
+  deliveryMethod,
+  onClose,
+}: {
+  result: CheckoutResponse;
+  deliveryMethod: "delivery" | "pickup";
+  onClose: () => void;
+}) {
   return (
     <div className="flex flex-col items-center gap-4 py-8 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
@@ -356,16 +371,21 @@ function SuccessView({ result, onClose }: { result: CheckoutResponse; onClose: (
         <p className="mt-1 text-sm text-muted-foreground">{result.message}</p>
       </div>
 
-      <div className="w-full max-w-sm rounded-xl border border-border/60 bg-secondary/30 p-4 text-left">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">No. Pesanan</span>
-          <span className="font-mono font-bold text-primary">{result.salesOrderName}</span>
-        </div>
-        {result.mock && (
-          <div className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-700">
-            ⚠️ Mode mock — set ERPNext terhubung untuk pesanan asli
+      <div className="w-full max-w-sm space-y-3 text-left">
+        <div className="rounded-xl border border-border/60 bg-secondary/30 p-4">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">No. Pesanan</span>
+            <span className="font-mono font-bold text-primary">{result.salesOrderName}</span>
           </div>
-        )}
+          {result.mock && (
+            <div className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-700">
+              ⚠️ Mode mock — set ERPNext terhubung untuk pesanan asli
+            </div>
+          )}
+        </div>
+
+        {/* Estimated delivery/pickup time for the confirmed order */}
+        <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
       </div>
 
       <Button onClick={onClose} className="mt-2 w-full max-w-sm rounded-xl">

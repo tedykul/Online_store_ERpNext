@@ -9,6 +9,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrustBadges } from "./trust-badges";
+import { DeliveryEstimateDisplay } from "./delivery-estimate";
 
 interface CartSheetProps {
   onCheckout: () => void;
@@ -161,7 +162,10 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
         {/* Footer summary */}
         {items.length > 0 && (
           <SheetFooter className="border-t border-border/60 p-4">
-            <div className="mb-3 space-y-1.5 text-sm">
+            <div className="mb-3 space-y-2 text-sm">
+              {/* Delivery estimate */}
+              <DeliveryEstimateDisplay method="delivery" variant="card" />
+
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal ({totalItems} item)</span>
                 <span className="font-medium text-foreground">{formatIDR(totalPrice)}</span>
