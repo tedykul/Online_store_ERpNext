@@ -32,6 +32,7 @@ import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "./product-image";
 
 interface ProductDetailDialogProps {
   product: Product | null;
@@ -112,9 +113,13 @@ function ProductDetailContent({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="text-[200px] leading-none drop-shadow-xl select-none"
+            className="h-full w-full"
           >
-            {product.emoji}
+            <ProductImage
+              product={product}
+              emojiClassName="text-[200px]"
+              className="h-full min-h-[360px] rounded-2xl"
+            />
           </motion.div>
         </div>
         <div className="absolute left-4 top-4 flex flex-col gap-1.5">
@@ -135,7 +140,13 @@ function ProductDetailContent({
       <div className="flex flex-col max-h-[92vh] md:max-h-[88vh]">
         {/* Mobile visual header */}
         <div className="md:hidden relative bg-gradient-to-br from-secondary/40 to-background p-6 flex items-center justify-center">
-          <span className="text-7xl drop-shadow-md">{product.emoji}</span>
+          <div className="h-40 w-40">
+            <ProductImage
+              product={product}
+              emojiClassName="text-7xl"
+              className="h-full rounded-2xl"
+            />
+          </div>
           <div className="absolute left-3 top-3 flex flex-col gap-1">
             {product.onSale && discount > 0 && (
               <Badge variant="destructive" className="text-[10px] font-bold">

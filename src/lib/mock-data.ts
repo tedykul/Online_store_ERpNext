@@ -406,6 +406,16 @@ function deriveReviewCount(itemCode: string): number {
   return 24 + (hash % 457); // 24 - 480
 }
 
+/** Mapping of product IDs to AI-generated product photos. */
+const PRODUCT_IMAGES: Record<string, string> = {
+  "TOMAT-MERAH-001": "/products/tomat.png",
+  "BAYAM-HIJAU-001": "/products/bayam.png",
+  "WORTEL-001": "/products/wortel.png",
+  "BROKOLI-001": "/products/brokoli.png",
+  "APEL-001": "/products/apel.png",
+  "ANGGUR-001": "/products/anggur.png",
+};
+
 /** Enrich each product with derived optional fields (mutates copy, not source). */
 const ENRICHED_PRODUCTS: Product[] = MOCK_PRODUCTS.map((p) => {
   const tags = p.tags || [];
@@ -420,6 +430,7 @@ const ENRICHED_PRODUCTS: Product[] = MOCK_PRODUCTS.map((p) => {
     benefits: p.benefits ?? BENEFITS_BY_CATEGORY[p.category] ?? [],
     storageTip: p.storageTip ?? STORAGE_TIP_BY_CATEGORY[p.category] ?? "Simpan di tempat sejuk dan kering.",
     origin: p.origin ?? (originTag ? ORIGIN_BY_TAG[originTag] : "Petani mitra SayurBox"),
+    image: p.image ?? PRODUCT_IMAGES[p.id] ?? undefined,
   };
 });
 

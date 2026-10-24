@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
+import { ProductImage } from "./product-image";
 
 interface RecentlyViewedSectionProps {
   /** Called when user clicks a recently viewed product card. */
@@ -62,11 +63,14 @@ export function RecentlyViewedSection({ onProductClick }: RecentlyViewedSectionP
             className="group flex w-32 shrink-0 flex-col gap-1.5 rounded-xl border border-border/60 bg-card p-2 text-left transition-all hover:shadow-md hover:border-primary/40 md:w-auto"
             aria-label={`Lihat kembali ${product.name}`}
           >
-            {/* Emoji */}
-            <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-gradient-to-br from-secondary/40 to-secondary/10">
-              <span className="text-4xl transition-transform group-hover:scale-110">
-                {product.emoji}
-              </span>
+            {/* Image / Emoji */}
+            <div className="aspect-square w-full overflow-hidden rounded-lg">
+              <ProductImage
+                product={product}
+                emojiClassName="text-4xl"
+                animateOnHover
+                className="h-full w-full"
+              />
             </div>
             {/* Name + price */}
             <div className="min-w-0">

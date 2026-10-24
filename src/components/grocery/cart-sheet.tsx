@@ -10,6 +10,7 @@ import { formatIDR } from "@/lib/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { TrustBadges } from "./trust-badges";
 import { DeliveryEstimateDisplay } from "./delivery-estimate";
+import { ProductImage } from "./product-image";
 
 interface CartSheetProps {
   onCheckout: () => void;
@@ -96,9 +97,13 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
                     transition={{ duration: 0.2 }}
                     className="flex gap-3 rounded-xl border border-border/60 bg-card p-3"
                   >
-                    {/* Thumb emoji */}
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-secondary/40 to-secondary/10 text-3xl">
-                      {item.product.emoji}
+                    {/* Thumb image / emoji */}
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg">
+                      <ProductImage
+                        product={item.product}
+                        emojiClassName="text-3xl"
+                        className="h-full w-full"
+                      />
                     </div>
 
                     {/* Info */}

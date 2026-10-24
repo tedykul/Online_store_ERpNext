@@ -18,6 +18,7 @@ import { formatIDR } from "@/lib/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import type { Product } from "@/types/grocery";
+import { ProductImage } from "./product-image";
 
 interface WishlistSheetProps {
   /** Called when user clicks "Move to cart" on an item. Optional. */
@@ -90,16 +91,20 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
                       transition={{ duration: 0.2 }}
                       className="flex gap-3 rounded-xl border border-border/60 bg-card p-3"
                     >
-                      {/* Thumb emoji */}
+                      {/* Thumb image / emoji */}
                       <button
                         onClick={() => {
                           onProductClick?.(product);
                           closeWishlist();
                         }}
-                        className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-secondary/40 to-secondary/10 text-3xl cursor-pointer"
+                        className="h-16 w-16 shrink-0 overflow-hidden rounded-lg cursor-pointer"
                         aria-label={`Lihat detail ${product.name}`}
                       >
-                        {product.emoji}
+                        <ProductImage
+                          product={product}
+                          emojiClassName="text-3xl"
+                          className="h-full w-full"
+                        />
                       </button>
 
                       {/* Info */}

@@ -9,6 +9,7 @@ import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
 import { cn } from "@/lib/utils";
 import { WishlistButton } from "./wishlist-button";
+import { ProductImage } from "./product-image";
 
 interface ProductCardProps {
   product: Product;
@@ -79,12 +80,13 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
           </div>
         )}
 
-        {/* Big emoji */}
-        <div className="flex h-full w-full items-center justify-center">
-          <span className="select-none text-7xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 drop-shadow-md">
-            {product.emoji}
-          </span>
-        </div>
+        {/* Big emoji / product photo */}
+        <ProductImage
+          product={product}
+          emojiClassName="text-7xl"
+          animateOnHover
+          className="aspect-square"
+        />
 
         {/* Stock overlay */}
         {outOfStock && (
