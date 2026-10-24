@@ -21,6 +21,7 @@ import { BackToTop } from "@/components/grocery/back-to-top";
 import { PromoBanner } from "@/components/grocery/promo-banner";
 import { AdminOverlay } from "@/components/admin/admin-overlay";
 import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
+import { OrderHistoryDialog } from "@/components/grocery/order-history-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Product, Category } from "@/types/grocery";
 import type { PageContent } from "@/lib/page-content";
@@ -127,11 +128,13 @@ export function HomeClient({ content }: HomeClientProps) {
   const [adminOpen, setAdminOpen] = useState(false);
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [trackingId, setTrackingId] = useState<string | undefined>(undefined);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const handleTrackOrder = (id: string) => {
     setTrackingId(id);
     setTrackingOpen(true);
-    setCheckoutOpen(false); // close checkout dialog
+    setCheckoutOpen(false);
+    setHistoryOpen(false);
   };
 
   return (
@@ -214,6 +217,7 @@ export function HomeClient({ content }: HomeClientProps) {
         content={content}
         onOpenAdmin={() => setAdminOpen(true)}
         onTrackOrder={() => { setTrackingId(undefined); setTrackingOpen(true); }}
+        onOrderHistory={() => setHistoryOpen(true)}
       />
 
       {/* Floating UI */}
@@ -233,6 +237,11 @@ export function HomeClient({ content }: HomeClientProps) {
         open={trackingOpen}
         onOpenChange={setTrackingOpen}
         initialTrackingId={trackingId}
+      />
+      <OrderHistoryDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        onTrackOrder={handleTrackOrder}
       />
       <BackToTop />
 

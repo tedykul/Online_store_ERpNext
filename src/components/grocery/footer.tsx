@@ -18,6 +18,8 @@ interface FooterProps {
   onOpenAdmin?: () => void;
   /** Open order tracking dialog. */
   onTrackOrder?: () => void;
+  /** Open order history dialog. */
+  onOrderHistory?: () => void;
 }
 
 /**
@@ -26,7 +28,7 @@ interface FooterProps {
  * that scroll to sections on the same page (no separate routes).
  * Social media links remain as placeholders (no real social accounts yet).
  */
-export function Footer({ content, onOpenAdmin, onTrackOrder }: FooterProps = {}) {
+export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: FooterProps = {}) {
   const brandText = content?.footerBrandText ?? "Marketplace sayur & buah segar langsung dari petani lokal. Mendukung ekonomi petani Indonesia.";
   const tagline = content?.footerTagline ?? "Sayur & Buah Segar";
   const phone = content?.contactPhone ?? "0800-1234-5678";
@@ -165,6 +167,16 @@ export function Footer({ content, onOpenAdmin, onTrackOrder }: FooterProps = {})
                   className="hover:text-primary transition-colors text-left"
                 >
                   📦 Lacak Pesanan
+                </button>
+              </li>
+            )}
+            {onOrderHistory && (
+              <li>
+                <button
+                  onClick={onOrderHistory}
+                  className="hover:text-primary transition-colors text-left"
+                >
+                  📋 Riwayat Pesanan
                 </button>
               </li>
             )}

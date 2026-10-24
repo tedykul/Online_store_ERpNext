@@ -229,3 +229,22 @@ Stage Summary:
 - Backward compatible: 17 of 23 products still use emoji (no image). ProductImage falls back gracefully.
 - New component: product-image.tsx.
 - New assets: 6 AI-generated PNGs in public/products/.
+
+---
+Task ID: sprint9
+Agent: main (Z.ai Code)
+Task: Sprint 9 - Mock payment gateway (VA + e-wallet + COD)
+
+Work Log:
+- Added Payment Prisma model (orderId, trackingId, method, amount, status, vaNumber, vaBank, paymentUrl, paidAt).
+- Created lib/payments.ts: createPayment() (mock VA for transfer, mock URL for e-wallet, skip for COD), simulatePayment() (marks paid + updates order to confirmed).
+- Created /api/payments/create + /api/payments/[paymentId]/confirm API routes.
+- Updated /api/checkout to also create payment record + return payment details.
+- Updated CheckoutDialog SuccessView: payment instructions per method (VA number for transfer, payment link for e-wallet, COD message), "Saya Sudah Bayar" button → confirm → order status confirmed.
+- Verified: transfer creates VA, confirm marks paid, COD skips payment. Zero errors.
+- Ready for Midtrans upgrade: replace mock VA/URL generation with real Midtrans API.
+
+Stage Summary:
+- 1 commit. Sprint 9 complete.
+- Backward compatible: payment fields optional, COD flow unchanged.
+- New: lib/payments.ts, 2 API routes, Payment model, SuccessView payment UI.
