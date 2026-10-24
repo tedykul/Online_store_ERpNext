@@ -157,3 +157,29 @@ Stage Summary:
 - Non-technical staff friendly: tab navigation, form fields with Indonesian labels, emoji/gradient/star pickers, SaveButton with visual feedback, DeleteButton with arm-then-confirm (prevent accidental delete), toast notifications for all actions.
 - Keyboard shortcuts: Ctrl+Shift+A to open admin, Escape to close.
 - Verified via Agent Browser: all 8 editors load with DB data, content changes reflect on frontend after reload.
+
+---
+Task ID: sprint6-phase0-to-5
+Agent: main (Z.ai Code)
+Task: Sprint 6 - Skenario C (audit log + rate limit) + Plan B documentation
+
+Work Log:
+- Phase 0: Audited existing admin API (8 routes, verifyAdmin pattern, no rate limit, no audit). Planned audit log integration + rate limit approach.
+- Phase 1: Added AdminAuditLog Prisma model (id, action, target, ip, userAgent, success, detail, createdAt with indexes). Created lib/audit.ts with logAdminAction() helper (fire-and-forget, non-blocking), getClientIp() (X-Forwarded-For aware), getAuditLogs() with filtering. Integrated audit logging into all 8 admin API routes: login (login_success/failed/rate_limited), content POST (update with field names), faqs/testimonials/categories CRUD (create/update/delete/publish_toggle/reorder). All unauthorized attempts logged. Added /api/admin/audit GET route (requires auth, filterable). Verified via curl: 7 audit entries logged correctly with action/target/ip/timestamp.
+- Phase 2: Created lib/rate-limit.ts: in-memory sliding window per IP. Two-tier: soft limit (5 attempts per 15 min → block 15 min), hard limit (20 attempts per 24h → block 24h). Cleanup old entries every 10 min. Applied to /api/admin/login: returns 429 with Retry-After header. Verified via curl: 5 wrong attempts → 401, 6th → 429, correct password after block → 429 (still blocked).
+- Phase 3: Created AuditLogViewer component: lists admin actions with filtering (action type, success status, search), stats summary (total/success/failed), color-coded badges per action type, relative time with full time tooltip, IP address display. Bug fix: initially used useAdminFetch hook which extracted first non-success key (entries array only) but component expected full { entries, total } object → client crash. Fixed by using custom fetch with useState. Added 'Audit Log' tab to admin overlay sidebar (ScrollText icon, 9 tabs total). Verified: tab renders, 15 log entries, stats show total=15, zero errors.
+- Phase 4: Created docs/PLAN_B_NEXTAUTH_MIGRATION.md: comprehensive migration plan from Skenario C to NextAuth.js. Documents: 6 trigger conditions, 8-day migration plan (2 sprints), dependencies, email service options, what stays same from Skenario C (~60% reusable), risks & mitigations, cost comparison, decision framework. Key insight: audit log + rate limit from Skenario C are reusable in NextAuth (just add userId column).
+- Phase 5: Full verification. API test: login (correct/wrong/rate-limited), content update (triggers audit), FAQ create (triggers audit), audit log entries verified with correct action/target/success. Browser golden path: page loads, admin opens, login works, 9 tabs render, Audit Log tab shows 15 entries with stats, zero console errors. Committed.
+
+Stage Summary:
+- 4 commits total (Phase 1+2 combined, Phase 3, Phase 4, Phase 5 docs).
+- Sprint 6 scope complete: Skenario C (audit log + rate limit) + Plan B documentation.
+- Backward compatible: audit logging is additive (no existing API contract changed), rate limit only adds 429 for abuse, audit viewer is new tab (no existing editors changed).
+- Code quality: ESLint clean, zero console errors, zero console warnings.
+- New components: audit-log-viewer.
+- New lib: lib/audit.ts (logAdminAction, getClientIp, getUserAgent, getAuditLogs), lib/rate-limit.ts (checkRateLimit, resetRateLimit).
+- New API: /api/admin/audit GET (list logs with filtering).
+- New Prisma model: AdminAuditLog (id, action, target, ip, userAgent, success, detail, createdAt).
+- New docs: docs/PLAN_B_NEXTAUTH_MIGRATION.md (NextAuth migration plan with trigger conditions).
+- Security improvements: brute force protection (5/15min, 20/24h), audit trail (IP + timestamp + action), unauthorized attempt logging.
+- Plan B readiness: ~60% of NextAuth work already done by Skenario C (audit log + rate limit reusable, just add userId column). Migration can be triggered when: karyawan > 15, turnover, compliance, public access, roles needed, multi-tenant.
