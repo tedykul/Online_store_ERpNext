@@ -21,6 +21,12 @@ export const metadata: Metadata = {
   description: "Belanja sayuran dan buah segar langsung dari petani lokal. Antar cepat, kualitas terjamin. Terintegrasi dengan ERPNext.",
   keywords: ["grocery", "sayur", "buah", "online", "segar", "ERPNext", "toko online"],
   authors: [{ name: "SayurBox" }],
+  icons: {
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
+  },
+  manifest: "/manifest.json",
   openGraph: {
     title: "SayurBox — Toko Online Sayur & Buah Segar",
     description: "Belanja sayuran dan buah segar langsung dari petani lokal.",
