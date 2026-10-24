@@ -96,6 +96,11 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-h-[92vh] overflow-y-auto scrollbar-grocery sm:max-w-lg">
+        {/* Always-present description for a11y (suppresses Radix warning
+            when step switches to loading/success without DialogDescription) */}
+        <DialogDescription className="sr-only">
+          Dialog checkout SayurBox
+        </DialogDescription>
         {step === "success" && result ? (
           <SuccessView result={result} onClose={() => handleClose(false)} />
         ) : step === "loading" ? (

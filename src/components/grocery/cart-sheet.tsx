@@ -1,6 +1,6 @@
 "use client";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -38,6 +38,9 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
               </span>
             )}
           </SheetTitle>
+          <SheetDescription className="sr-only">
+            Keranjang belanja SayurBox — kelola item dan checkout
+          </SheetDescription>
         </SheetHeader>
 
         {/* Free shipping progress */}
