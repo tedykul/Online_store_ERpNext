@@ -56,3 +56,27 @@ Stage Summary:
 - New components: theme-provider, theme-toggle, main-nav, about-section, faq-section, contact-section.
 - Accessibility improvements: aria-labels on nav/cart/buttons, aria-expanded on hamburger, aria-invalid on form fields, role=alert on errors, sr-only descriptions on dialogs, semantic nav/section/headings.
 - Verified via Agent Browser (desktop 1440x900 + mobile 390x844): all interactions work end-to-end.
+
+---
+Task ID: sprint2-phase1-to-5
+Agent: main (Z.ai Code)
+Task: Sprint 2 - Product detail modal, advanced filter, testimonials, trust badges
+
+Work Log:
+- Phase 0: Audited product-card.tsx, checkout-dialog.tsx, page.tsx, types/grocery.ts, mock-data.ts. Confirmed Product type already has organic/onSale/tags fields. Planned backward-compatible extensions.
+- Phase 1: Product detail modal. Extended Product type with optional fields (rating, reviewCount, longDescription, benefits, storageTip, origin). Added enrichment layer in mock-data.ts (derive rating 4.2-4.9 + reviewCount 24-480 deterministically from itemCode hash; derive benefits/storageTip/origin from category & tags). Exported MOCK_PRODUCTS_ENRICHED (kept raw MOCK_PRODUCTS for backward compat). Updated erpnext.ts to return enriched products in mock fallback. Created ProductDetailDialog component: split-pane layout (visual + info), rating stars, price with discount, tags, long description, benefits list, info grid (asal/kategori/penyimpanan), trust badges, qty stepper, add-to-cart with toast. Wrapper uses keyed inner component to auto-reset qty on product change (no useEffect needed — clean React pattern). Updated ProductCard with optional onOpenDetail prop (backward compatible): card body & image clickable, action buttons stop propagation, card shows compact rating. Updated ProductGrid to forward onOpenDetail. Wired in page.tsx. Committed.
+- Phase 2: Advanced filter. Created AdvancedFilter component with Popover trigger. Filter state: priceRange [min,max], organicOnly, onSaleOnly, tags[]. Price range uses shadcn Slider (dual thumb) with bounds derived from product list. Toggle chips for organic & on-sale (aria-pressed). Tag chips with AND logic. Active filter count badge on trigger. Reset button. Exported pure applyFilter() function. DEFAULT_FILTER constant. Wired in page.tsx: filter state + applyFilter in filteredProducts memo. Verified: organic filter 23->4, tag 'impor' 23->2, price max 101000 23->21, reset back to 23. Committed.
+- Phase 3: Testimonials section. Created TestimonialsSection with id='testimoni' anchor. 4 platform stats (4.9/5 rating, 98% puas, 120+ petani, 15K+ pesanan/bulan). 6 testimonials with diverse personas from various cities. Each: emoji avatar, star rating (4.5-5), quote, name+role+location, 'Verified' badge. Trust strip at bottom with CTA to #belanja. Framer Motion scroll-reveal. Placed between About and FAQ. Committed.
+- Phase 4: Trust badges. Created reusable TrustBadges component with 2 variants (compact: 4 icon badges + payment chips; grid: 2x2 with title+desc). 4 trust signals: Pembayaran Aman (SSL), Garansi Segar (refund 100%), Refund Mudah (24h), Antar Cepat (2 jam). 6 payment methods: COD, BCA, Mandiri, GoPay, OVO, DANA. Integrated into CheckoutDialog (compact, below submit button) and CartSheet (mini trust strip below Checkout button). Committed.
+- Phase 5: Full verification. API test via curl: all 4 routes return 200/201 with correct data, contact validation returns 422 with 4 errors. Browser test via Agent Browser: all 6 sections render, advanced filter works (23->4 organic, 23->2 impor, 23->21 price max), product detail modal opens with full content, add to cart from modal works, checkout form fill + submit + success state, trust badges (4) confirmed in checkout, mobile responsive (390x844), dark mode toggle works. Zero console errors/warnings. Committed.
+
+Stage Summary:
+- 6 commits total (1 per phase + 1 chore for accidental screenshot removal + 1 docs).
+- Sprint 2 scope complete: product detail modal, advanced filter, testimonials section, trust badges in checkout.
+- Backward compatibility maintained: ProductCard props unchanged (onOpenDetail optional), ProductGrid props unchanged (onOpenDetail optional), AdvancedFilter optional, applyFilter pure function, Product type only added optional fields, ProductDetailDialog wrapper handles null product gracefully.
+- Code quality: ESLint clean (used keyed component pattern instead of useEffect for qty reset), zero console errors, zero console warnings.
+- New components: product-detail-dialog, advanced-filter, testimonials-section, trust-badges.
+- New exports: MOCK_PRODUCTS_ENRICHED, DEFAULT_FILTER, applyFilter, FilterState type.
+- API unchanged (no new routes needed — enrichment happens in mock-data layer).
+- Accessibility: aria-label on clickable cards, aria-pressed on toggle chips, aria-label on sliders, sr-only DialogDescription, semantic headings.
+- Verified via Agent Browser (desktop 1440x900 + mobile 390x844): all interactions work end-to-end including golden path (add cart -> checkout -> success) with all Sprint 2 features active.
