@@ -20,6 +20,7 @@ import { ContactSection } from "@/components/grocery/contact-section";
 import { BackToTop } from "@/components/grocery/back-to-top";
 import { PromoBanner } from "@/components/grocery/promo-banner";
 import { AdminOverlay } from "@/components/admin/admin-overlay";
+import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Product, Category } from "@/types/grocery";
 import type { PageContent } from "@/lib/page-content";
@@ -124,6 +125,14 @@ export function HomeClient({ content }: HomeClientProps) {
   };
 
   const [adminOpen, setAdminOpen] = useState(false);
+  const [trackingOpen, setTrackingOpen] = useState(false);
+  const [trackingId, setTrackingId] = useState<string | undefined>(undefined);
+
+  const handleTrackOrder = (id: string) => {
+    setTrackingId(id);
+    setTrackingOpen(true);
+    setCheckoutOpen(false); // close checkout dialog
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -201,17 +210,30 @@ export function HomeClient({ content }: HomeClientProps) {
         <ContactSection content={content} />
       </main>
 
-      <Footer content={content} onOpenAdmin={() => setAdminOpen(true)} />
+      <Footer
+        content={content}
+        onOpenAdmin={() => setAdminOpen(true)}
+        onTrackOrder={() => { setTrackingId(undefined); setTrackingOpen(true); }}
+      />
 
       {/* Floating UI */}
       <CartSheet onCheckout={() => setCheckoutOpen(true)} />
-      <CheckoutDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
+      <CheckoutDialog
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        onTrackOrder={handleTrackOrder}
+      />
       <ProductDetailDialog
         product={detailProduct}
         open={detailOpen}
         onOpenChange={setDetailOpen}
       />
       <WishlistSheet onProductClick={handleOpenDetail} />
+      <OrderTrackingDialog
+        open={trackingOpen}
+        onOpenChange={setTrackingOpen}
+        initialTrackingId={trackingId}
+      />
       <BackToTop />
 
       {/* Admin overlay (hidden by default, Ctrl+Shift+A or footer button) */}

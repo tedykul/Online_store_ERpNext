@@ -20,11 +20,13 @@ import { DeliveryEstimateDisplay } from "./delivery-estimate";
 interface CheckoutDialogProps {
   open: boolean;
   onOpenChange: (o: boolean) => void;
+  /** Called when user clicks "Lacak Pesanan" in success view. Optional. */
+  onTrackOrder?: (trackingId: string) => void;
 }
 
 type Step = "form" | "loading" | "success";
 
-export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
+export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDialogProps) {
   const [step, setStep] = useState<Step>("form");
   const [result, setResult] = useState<CheckoutResponse | null>(null);
   const [form, setForm] = useState({
@@ -113,6 +115,7 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
             result={result}
             deliveryMethod={deliveryMethod}
             onClose={() => handleClose(false)}
+            onTrackOrder={onTrackOrder}
           />
         ) : step === "loading" ? (
           <LoadingView />
@@ -356,10 +359,12 @@ function SuccessView({
   result,
   deliveryMethod,
   onClose,
+  onTrackOrder,
 }: {
   result: CheckoutResponse;
   deliveryMethod: "delivery" | "pickup";
   onClose: () => void;
+  onTrackOrder?: (trackingId: string) => void;
 }) {
   return (
     <div className="flex flex-col items-center gap-4 py-8 text-center">
@@ -372,10 +377,37 @@ function SuccessView({
       </div>
 
       <div className="w-full max-w-sm space-y-3 text-left">
+        {/* Tracking ID (prominent — customer uses this to track) */}
+        {result.trackingId && (
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <p className="text-[10px] font-medium uppercase text-muted-foreground">
+              Tracking ID
+            </p>
+            <div className="flex items-center justify-between gap-2 mt-1">
+              <code className="text-xl font-mono font-bold text-primary">
+                {result.trackingId}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(result.trackingId!);
+                  toast.success("Tracking ID disalin!");
+                }}
+                className="text-muted-foreground hover:text-foreground text-xs"
+                aria-label="Salin tracking ID"
+              >
+                Salin
+              </button>
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              Simpan ID ini untuk lacak pesanan kamu
+            </p>
+          </div>
+        )}
+
         <div className="rounded-xl border border-border/60 bg-secondary/30 p-4">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">No. Pesanan</span>
-            <span className="font-mono font-bold text-primary">{result.salesOrderName}</span>
+            <span className="text-muted-foreground">No. Pesanan ERP</span>
+            <span className="font-mono font-bold text-primary text-xs">{result.salesOrderName}</span>
           </div>
           {result.mock && (
             <div className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-700">
@@ -388,9 +420,21 @@ function SuccessView({
         <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
       </div>
 
-      <Button onClick={onClose} className="mt-2 w-full max-w-sm rounded-xl">
-        Selesai
-      </Button>
+      <div className="flex w-full max-w-sm gap-2">
+        {result.trackingId && onTrackOrder && (
+          <Button
+            variant="outline"
+            onClick={() => onTrackOrder(result.trackingId!)}
+            className="flex-1 rounded-xl"
+          >
+            <Package className="h-4 w-4 mr-2" />
+            Lacak Pesanan
+          </Button>
+        )}
+        <Button onClick={onClose} className="flex-1 rounded-xl">
+          Selesai
+        </Button>
+      </div>
     </div>
   );
 }
