@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSalesOrder } from "@/lib/erpnext";
 import { createOrder } from "@/lib/orders";
+import { createPayment } from "@/lib/payments";
 import { estimateDelivery } from "@/lib/delivery";
 import type { CheckoutPayload } from "@/types/grocery";
 
@@ -80,11 +81,31 @@ export async function POST(req: NextRequest) {
       estimatedDelivery: estimate.earliestDate.toISOString(),
     });
 
+    // 5. Create payment record (mock gateway)
+    const payment = await createPayment(
+      order.id,
+      order.trackingId,
+      payload.paymentMethod,
+      total
+    );
+
     return NextResponse.json({
       success: true,
       message: erpResult.message,
       salesOrderName: erpResult.salesOrderName,
       trackingId: order.trackingId,
+      orderId: order.id,
+      paymentId: payment.success ? payment.paymentId : undefined,
+      payment: payment.success ? {
+        method: payment.method,
+        status: payment.status,
+        amount: payment.amount,
+        vaNumber: payment.vaNumber,
+        vaBank: payment.vaBank,
+        paymentUrl: payment.paymentUrl,
+        ewalletProvider: payment.ewalletProvider,
+        message: payment.message,
+      } : undefined,
       mock: erpResult.mock,
       estimatedDelivery: {
         dateLabel: estimate.dateLabel,

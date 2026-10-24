@@ -83,6 +83,21 @@ export interface CheckoutResponse {
   salesOrderName?: string;
   /** Customer-facing tracking ID (e.g., "SB3X9K") */
   trackingId?: string;
+  /** Internal order ID (for payment API) */
+  orderId?: string;
+  /** Payment ID (for confirm API) */
+  paymentId?: string;
+  /** Payment details (VA number, payment URL, etc.) */
+  payment?: {
+    method: string;
+    status: string;
+    amount: number;
+    vaNumber?: string;
+    vaBank?: string;
+    paymentUrl?: string;
+    ewalletProvider?: string;
+    message: string;
+  };
   message: string;
   /** Mock mode indicator */
   mock?: boolean;

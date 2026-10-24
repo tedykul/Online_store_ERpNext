@@ -210,3 +210,22 @@ Stage Summary:
 - Admin flow: open admin → default 'Pesanan' tab → list orders → filter/search → expand details → update status via dropdown → audit logged.
 - Status workflow: pending → confirmed → preparing → out_for_delivery → delivered (or cancelled). 6 statuses with labels, colors, icons.
 - Verified via curl (full golden path) + Agent Browser (UI end-to-end).
+
+---
+Task ID: sprint8
+Agent: main (Z.ai Code)
+Task: Sprint 8 - Product Photos (AI-generated images + ProductImage component)
+
+Work Log:
+- Generated 6 AI product photos using z-ai image-generation CLI (tomat, apel, brokoli, bayam, wortel, anggur). 1024x1024 professional product photography style.
+- Added PRODUCT_IMAGES mapping in mock-data.ts enrichment layer (product ID → image path).
+- Created ProductImage component: reusable image renderer with emoji fallback on error. Supports emojiClassName, animateOnHover, className, lazy loading.
+- Updated 5 components: ProductCard, ProductDetailDialog, CartSheet, WishlistSheet, RecentlyViewedSection. All now show product photos when available, emoji fallback otherwise.
+- Inline emoji in order lists (checkout, tracking, admin) kept as-is (too small for thumbnails).
+- Verified: 6 images render on cards, detail dialog shows photo, cart shows thumbnail, zero errors.
+
+Stage Summary:
+- 1 commit. Sprint 8 complete.
+- Backward compatible: 17 of 23 products still use emoji (no image). ProductImage falls back gracefully.
+- New component: product-image.tsx.
+- New assets: 6 AI-generated PNGs in public/products/.

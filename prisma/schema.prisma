@@ -258,3 +258,35 @@ model Order {
   @@index([customerPhone])
   @@index([customerEmail])
 }
+
+// ============================================================
+// Payments — mock payment gateway (ready for Midtrans upgrade).
+// ============================================================
+// Payment: 1 per order. Status: pending → paid → failed.
+// method: "cod" | "transfer" | "ewallet"
+// vaNumber: Virtual Account number for transfer (mock: random)
+// paymentUrl: payment link for e-wallet (mock)
+// When upgraded to Midtrans: replace mock VA/URL with real API response.
+// ============================================================
+
+model Payment {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  trackingId  String   // snapshot for customer reference
+  method      String   // "cod" | "transfer" | "ewallet"
+  amount      Int      // in IDR
+  status      String   @default("pending") // "pending" | "paid" | "failed"
+  /// VA number for transfer (mock: random 12-digit)
+  vaNumber    String?
+  /// Bank name for VA
+  vaBank      String?
+  /// Payment URL for e-wallet (mock)
+  paymentUrl  String?
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+  @@index([trackingId])
+}

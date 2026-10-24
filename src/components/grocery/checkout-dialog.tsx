@@ -366,6 +366,34 @@ function SuccessView({
   onClose: () => void;
   onTrackOrder?: (trackingId: string) => void;
 }) {
+  const [paying, setPaying] = useState(false);
+  const [paid, setPaid] = useState(false);
+
+  const handleConfirmPayment = async () => {
+    if (!result.paymentId) return;
+    setPaying(true);
+    try {
+      const res = await fetch(`/api/payments/${result.paymentId}/confirm`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPaid(true);
+        toast.success("Pembayaran dikonfirmasi! Pesanan diproses.");
+      } else {
+        toast.error(data.message || "Gagal konfirmasi pembayaran");
+      }
+    } catch {
+      toast.error("Koneksi gagal");
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const payment = result.payment;
+  const isCod = payment?.method === "cod";
+  const needsPayment = payment && !isCod && !paid;
+
   return (
     <div className="flex flex-col items-center gap-4 py-8 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
@@ -377,7 +405,7 @@ function SuccessView({
       </div>
 
       <div className="w-full max-w-sm space-y-3 text-left">
-        {/* Tracking ID (prominent — customer uses this to track) */}
+        {/* Tracking ID */}
         {result.trackingId && (
           <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
             <p className="text-[10px] font-medium uppercase text-muted-foreground">
@@ -393,7 +421,6 @@ function SuccessView({
                   toast.success("Tracking ID disalin!");
                 }}
                 className="text-muted-foreground hover:text-foreground text-xs"
-                aria-label="Salin tracking ID"
               >
                 Salin
               </button>
@@ -404,6 +431,72 @@ function SuccessView({
           </div>
         )}
 
+        {/* Payment instructions */}
+        {payment && (
+          <div className={`rounded-xl border p-4 ${paid ? "border-emerald-500/40 bg-emerald-500/5" : "border-border/60 bg-secondary/30"}`}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold">
+                {paid ? "✅ Pembayaran Diterima" : "💳 Pembayaran"}
+              </p>
+              <span className="text-xs font-bold text-primary">
+                {formatIDR(payment.amount)}
+              </span>
+            </div>
+
+            {isCod && (
+              <p className="text-xs text-muted-foreground">
+                💵 Bayar tunai saat pesanan tiba. Siapkan uang pas ya!
+              </p>
+            )}
+
+            {payment.method === "transfer" && !paid && (
+              <div className="space-y-2">
+                <div className="rounded-lg bg-background p-2.5">
+                  <p className="text-[10px] text-muted-foreground">{payment.vaBank} Virtual Account</p>
+                  <div className="flex items-center justify-between mt-0.5">
+                    <code className="text-sm font-mono font-bold">{payment.vaNumber}</code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(payment.vaNumber!);
+                        toast.success("VA number disalin!");
+                      }}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Salin
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Transfer ke VA di atas. Klik "Saya Sudah Bayar" setelah transfer.
+                </p>
+              </div>
+            )}
+
+            {payment.method === "ewallet" && !paid && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Bayar via {payment.ewalletProvider}:
+                </p>
+                <a
+                  href={payment.paymentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full rounded-lg bg-primary px-3 py-2 text-center text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Buka Link Pembayaran →
+                </a>
+              </div>
+            )}
+
+            {paid && (
+              <p className="text-xs text-emerald-600">
+                Pesanan kamu sedang diproses! Cek status via Tracking ID.
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ERP order number */}
         <div className="rounded-xl border border-border/60 bg-secondary/30 p-4">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">No. Pesanan ERP</span>
@@ -416,11 +509,28 @@ function SuccessView({
           )}
         </div>
 
-        {/* Estimated delivery/pickup time for the confirmed order */}
+        {/* Estimated delivery/pickup time */}
         <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
       </div>
 
+      {/* Actions */}
       <div className="flex w-full max-w-sm gap-2">
+        {needsPayment && (
+          <Button
+            onClick={handleConfirmPayment}
+            disabled={paying}
+            className="flex-1 rounded-xl"
+          >
+            {paying ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Memproses...
+              </>
+            ) : (
+              "Saya Sudah Bayar"
+            )}
+          </Button>
+        )}
         {result.trackingId && onTrackOrder && (
           <Button
             variant="outline"
@@ -428,10 +538,10 @@ function SuccessView({
             className="flex-1 rounded-xl"
           >
             <Package className="h-4 w-4 mr-2" />
-            Lacak Pesanan
+            Lacak
           </Button>
         )}
-        <Button onClick={onClose} className="flex-1 rounded-xl">
+        <Button onClick={onClose} variant={paid || isCod ? "default" : "outline"} className="flex-1 rounded-xl">
           Selesai
         </Button>
       </div>
