@@ -9,6 +9,7 @@ import { CartSheet } from "@/components/grocery/cart-sheet";
 import { CheckoutDialog } from "@/components/grocery/checkout-dialog";
 import { Footer } from "@/components/grocery/footer";
 import { AboutSection } from "@/components/grocery/about-section";
+import { FaqSection } from "@/components/grocery/faq-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles } from "lucide-react";
 import type { Product, Category } from "@/types/grocery";
@@ -159,6 +160,9 @@ export default function HomePage() {
 
         {/* About section */}
         <AboutSection />
+
+        {/* FAQ section */}
+        <FaqSection />
       </main>
 
       <Footer />
