@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Lock, Loader2, AlertCircle, LogOut,
-  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom, ScrollText,
+  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom, ScrollText, Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { AboutEditor } from "./sections/about-editor";
 import { CategoryEditor } from "./sections/category-editor";
 import { FooterEditor } from "./sections/footer-editor";
 import { AuditLogViewer } from "./sections/audit-log-viewer";
+import { OrderEditor } from "./sections/order-editor";
 import { toast } from "sonner";
 
 // ============================================================
@@ -29,9 +30,10 @@ import { toast } from "sonner";
 // After login: sidebar tabs + content editor per section.
 // ============================================================
 
-type Tab = "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer" | "audit";
+type Tab = "orders" | "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer" | "audit";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
+  { id: "orders", label: "Pesanan", icon: Package },
   { id: "hero", label: "Hero", icon: Home },
   { id: "promo", label: "Promo", icon: Sparkles },
   { id: "contact", label: "Kontak", icon: Phone },
@@ -54,7 +56,7 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
   // mounted: false on SSR, true on client. Used to skip rendering
   // during hydration (avoid flash of login form when token exists).
   const [mounted] = useState(() => typeof window !== "undefined");
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+  const [activeTab, setActiveTab] = useState<Tab>("orders");
 
   // Keyboard shortcut: Ctrl+Shift+A toggles admin
   useEffect(() => {
@@ -170,6 +172,7 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
               {/* Content area */}
               <div className="flex-1 overflow-y-auto scrollbar-grocery p-4 md:p-6">
                 <div className="mx-auto max-w-3xl">
+                  {activeTab === "orders" && <OrderEditor />}
                   {activeTab === "hero" && <HeroPromoContactEditor section="hero" />}
                   {activeTab === "promo" && <HeroPromoContactEditor section="promo" />}
                   {activeTab === "contact" && <HeroPromoContactEditor section="contact" />}
