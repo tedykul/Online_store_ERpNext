@@ -183,3 +183,30 @@ Stage Summary:
 - New docs: docs/PLAN_B_NEXTAUTH_MIGRATION.md (NextAuth migration plan with trigger conditions).
 - Security improvements: brute force protection (5/15min, 20/24h), audit trail (IP + timestamp + action), unauthorized attempt logging.
 - Plan B readiness: ~60% of NextAuth work already done by Skenario C (audit log + rate limit reusable, just add userId column). Migration can be triggered when: karyawan > 15, turnover, compliance, public access, roles needed, multi-tenant.
+
+---
+Task ID: sprint7-phase0-to-5
+Agent: main (Z.ai Code)
+Task: Sprint 7 - Order Tracking (customer tracking + admin management)
+
+Work Log:
+- Phase 0: Audited existing checkout flow (creates Sales Order in ERPNext/mock, no Order record in Prisma, no tracking UI). Planned Order model + tracking ID + customer tracking + admin management.
+- Phase 1: Added Order Prisma model (id, trackingId unique 6-char, customer info snapshot, itemsJson, pricing, delivery+payment method, status workflow, erpSalesOrderName link, estimatedDelivery, statusHistoryJson). Created lib/orders.ts with generateTrackingId() (SB prefix + 4 chars, collision-safe), createOrder(), getOrderByTrackingId(), getOrderById(), listOrders(), updateOrderStatus() with history append. Migrated /api/checkout POST to also create Order record + return trackingId + estimatedDelivery. Updated CheckoutResponse type with trackingId + estimatedDelivery fields. Verified: checkout returns trackingId='SBKS26'.
+- Phase 2: Created 3 API routes: /api/orders/[trackingId] GET (public customer track, 404 if not found), /api/admin/orders GET (list with filter+search, requires auth), /api/admin/orders/[id] GET+PUT (get single + update status with validation + audit log). Verified via curl: customer track returns order with items+history, invalid tracking→404, admin list returns orders, admin update status appends to history.
+- Phase 3: Created OrderTrackingDialog component (customer UI): input tracking ID → fetch /api/orders/[trackingId] → display order with tracking ID (copyable), status badge, progress timeline (5 steps with checkmarks/spinner/cancelled), customer info, order items, pricing summary, estimated delivery. Pre-fill from checkout success. Update CheckoutDialog SuccessView: show tracking ID prominently (primary card, copyable), add 'Lacak Pesanan' button. Update Footer: add '📦 Lacak Pesanan' link in Bantuan section. Wire in home-client: trackingOpen state, handleTrackOrder. Verified: footer link opens dialog, valid tracking shows order details, invalid shows error.
+- Phase 4: Created OrderEditor component (admin UI): stats summary (total/pending/preparing/out_for_delivery), filter by status, search by tracking/name/phone, order list with tracking ID + status badge + customer + items + total + date + quick status dropdown, expandable details (customer info, order items, pricing, payment, ERP link, status history timeline). Add 'Pesanan' tab to admin sidebar (Package icon, FIRST tab). Default tab changed to 'orders'. Verified: default tab 'Pesanan', 3 orders listed, expand shows customer+details+history, zero errors.
+- Phase 5: Full golden path test. API: checkout creates order with tracking ID → customer track → admin list → admin update status (pending→confirmed→preparing, history grows) → customer re-track sees updated status. Existing APIs (products, categories, content) still work. Browser: page loads, footer 'Lacak Pesanan' link, admin default tab 'Pesanan' with 3 orders, zero console errors. Committed.
+
+Stage Summary:
+- 5 commits total (Phase 1, 2, 3, 4, 5).
+- Sprint 7 scope complete: order tracking (customer) + order management (admin).
+- Backward compatible: Order model additive, checkout still creates ERPNext Sales Order (now also creates Prisma Order), all new API routes, tracking UI is new dialog, admin tab is new. No existing API/UI changed.
+- Code quality: ESLint clean, zero console errors, zero console warnings.
+- New components: order-tracking-dialog (customer), order-editor (admin).
+- New lib: lib/orders.ts (createOrder, getOrderByTrackingId, getOrderById, listOrders, updateOrderStatus, generateTrackingId, OrderStatus types + labels + colors + icons).
+- New API routes: /api/orders/[trackingId] GET, /api/admin/orders GET, /api/admin/orders/[id] GET+PUT.
+- New Prisma model: Order (id, trackingId, customer info, itemsJson, pricing, status workflow, erpSalesOrderName, estimatedDelivery, statusHistoryJson).
+- Customer flow: checkout → get tracking ID → track via footer link → see status timeline + history.
+- Admin flow: open admin → default 'Pesanan' tab → list orders → filter/search → expand details → update status via dropdown → audit logged.
+- Status workflow: pending → confirmed → preparing → out_for_delivery → delivered (or cancelled). 6 statuses with labels, colors, icons.
+- Verified via curl (full golden path) + Agent Browser (UI end-to-end).
