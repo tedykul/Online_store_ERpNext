@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Lock, Loader2, AlertCircle, LogOut,
-  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, Footer as FooterIcon,
+  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "testimonials", label: "Testimoni", icon: MessageSquare },
   { id: "about", label: "Tentang", icon: Users },
   { id: "categories", label: "Kategori", icon: Layers },
-  { id: "footer", label: "Footer", icon: FooterIcon },
+  { id: "footer", label: "Footer", icon: PanelBottom },
 ];
 
 interface AdminOverlayProps {

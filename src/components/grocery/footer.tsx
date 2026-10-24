@@ -1,8 +1,22 @@
 "use client";
 
-import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send } from "lucide-react";
+import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewsletterForm } from "./newsletter-form";
+
+interface FooterProps {
+  /** Admin-editable content from DB. Null fields fall back to defaults. */
+  content?: {
+    footerBrandText: string | null;
+    footerTagline: string | null;
+    contactPhone: string | null;
+    contactEmail: string | null;
+    contactAddress: string | null;
+    contactHours: string | null;
+  };
+  /** Open admin overlay. */
+  onOpenAdmin?: () => void;
+}
 
 /**
  * Footer — bottom of page.
@@ -10,7 +24,14 @@ import { NewsletterForm } from "./newsletter-form";
  * that scroll to sections on the same page (no separate routes).
  * Social media links remain as placeholders (no real social accounts yet).
  */
-export function Footer() {
+export function Footer({ content, onOpenAdmin }: FooterProps = {}) {
+  const brandText = content?.footerBrandText ?? "Marketplace sayur & buah segar langsung dari petani lokal. Mendukung ekonomi petani Indonesia.";
+  const tagline = content?.footerTagline ?? "Sayur & Buah Segar";
+  const phone = content?.contactPhone ?? "0800-1234-5678";
+  const email = content?.contactEmail ?? "halo@sayurbox.id";
+  const address = content?.contactAddress ?? "Jl. Petani Sejahtera No. 88, Jakarta Selatan";
+  const hours = content?.contactHours ?? "Setiap hari, 08.00 - 21.00 WIB";
+
   const handleNavClick = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     const el = document.getElementById(id);
@@ -52,7 +73,7 @@ export function Footer() {
             <span className="text-lg font-bold">SayurBox</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Marketplace sayur & buah segar langsung dari petani lokal. Mendukung ekonomi petani Indonesia.
+            {brandText}
           </p>
           <div className="flex gap-2">
             {[
@@ -144,23 +165,23 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary shrink-0" />
-              <a href="tel:080012345678" className="hover:text-primary transition-colors">
-                0800-1234-5678
+              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="hover:text-primary transition-colors">
+                {phone}
               </a>
             </li>
             <li className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-primary shrink-0" />
-              <a href="mailto:halo@sayurbox.id" className="hover:text-primary transition-colors">
-                halo@sayurbox.id
+              <a href={`mailto:${email}`} className="hover:text-primary transition-colors">
+                {email}
               </a>
             </li>
             <li className="flex items-start gap-2">
               <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <span>Jl. Petani Sejahtera No. 88, Jakarta Selatan</span>
+              <span>{address}</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="text-primary text-base">🕗</span>
-              <span>Setiap hari, 08.00 - 21.00 WIB</span>
+              <span>{hours}</span>
             </li>
           </ul>
         </div>
@@ -184,6 +205,18 @@ export function Footer() {
             >
               Kebijakan Privasi
             </a>
+            {onOpenAdmin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onOpenAdmin}
+                className="h-8 w-8 rounded-full hover:bg-primary hover:text-primary-foreground"
+                aria-label="Buka admin dashboard"
+                title="Admin (Ctrl+Shift+A)"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"

@@ -49,7 +49,15 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   },
 ];
 
-export function FaqSection() {
+interface FaqSectionProps {
+  /** DB-driven FAQs. If empty/missing, falls back to hardcoded defaults. */
+  faqs?: { id: string; q: string; a: string }[];
+}
+
+export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
+  // Use DB FAQs if provided and non-empty, else hardcoded defaults
+  const items = dbFaqs && dbFaqs.length > 0 ? dbFaqs : FAQ_ITEMS;
+
   const handleContactClick = () => {
     const el = document.getElementById("kontak");
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -93,9 +101,9 @@ export function FaqSection() {
           className="mt-10"
         >
           <Accordion type="single" collapsible className="space-y-3">
-            {FAQ_ITEMS.map((item, i) => (
+            {items.map((item, i) => (
               <AccordionItem
-                key={i}
+                key={item.id || i}
                 value={`item-${i}`}
                 className="overflow-hidden rounded-xl border border-border/60 bg-card px-5 shadow-sm transition-shadow data-[state=open]:shadow-md"
               >

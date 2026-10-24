@@ -3,41 +3,73 @@
 import { motion } from "framer-motion";
 import { Sprout, Handshake, Truck, Leaf, Users, Clock, Award, Heart } from "lucide-react";
 
+interface AboutContent {
+  aboutBadge: string | null;
+  aboutTitleA: string | null;
+  aboutTitleHighlight: string | null;
+  aboutTitleB: string | null;
+  aboutSubtitle: string | null;
+  aboutStoryH3: string | null;
+  aboutStoryP1: string | null;
+  aboutStoryP2: string | null;
+  aboutStat1Value: string | null;
+  aboutStat1Label: string | null;
+  aboutStat2Value: string | null;
+  aboutStat2Label: string | null;
+  aboutStat3Value: string | null;
+  aboutStat3Label: string | null;
+  aboutStat4Value: string | null;
+  aboutStat4Label: string | null;
+  aboutValue1Title: string | null;
+  aboutValue1Desc: string | null;
+  aboutValue2Title: string | null;
+  aboutValue2Desc: string | null;
+  aboutValue3Title: string | null;
+  aboutValue3Desc: string | null;
+  aboutValue4Title: string | null;
+  aboutValue4Desc: string | null;
+}
+
+interface AboutSectionProps {
+  content?: Partial<AboutContent>;
+}
+
 /**
  * Section "Tentang SayurBox" — brand story, mission, statistics, values.
  * Anchor target: #tentang (with scroll-mt-24 for sticky header offset).
  */
-export function AboutSection() {
+export function AboutSection({ content }: AboutSectionProps = {}) {
+  const c = content || {};
   const stats = [
-    { icon: Users, value: "5.000+", label: "Pelanggan Bahagia", emoji: "😊" },
-    { icon: Sprout, value: "120+", label: "Petani Mitra", emoji: "👨‍🌾" },
-    { icon: Truck, value: "15", label: "Kota Terjangkau", emoji: "🚚" },
-    { icon: Award, value: "4.9/5", label: "Rating Pengguna", emoji: "⭐" },
+    { icon: Users, value: c.aboutStat1Value ?? "5.000+", label: c.aboutStat1Label ?? "Pelanggan Bahagia", emoji: "😊" },
+    { icon: Sprout, value: c.aboutStat2Value ?? "120+", label: c.aboutStat2Label ?? "Petani Mitra", emoji: "👨‍🌾" },
+    { icon: Truck, value: c.aboutStat3Value ?? "15", label: c.aboutStat3Label ?? "Kota Terjangkau", emoji: "🚚" },
+    { icon: Award, value: c.aboutStat4Value ?? "4.9/5", label: c.aboutStat4Label ?? "Rating Pengguna", emoji: "⭐" },
   ];
 
   const values = [
     {
       icon: Leaf,
-      title: "Segar dari Kebun",
-      desc: "Dipetik pagi hari, dikirim langsung tanpa middle-man. Kualitas terjaga, nutrisi maksimal.",
+      title: c.aboutValue1Title ?? "Segar dari Kebun",
+      desc: c.aboutValue1Desc ?? "Dipetik pagi hari, dikirim langsung tanpa middle-man. Kualitas terjaga, nutrisi maksimal.",
       color: "bg-green-500/10 text-green-600 dark:text-green-400",
     },
     {
       icon: Handshake,
-      title: "Harga Adil untuk Petani",
-      desc: "Kami bayar petani dengan harga layak. Tanpa eksploitasi, hubungan jangka panjang yang saling menguntungkan.",
+      title: c.aboutValue2Title ?? "Harga Adil untuk Petani",
+      desc: c.aboutValue2Desc ?? "Kami bayar petani dengan harga layak. Tanpa eksploitasi, hubungan jangka panjang yang saling menguntungkan.",
       color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
     },
     {
       icon: Heart,
-      title: "100% Organik Pilihan",
-      desc: "Sayuran organik tanpa pestisida. Sehat untuk keluarga, ramah untuk bumi.",
+      title: c.aboutValue3Title ?? "100% Organik Pilihan",
+      desc: c.aboutValue3Desc ?? "Sayuran organik tanpa pestisida. Sehat untuk keluarga, ramah untuk bumi.",
       color: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
     },
     {
       icon: Clock,
-      title: "Antar 2 Jam",
-      desc: "Pesan sekarang, sampai siang. Rantai pasok pendek = kesegaran terjaga maksimal.",
+      title: c.aboutValue4Title ?? "Antar 2 Jam",
+      desc: c.aboutValue4Desc ?? "Pesan sekarang, sampai siang. Rantai pasok pendek = kesegaran terjaga maksimal.",
       color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
     },
   ];
@@ -58,19 +90,17 @@ export function AboutSection() {
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <Sprout className="h-3.5 w-3.5" />
-            Tentang Kami
+            {c.aboutBadge ?? "Tentang Kami"}
           </span>
           <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance md:text-5xl">
-            Dari Kebun Petani,{" "}
+            {c.aboutTitleA ?? "Dari Kebun Petani,"}{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
-              Langsung ke Meja Makan
+              {c.aboutTitleHighlight ?? "Langsung ke Meja Makan"}
             </span>{" "}
-            Keluargamu
+            {c.aboutTitleB ?? "Keluargamu"}
           </h2>
           <p className="mt-4 text-base text-muted-foreground md:text-lg text-balance">
-            SayurBox lahir dari kepedulian pada petani Indonesia. Kami menghubungkan
-            petani lokal langsung dengan konsumen — tanpa perantara, tanpa bahan kimia,
-            dengan harga yang adil untuk semua pihak.
+            {c.aboutSubtitle ?? "SayurBox lahir dari kepedulian pada petani Indonesia. Kami menghubungkan petani lokal langsung dengan konsumen — tanpa perantara, tanpa bahan kimia, dengan harga yang adil untuk semua pihak."}
           </p>
         </motion.div>
 
@@ -84,16 +114,12 @@ export function AboutSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-bold">Misi Kami 🌱</h3>
+            <h3 className="text-2xl font-bold">{c.aboutStoryH3 ?? "Misi Kami 🌱"}</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Indonesia adalah negara agraris yang kaya, tapi banyak petani masih
-              kesulitan menjual hasil panen dengan harga layak. Sementara itu,
-              konsumen kota sulit mendapatkan sayur & buah benar-benar segar.
+              {c.aboutStoryP1 ?? "Indonesia adalah negara agraris yang kaya, tapi banyak petani masih kesulitan menjual hasil panen dengan harga layak. Sementara itu, konsumen kota sulit mendapatkan sayur & buah benar-benar segar."}
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">SayurBox menjembatani</strong> kedua
-              pihak: petani mendapat harga adil, konsumen mendapat produk segar dengan
-              harga jujur. Win-win untuk semua.
+              {c.aboutStoryP2 ?? "SayurBox menjembatani kedua pihak: petani mendapat harga adil, konsumen mendapat produk segar dengan harga jujur. Win-win untuk semua."}
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
               {["#DukungPetaniLokal", "#SayurOrganik", "#TanpaPestisida", "#RantaiPendek"].map(

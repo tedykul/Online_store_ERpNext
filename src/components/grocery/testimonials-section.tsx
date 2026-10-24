@@ -77,7 +77,24 @@ const PLATFORM_STATS = [
   { value: "15K+", label: "Pesanan/Bulan", subtext: "dan terus bertumbuh", icon: Quote },
 ];
 
-export function TestimonialsSection() {
+interface TestimonialItem {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  rating: number;
+  text: string;
+  location: string;
+}
+
+interface TestimonialsSectionProps {
+  /** DB-driven testimonials. If empty/missing, falls back to hardcoded. */
+  testimonials?: TestimonialItem[];
+}
+
+export function TestimonialsSection({ testimonials: dbTestimonials }: TestimonialsSectionProps = {}) {
+  // Use DB testimonials if provided and non-empty, else hardcoded
+  const items = dbTestimonials && dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
   return (
     <section
       id="testimoni"
@@ -140,7 +157,7 @@ export function TestimonialsSection() {
 
         {/* Testimonials grid */}
         <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((t, i) => (
+          {items.map((t, i) => (
             <TestimonialCard key={t.name} testimonial={t} index={i} />
           ))}
         </div>

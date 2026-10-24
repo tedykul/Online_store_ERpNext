@@ -43,7 +43,29 @@ const CONTACT_INFOS: ContactInfo[] = [
   },
 ];
 
-export function ContactSection() {
+interface ContactSectionProps {
+  /** Admin-editable content from DB. Null fields fall back to defaults. */
+  content?: {
+    contactPhone: string | null;
+    contactEmail: string | null;
+    contactAddress: string | null;
+    contactHours: string | null;
+  };
+}
+
+export function ContactSection({ content }: ContactSectionProps = {}) {
+  const phone = content?.contactPhone ?? "0800-1234-5678";
+  const email = content?.contactEmail ?? "halo@sayurbox.id";
+  const address = content?.contactAddress ?? "Jl. Petani Sejahtera No. 88, Jakarta Selatan";
+  const hours = content?.contactHours ?? "Setiap hari, 08.00 - 21.00 WIB";
+
+  const contactInfos: ContactInfo[] = [
+    { icon: Phone, label: "Telepon", value: phone, href: `tel:${phone.replace(/[^0-9+]/g, "")}` },
+    { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
+    { icon: MapPin, label: "Alamat", value: address },
+    { icon: Clock, label: "Jam Operasional", value: hours },
+  ];
+
   const [status, setStatus] = useState<Status>("idle");
   const [form, setForm] = useState({
     name: "",
@@ -142,7 +164,7 @@ export function ContactSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="lg:col-span-2 space-y-4"
           >
-            {CONTACT_INFOS.map((info, i) => (
+            {contactInfos.map((info, i) => (
               <div
                 key={info.label}
                 className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/40"

@@ -4,13 +4,41 @@ import { motion } from "framer-motion";
 import { Truck, ShieldCheck, Sprout, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function Hero({
-  onShopNow,
-  onViewPromo,
-}: {
+// Hardcoded defaults (used when content prop is null/missing)
+const DEFAULTS = {
+  badge: "Dipetik pagi, sampai rumah siang",
+  titleA: "Sayur & Buah",
+  titleHighlight: "Segar Harian",
+  titleB: "dari Petani Lokal",
+  subtitle: "Belanja sayuran organik dan buah-buahan pilihan langsung dari kebun. Tanpa perantara, harga jujur, kualitas terjamin.",
+  ctaPrimary: "Mulai Belanja",
+  ctaSecondary: "Lihat Promo",
+};
+
+interface HeroProps {
   onShopNow: () => void;
   onViewPromo?: () => void;
-}) {
+  /** Admin-editable content from DB. Null fields fall back to defaults. */
+  content?: {
+    heroBadge: string | null;
+    heroTitleA: string | null;
+    heroTitleHighlight: string | null;
+    heroTitleB: string | null;
+    heroSubtitle: string | null;
+    heroCtaPrimary: string | null;
+    heroCtaSecondary: string | null;
+  };
+}
+
+export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
+  const badge = content?.heroBadge ?? DEFAULTS.badge;
+  const titleA = content?.heroTitleA ?? DEFAULTS.titleA;
+  const titleHighlight = content?.heroTitleHighlight ?? DEFAULTS.titleHighlight;
+  const titleB = content?.heroTitleB ?? DEFAULTS.titleB;
+  const subtitle = content?.heroSubtitle ?? DEFAULTS.subtitle;
+  const ctaPrimary = content?.heroCtaPrimary ?? DEFAULTS.ctaPrimary;
+  const ctaSecondary = content?.heroCtaSecondary ?? DEFAULTS.ctaSecondary;
+
   const handleViewPromo = () => {
     if (onViewPromo) {
       onViewPromo();
@@ -40,7 +68,7 @@ export function Hero({
             className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
           >
             <Sprout className="h-3.5 w-3.5" />
-            Dipetik pagi, sampai rumah siang
+            {badge}
           </motion.div>
 
           <motion.h1
@@ -49,11 +77,11 @@ export function Hero({
             transition={{ duration: 0.5, delay: 0.05 }}
             className="text-4xl font-extrabold leading-tight tracking-tight text-balance md:text-6xl"
           >
-            Sayur & Buah{" "}
+            {titleA}{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
-              Segar Harian
+              {titleHighlight}
             </span>{" "}
-            dari Petani Lokal
+            {titleB}
           </motion.h1>
 
           <motion.p
@@ -62,8 +90,7 @@ export function Hero({
             transition={{ duration: 0.5, delay: 0.1 }}
             className="max-w-prose text-base text-muted-foreground md:text-lg text-balance"
           >
-            Belanja sayuran organik dan buah-buahan pilihan langsung dari kebun.
-            Tanpa perantara, harga jujur, kualitas terjamin.
+            {subtitle}
           </motion.p>
 
           <motion.div
@@ -73,7 +100,7 @@ export function Hero({
             className="flex flex-wrap gap-3"
           >
             <Button size="lg" className="rounded-full px-7 h-12 text-base shadow-md" onClick={onShopNow}>
-              Mulai Belanja
+              {ctaPrimary}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
@@ -82,7 +109,7 @@ export function Hero({
               className="rounded-full px-7 h-12 text-base"
               onClick={handleViewPromo}
             >
-              Lihat Promo
+              {ctaSecondary}
             </Button>
           </motion.div>
 
