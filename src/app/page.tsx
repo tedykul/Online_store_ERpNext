@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/grocery/product-grid";
 import { CartSheet } from "@/components/grocery/cart-sheet";
 import { CheckoutDialog } from "@/components/grocery/checkout-dialog";
 import { Footer } from "@/components/grocery/footer";
+import { AboutSection } from "@/components/grocery/about-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles } from "lucide-react";
 import type { Product, Category } from "@/types/grocery";
@@ -155,6 +156,9 @@ export default function HomePage() {
 
           <ProductGrid products={filteredProducts} loading={loading} source={source} />
         </section>
+
+        {/* About section */}
+        <AboutSection />
       </main>
 
       <Footer />
