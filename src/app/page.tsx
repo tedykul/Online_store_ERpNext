@@ -15,8 +15,8 @@ import { TestimonialsSection } from "@/components/grocery/testimonials-section";
 import { FaqSection } from "@/components/grocery/faq-section";
 import { ContactSection } from "@/components/grocery/contact-section";
 import { BackToTop } from "@/components/grocery/back-to-top";
+import { PromoBanner } from "@/components/grocery/promo-banner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles } from "lucide-react";
 import type { Product, Category } from "@/types/grocery";
 
 type SortKey = "popular" | "price-asc" | "price-desc" | "name";
@@ -126,17 +126,8 @@ export default function HomePage() {
       <main className="flex-1">
         <Hero onShopNow={scrollToProducts} />
 
-        {/* Promo banner */}
-        <div
-          id="promo"
-          className="border-b border-border/40 bg-gradient-to-r from-primary/10 via-emerald-500/10 to-amber-400/10 scroll-mt-24"
-        >
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 px-4 py-2.5 text-center text-sm">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="font-medium">Promo Akhir Pekan!</span>
-            <span className="text-muted-foreground">Diskon hingga 25% untuk semua sayuran organik. Berlaku sampai akhir minggu.</span>
-          </div>
-        </div>
+        {/* Promo banner (dismissible, persists via localStorage) */}
+        <PromoBanner />
 
         {/* Products section */}
         <section
