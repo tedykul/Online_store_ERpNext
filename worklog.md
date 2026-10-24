@@ -129,3 +129,31 @@ Stage Summary:
 - New hook: use-recently-viewed.ts (wrapper around zustand store).
 - Accessibility: aria-label on heart buttons, aria-pressed state, role=dialog on cookie banner, aria-live=polite, role=alert on newsletter errors.
 - Verified via Agent Browser (desktop 1440x900): all 4 Sprint 4 features work end-to-end in golden path.
+
+---
+Task ID: sprint5-phase0-to-9
+Agent: main (Z.ai Code)
+Task: Sprint 5 - Admin dashboard for content management (owner + non-technical staff)
+
+Work Log:
+- Phase 0: Added 4 Prisma models (SiteSetting singleton with 30+ optional fields, FAQ, Testimonial, CategorySetting). Pushed schema + regenerated client. Created scripts/seed-content.ts with upsert pattern (idempotent) — seeded SiteSetting + 8 FAQs + 6 testimonials + 4 categories with existing hardcoded values. Added 'db:seed' script. Committed.
+- Phase 1: Added ADMIN_PASSWORD env var. Created lib/admin-auth.ts (verifyAdmin reads Bearer token, constant-time compare). Created lib/content.ts (DB fetchers with null fallback). Created 8 API routes: /api/admin/login (POST), /api/admin/content (GET+POST with auth), /api/admin/faqs (GET+POST) + [id] (PUT+DELETE), /api/admin/testimonials (GET+POST) + [id] (PUT+DELETE), /api/admin/categories (GET+POST) + [id] (PUT+DELETE). Bug fix: Next.js 16 dynamic route params are async Promise — applied `await params` to all [id] routes. Verified via curl: login, auth gate, CRUD all work. Committed.
+- Phase 2-7: Created lib/admin-client.ts (sessionStorage token, loginAdmin, adminFetch wrapper). Created components/admin/admin-ui.tsx (reusable primitives: AdminSectionHeading, AdminField, SaveButton with loading/success states, DeleteButton with arm-then-confirm, AdminCard, AdminEmptyState, useAdminFetch hook). Created admin-overlay.tsx (full-screen overlay, password gate LoginGate, 8 sidebar tabs, top bar with Preview/Logout/Close, keyboard shortcut Ctrl+Shift+A). Created 6 editor sections: hero-promo-contact-editor (shared SiteSetting form), faq-editor (CRUD + reorder + publish toggle), testimonial-editor (CRUD + emoji/star picker), about-editor (story + 4 stats + 4 values), category-editor (CRUD + emoji/gradient picker), footer-editor (brand text + tagline). Bug fix: lucide-react doesn't export 'Footer' icon, replaced with 'PanelBottom'. Committed.
+- Phase 8: Created lib/page-content.ts (server-side getPageContent fetcher — reads all content in parallel with fallback). Restructured routing: page.tsx → server component fetches content → renders HomeClient (client component) with content prop. Migrated 7 section components to accept optional content props with fallback to hardcoded defaults (Hero, PromoBanner, AboutSection, TestimonialsSection, FaqSection, ContactSection, Footer). Added admin button (Settings icon) in footer. Verified end-to-end: edit Hero CTA via API → reload → frontend reflects change; edit FAQ via API → reload → frontend reflects update. Committed.
+- Phase 9: Full verification. API test: all admin routes work (login auth gate, content GET/POST, FAQ CRUD, testimonial CRUD, category CRUD). Browser golden path: page loads with DB content, all 6 sections render, footer admin button works, Ctrl+Shift+A opens overlay, Escape closes, all 8 tabs render editors with DB data, zero console errors. Committed.
+
+Stage Summary:
+- 4 commits total (Phase 0, Phase 1, Phase 2-7 combined, Phase 8, Phase 9 docs).
+- Sprint 5 scope complete: admin dashboard for 8 content types (Hero, Promo, Contact, FAQ, Testimonials, About, Categories, Footer).
+- Backward compatibility maintained: all section content props optional with fallback to hardcoded defaults — site works identically if DB empty. No existing API routes changed. New admin routes purely additive.
+- Code quality: ESLint clean (used lazy useState init + block eslint-disable for cookie-consent pattern), zero console errors, zero console warnings.
+- New components: admin-overlay, admin-ui, 6 editor sections (hero-promo-contact, faq, testimonial, about, category, footer).
+- New stores/lib: lib/admin-auth.ts, lib/admin-client.ts, lib/content.ts, lib/page-content.ts.
+- New API routes: /api/admin/login, /api/admin/content, /api/admin/faqs + [id], /api/admin/testimonials + [id], /api/admin/categories + [id] (8 routes total).
+- New Prisma models: SiteSetting, FAQ, Testimonial, CategorySetting.
+- New script: scripts/seed-content.ts + 'db:seed' command.
+- Auth: password gate (ADMIN_PASSWORD env var), sessionStorage token, Bearer auth header, constant-time compare.
+- Accessibility: password gate form with aria-invalid + role=alert, sidebar tabs with aria-current, dialog role + aria-modal + aria-label.
+- Non-technical staff friendly: tab navigation, form fields with Indonesian labels, emoji/gradient/star pickers, SaveButton with visual feedback, DeleteButton with arm-then-confirm (prevent accidental delete), toast notifications for all actions.
+- Keyboard shortcuts: Ctrl+Shift+A to open admin, Escape to close.
+- Verified via Agent Browser: all 8 editors load with DB data, content changes reflect on frontend after reload.
