@@ -11,6 +11,7 @@ import { ProductDetailDialog } from "@/components/grocery/product-detail-dialog"
 import { AdvancedFilter, DEFAULT_FILTER, applyFilter, type FilterState } from "@/components/grocery/advanced-filter";
 import { Footer } from "@/components/grocery/footer";
 import { AboutSection } from "@/components/grocery/about-section";
+import { TestimonialsSection } from "@/components/grocery/testimonials-section";
 import { FaqSection } from "@/components/grocery/faq-section";
 import { ContactSection } from "@/components/grocery/contact-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -184,6 +185,9 @@ export default function HomePage() {
 
         {/* About section */}
         <AboutSection />
+
+        {/* Testimonials section */}
+        <TestimonialsSection />
 
         {/* FAQ section */}
         <FaqSection />
