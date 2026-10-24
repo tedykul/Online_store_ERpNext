@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Lock, Loader2, AlertCircle, LogOut,
-  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom,
+  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom, ScrollText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { TestimonialEditor } from "./sections/testimonial-editor";
 import { AboutEditor } from "./sections/about-editor";
 import { CategoryEditor } from "./sections/category-editor";
 import { FooterEditor } from "./sections/footer-editor";
+import { AuditLogViewer } from "./sections/audit-log-viewer";
 import { toast } from "sonner";
 
 // ============================================================
@@ -28,7 +29,7 @@ import { toast } from "sonner";
 // After login: sidebar tabs + content editor per section.
 // ============================================================
 
-type Tab = "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer";
+type Tab = "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer" | "audit";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "hero", label: "Hero", icon: Home },
@@ -39,6 +40,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "about", label: "Tentang", icon: Users },
   { id: "categories", label: "Kategori", icon: Layers },
   { id: "footer", label: "Footer", icon: PanelBottom },
+  { id: "audit", label: "Audit Log", icon: ScrollText },
 ];
 
 interface AdminOverlayProps {
@@ -176,6 +178,7 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
                   {activeTab === "about" && <AboutEditor />}
                   {activeTab === "categories" && <CategoryEditor />}
                   {activeTab === "footer" && <FooterEditor />}
+                  {activeTab === "audit" && <AuditLogViewer />}
                 </div>
               </div>
             </div>
