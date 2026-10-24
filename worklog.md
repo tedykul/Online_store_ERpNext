@@ -248,3 +248,20 @@ Stage Summary:
 - 1 commit. Sprint 9 complete.
 - Backward compatible: payment fields optional, COD flow unchanged.
 - New: lib/payments.ts, 2 API routes, Payment model, SuccessView payment UI.
+
+---
+Task ID: sprint10
+Agent: main (Z.ai Code)
+Task: Sprint 10 - Order History Lookup (customer 'login' alternative)
+
+Work Log:
+- Created /api/orders/history GET: search by email or phone, returns all matching orders (no registration needed).
+- Created OrderHistoryDialog: input email/phone → list orders with tracking ID, status, total, date → 'Lacak' button opens tracking.
+- Added '📋 Riwayat Pesanan' link in footer.
+- Verified: email search finds 1 order, phone search finds 6, 'Lacak' button opens tracking dialog.
+- Practical alternative to NextAuth: no registration, uses existing order data, works for repeat customers.
+
+Stage Summary:
+- 1 commit. Sprint 10 complete.
+- Backward compatible: new dialog + API only.
+- New: /api/orders/history, order-history-dialog component.
