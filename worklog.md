@@ -80,3 +80,26 @@ Stage Summary:
 - API unchanged (no new routes needed — enrichment happens in mock-data layer).
 - Accessibility: aria-label on clickable cards, aria-pressed on toggle chips, aria-label on sliders, sr-only DialogDescription, semantic headings.
 - Verified via Agent Browser (desktop 1440x900 + mobile 390x844): all interactions work end-to-end including golden path (add cart -> checkout -> success) with all Sprint 2 features active.
+
+---
+Task ID: sprint3-phase1-to-5
+Agent: main (Z.ai Code)
+Task: Sprint 3 - Back-to-top, dismissible promo banner, checkout step indicator, ETA
+
+Work Log:
+- Phase 0: Audited page.tsx (promo banner inline, no back-to-top), checkout-dialog.tsx (3 steps but no visual indicator, no ETA), cart-sheet.tsx (no ETA), footer.tsx (has static ArrowUp but not floating). Planned 4 backward-compatible features.
+- Phase 1: Back-to-top button. Created BackToTop component: floating fixed position bottom-right, appears after scroll >500px, smooth scroll on click. requestAnimationFrame + ticking flag for scroll perf (passive listener). Framer Motion enter/exit animations. h-11 w-11 (≥44px touch target). aria-label, focus-visible ring. Configurable props (threshold, bottom, right). Mounted in page.tsx floating UI section. Verified: hidden at top, visible after scroll, click → smooth scroll to top + auto-hide. Mobile 390x844 works. Committed.
+- Phase 2: Dismissible promo banner. Created PromoBanner component: extract inline banner to reusable. Dismiss X button (top-right, aria-label='Tutup promo'). Persist dismiss in localStorage (key: promo-dismissed-{promoId}). Cross-tab sync via storage event listener. Framer Motion height+opacity animation on enter/exit. Lazy useState initializer reads localStorage (no useEffect setState — passes lint). Configurable: promoId (change to reset campaign), title, description, icon. Replace inline banner in page.tsx with <PromoBanner />. Verified: visible by default, dismiss hides, reload stays hidden (localStorage='1'). Committed.
+- Phase 3: Checkout step indicator. Created CheckoutSteps component: 3 steps (Data Pengiriman, Memproses, Selesai). Visual states: current (primary fill + ring), completed (checkmark), future (muted). Animated connector lines (Framer Motion width transition). In loading state: step 2 shows Loader2 spinner. In success state: all 3 steps show checkmarks, all connectors 100% filled. aria-current='step' on active step. Pure presentational driven by 'current' prop. Integrated into CheckoutDialog above conditional rendering. Verified: step 1 active in form, all 3 checkmarks in success. Committed.
+- Phase 4: Estimated delivery time. Created lib/delivery.ts with estimateDelivery() pure function: business hours 08-21 WIB (skip Sunday), same-day cutoff 19:00, delivery 2-hour window, pickup 30-min ready. Returns methodLabel, earliestDate, dateLabel (Hari ini/Besok/Senin 12 Mei), timeWindow (15:00-17:00 WIB), durationHours, sameDay, icon. Created DeliveryEstimateDisplay component: 2 variants (compact pill, card with icon). Integrated into CartSheet (card in footer summary), CheckoutDialog (card below delivery RadioGroup, real-time updates on method switch), SuccessView (shows ETA for confirmed method). Verified: cart ETA 'Estimasi Antar SAME DAY 11:00-13:00 WIB', pickup ETA '10:28-10:58 WIB', real-time switch works. Committed.
+- Phase 5: Full verification. API regression: all 4 routes return 200/201 with correct data. Browser golden path: promo banner visible/dismissible/persists, back-to-top appears on scroll, cart shows ETA, checkout step indicator (step 1 active, 3 checkmarks in success), checkout ETA updates on method switch, success view shows ETA, zero console errors. Mobile 390x844 verified. Committed.
+
+Stage Summary:
+- 6 commits total (1 per phase + 1 docs).
+- Sprint 3 scope complete: back-to-top, dismissible promo banner, checkout step indicator, specific estimated delivery time.
+- Backward compatibility maintained: BackToTop optional (no existing components changed), PromoBanner replaces inline with same default content, CheckoutSteps added above existing content (no logic changes), DeliveryEstimateDisplay optional (no existing props changed), estimateDelivery pure function, no API contract changes.
+- Code quality: ESLint clean (used lazy useState initializer for localStorage read — no useEffect setState needed), zero console errors, zero console warnings.
+- New components: back-to-top, promo-banner, checkout-steps, delivery-estimate.
+- New utility: lib/delivery.ts (estimateDelivery pure function, DeliveryEstimate interface).
+- Accessibility: aria-label on back-to-top & dismiss button, aria-current='step' on active step, aria-label on step list, focus-visible ring on interactive elements.
+- Verified via Agent Browser (desktop 1440x900 + mobile 390x844): all 4 Sprint 3 features work end-to-end in golden path.
