@@ -8,6 +8,7 @@ import { Minus, Plus, Trash2, ShoppingBag, Truck } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
+import { TrustBadges } from "./trust-badges";
 
 interface CartSheetProps {
   onCheckout: () => void;
@@ -183,6 +184,16 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
             >
               Checkout Sekarang
             </Button>
+            {/* Mini trust indicators under checkout button */}
+            <div className="flex items-center justify-center gap-3 pt-1 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Truck className="h-3 w-3 text-primary" /> Antar 2 jam
+              </span>
+              <span>·</span>
+              <span>SSL Aman</span>
+              <span>·</span>
+              <span>Garansi Segar</span>
+            </div>
           </SheetFooter>
         )}
       </SheetContent>

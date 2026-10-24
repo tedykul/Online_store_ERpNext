@@ -13,6 +13,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import type { CheckoutResponse } from "@/types/grocery";
 import { toast } from "sonner";
+import { TrustBadges } from "./trust-badges";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -269,6 +270,9 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
               >
                 Buat Pesanan — {formatIDR(grandTotal)}
               </Button>
+
+              {/* Trust badges — reassure user before clicking submit */}
+              <TrustBadges variant="compact" className="pt-1" />
             </form>
           </>
         )}
