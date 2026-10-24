@@ -14,6 +14,7 @@ import { AboutSection } from "@/components/grocery/about-section";
 import { TestimonialsSection } from "@/components/grocery/testimonials-section";
 import { FaqSection } from "@/components/grocery/faq-section";
 import { ContactSection } from "@/components/grocery/contact-section";
+import { BackToTop } from "@/components/grocery/back-to-top";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles } from "lucide-react";
 import type { Product, Category } from "@/types/grocery";
@@ -206,6 +207,7 @@ export default function HomePage() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
       />
+      <BackToTop />
     </div>
   );
 }
