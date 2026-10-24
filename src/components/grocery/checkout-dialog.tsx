@@ -14,6 +14,7 @@ import { formatIDR } from "@/lib/mock-data";
 import type { CheckoutResponse } from "@/types/grocery";
 import { toast } from "sonner";
 import { TrustBadges } from "./trust-badges";
+import { CheckoutSteps } from "./checkout-steps";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -102,6 +103,10 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
         <DialogDescription className="sr-only">
           Dialog checkout SayurBox
         </DialogDescription>
+
+        {/* Step indicator (3-step progress: form -> loading -> success) */}
+        <CheckoutSteps current={step} />
+
         {step === "success" && result ? (
           <SuccessView result={result} onClose={() => handleClose(false)} />
         ) : step === "loading" ? (
