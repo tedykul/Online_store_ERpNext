@@ -179,3 +179,33 @@ model CategorySetting {
   @@index([published])
   @@index([order])
 }
+
+// ============================================================
+// Audit log — track all admin actions for accountability.
+// ============================================================
+// Sprint 6 (Skenario C): logs IP + timestamp + action (no user
+// tracking since password gate is shared). When upgraded to NextAuth
+// (Plan B), add userId field for user-specific tracking.
+// ============================================================
+
+/// Audit log entries for all admin API actions.
+model AdminAuditLog {
+  id        String   @id @default(cuid())
+  /// Action type: "login_success" | "login_failed" | "create" | "update" | "delete" | "rate_limit_hit"
+  action    String
+  /// Target of action: "faq:abc123" | "content:hero" | "testimonial:xyz" | "login"
+  target    String
+  /// IP address of requester (for cross-referencing with karyawan)
+  ip        String?
+  /// User-Agent string (browser/device info)
+  userAgent String?
+  /// Whether action succeeded (false for failed login, etc.)
+  success   Boolean  @default(true)
+  /// Optional detail message (e.g., validation error)
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([ip])
+}

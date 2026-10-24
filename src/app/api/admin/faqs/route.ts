@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export async function GET() {
 // Body: { question, answer, published?, order? }
 export async function POST(req: NextRequest) {
   if (!(await verifyAdmin())) {
+    await logAdminAction({ action: "unauthorized_attempt", target: "faq:create", success: false });
     return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
   }
   try {
@@ -38,6 +40,7 @@ export async function POST(req: NextRequest) {
     const faq = await db.fAQ.create({
       data: { question: question.trim(), answer: answer.trim(), published, order: orderVal },
     });
+    await logAdminAction({ action: "create", target: `faq:${faq.id}`, success: true });
     return NextResponse.json({ success: true, faq }, { status: 201 });
   } catch (err: any) {
     console.error("[api/admin/faqs] POST error:", err);

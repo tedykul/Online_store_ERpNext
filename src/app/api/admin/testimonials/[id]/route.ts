@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ interface Params {
 // PUT /api/admin/testimonials/[id] — update testimonial
 export async function PUT(req: NextRequest, { params }: Params) {
   if (!(await verifyAdmin())) {
+    await logAdminAction({ action: "unauthorized_attempt", target: "testimonial:update", success: false });
     return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
   }
   try {
@@ -51,6 +53,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
       where: { id },
       data,
     });
+    const action = "published" in data ? "publish_toggle" : "order" in data ? "reorder" : "update";
+    await logAdminAction({ action, target: `testimonial:${id}`, success: true });
     return NextResponse.json({ success: true, testimonial: item });
   } catch (err: any) {
     console.error("[api/admin/testimonials/[id]] PUT error:", err);
@@ -61,11 +65,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
 // DELETE /api/admin/testimonials/[id]
 export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!(await verifyAdmin())) {
+    await logAdminAction({ action: "unauthorized_attempt", target: "testimonial:delete", success: false });
     return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
   }
   try {
     const { id } = await params;
     await db.testimonial.delete({ where: { id } });
+    await logAdminAction({ action: "delete", target: `testimonial:${id}`, success: true });
     return NextResponse.json({ success: true, message: "Testimoni dihapus." });
   } catch (err: any) {
     console.error("[api/admin/testimonials/[id]] DELETE error:", err);

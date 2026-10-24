@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export async function GET() {
 // Body: { name, emoji, description?, gradient, published?, order? }
 export async function POST(req: NextRequest) {
   if (!(await verifyAdmin())) {
+    await logAdminAction({ action: "unauthorized_attempt", target: "category:create", success: false });
     return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
   }
   try {
@@ -52,6 +54,7 @@ export async function POST(req: NextRequest) {
           order: orderVal,
         },
       });
+      await logAdminAction({ action: "create", target: `category:${item.id}`, success: true });
       return NextResponse.json({ success: true, category: item }, { status: 201 });
     } catch (e: any) {
       if (e?.code === "P2002") {

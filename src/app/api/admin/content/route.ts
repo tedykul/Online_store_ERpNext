@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,11 @@ export async function GET() {
 // Requires auth.
 export async function POST(req: NextRequest) {
   if (!(await verifyAdmin())) {
+    await logAdminAction({
+      action: "unauthorized_attempt",
+      target: "content:update",
+      success: false,
+    });
     return NextResponse.json(
       { success: false, message: "Unauthorized." },
       { status: 401 }
@@ -69,6 +75,13 @@ export async function POST(req: NextRequest) {
       where: { id: "singleton" },
       update: data,
       create: { id: "singleton", ...data },
+    });
+
+    // Audit log: record which fields were updated
+    await logAdminAction({
+      action: "update",
+      target: `content:${Object.keys(data).join(",")}`,
+      success: true,
     });
 
     return NextResponse.json({
