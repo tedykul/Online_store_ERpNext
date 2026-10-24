@@ -113,7 +113,10 @@ export default function HomePage() {
         <Hero onShopNow={scrollToProducts} />
 
         {/* Promo banner */}
-        <div className="border-b border-border/40 bg-gradient-to-r from-primary/10 via-emerald-500/10 to-amber-400/10">
+        <div
+          id="promo"
+          className="border-b border-border/40 bg-gradient-to-r from-primary/10 via-emerald-500/10 to-amber-400/10 scroll-mt-24"
+        >
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 px-4 py-2.5 text-center text-sm">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="font-medium">Promo Akhir Pekan!</span>

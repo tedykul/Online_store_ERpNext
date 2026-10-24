@@ -4,7 +4,23 @@ import { motion } from "framer-motion";
 import { Truck, ShieldCheck, Sprout, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function Hero({ onShopNow }: { onShopNow: () => void }) {
+export function Hero({
+  onShopNow,
+  onViewPromo,
+}: {
+  onShopNow: () => void;
+  onViewPromo?: () => void;
+}) {
+  const handleViewPromo = () => {
+    if (onViewPromo) {
+      onViewPromo();
+    } else {
+      // Default: scroll to #promo section
+      const el = document.getElementById("promo");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <section id="beranda" className="relative overflow-hidden border-b border-border/40 scroll-mt-24">
       {/* Decorative gradient blobs */}
@@ -60,7 +76,12 @@ export function Hero({ onShopNow }: { onShopNow: () => void }) {
               Mulai Belanja
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="rounded-full px-7 h-12 text-base">
+            <Button
+              size="lg"
+              variant="outline"
+              className="rounded-full px-7 h-12 text-base"
+              onClick={handleViewPromo}
+            >
               Lihat Promo
             </Button>
           </motion.div>
