@@ -103,3 +103,29 @@ Stage Summary:
 - New utility: lib/delivery.ts (estimateDelivery pure function, DeliveryEstimate interface).
 - Accessibility: aria-label on back-to-top & dismiss button, aria-current='step' on active step, aria-label on step list, focus-visible ring on interactive elements.
 - Verified via Agent Browser (desktop 1440x900 + mobile 390x844): all 4 Sprint 3 features work end-to-end in golden path.
+
+---
+Task ID: sprint4-phase1-to-5
+Agent: main (Z.ai Code)
+Task: Sprint 4 - Wishlist, recently viewed, newsletter signup, cookie consent
+
+Work Log:
+- Phase 0: Audited product-card.tsx (image button, hover hint), cart.ts (zustand persist pattern), footer.tsx (4-col grid), prisma/schema.prisma (ContactMessage model). Planned 4 backward-compatible features.
+- Phase 1: Wishlist. Created lib/store/wishlist.ts (zustand + persist, cap 50 items). Created WishlistButton component (2 variants: overlay for cards, inline for detail; 3 sizes; spring animation; stopPropagation). Created WishlistSheet component (drawer with items list, move to cart, remove, clear). Integrated heart button into ProductCard (replaced Eye hover hint). Fixed nested-button bug: changed image area from <button> to <div role='button'> so heart <button> inside is valid HTML. Added heart icon + count badge in Header. Added wishlist quick action in MobileNav. Mounted WishlistSheet in page.tsx. Verified: 23 hearts render, click adds to wishlist, header count updates, drawer shows items, move to cart works. Committed.
+- Phase 2: Recently viewed. Created lib/store/recently-viewed.ts (zustand + persist, cap 8 items, most recent first). Created useRecentlyViewed hook (wrapper around store). Created RecentlyViewedSection component (horizontal scroll mobile, 6-col grid desktop, clear button). Wired addRecentlyViewed in handleOpenDetail. Bug fix: initially used excludeIds prop to filter products in main grid — but ALL products are in grid by default, so recently viewed was always empty. Removed excludeIds. Bug fix: initially used local useState hook — 2 instances (page + section) had separate state. Converted to zustand store for single source of truth. Verified: section hidden initially, appears after opening details, most recent first, persists across reload, click reopens detail, clear works. Committed.
+- Phase 3: Newsletter signup. Added NewsletterSubscriber model to Prisma (email unique, status, source, timestamps). Pushed schema + regenerated client. Created /api/newsletter POST route (zod validation, idempotent — re-subscribe returns 'already subscribed', reactivate unsubscribed users) + DELETE route (unsubscribe by email). Created NewsletterForm component (email input + Langganan button, idle→loading→success states, aria-invalid + role=alert, toast). Integrated into Footer as newsletter strip above main grid (2-col: heading + form). Bug fix: Prisma Client not regenerated after schema push — had to run bun run db:generate + restart dev server. Verified via curl: new/duplicate/invalid/unsubscribe/reactivate all work. Verified via Agent Browser: form renders, valid submit → success, invalid → error. Committed.
+- Phase 4: Cookie consent. Created CookieConsent component: fixed bottom banner with Cookie icon, text, Accept/Decline buttons. Persists in localStorage (cookie-consent-v1). Framer Motion slide-up animation. Mounted in root layout. SSR-safe: starts hidden, reads localStorage via useEffect after mount (standard SSR pattern, block eslint-disable for set-state-in-effect). Bug fix: initially used lazy useState init — but SSR returns null and hydration doesn't re-read localStorage, so banner reappeared on reload. Fixed by using useEffect to sync state after mount. Verified: first visit shows banner, accept/decline hides + persists, reload stays hidden. Committed.
+- Phase 5: Full verification. API test: all 5 routes return 200/201 with correct data. Browser golden path: cookie banner appears → accept, 23 wishlist hearts → click 2 → header count=2, open detail → recently viewed section appears, newsletter form in footer → subscribe → success. Zero console errors. Committed.
+
+Stage Summary:
+- 7 commits total (1 per phase + 1 chore for upload dir cleanup + 1 docs).
+- Sprint 4 scope complete: wishlist, recently viewed, newsletter signup, cookie consent.
+- Backward compatibility maintained: wishlist purely additive (no existing props changed), recently viewed purely additive, newsletter only added new Prisma model + API route, cookie consent mounted in layout (no existing changed).
+- Code quality: ESLint clean (used block eslint-disable for cookie consent useEffect — legitimate SSR localStorage sync pattern), zero console errors, zero console warnings.
+- New components: wishlist-button, wishlist-sheet, recently-viewed-section, newsletter-form, cookie-consent.
+- New stores: lib/store/wishlist.ts, lib/store/recently-viewed.ts.
+- New API: /api/newsletter (POST subscribe + DELETE unsubscribe).
+- New Prisma model: NewsletterSubscriber (email unique, status, source).
+- New hook: use-recently-viewed.ts (wrapper around zustand store).
+- Accessibility: aria-label on heart buttons, aria-pressed state, role=dialog on cookie banner, aria-live=polite, role=alert on newsletter errors.
+- Verified via Agent Browser (desktop 1440x900): all 4 Sprint 4 features work end-to-end in golden path.
