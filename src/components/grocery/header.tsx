@@ -5,6 +5,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface HeaderProps {
   searchQuery: string;
@@ -37,7 +38,7 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
       {/* Main header */}
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6">
         {/* Logo */}
-        <a href="#" className="flex shrink-0 items-center gap-2">
+        <a href="#beranda" className="flex shrink-0 items-center gap-2" aria-label="SayurBox beranda">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Leaf className="h-5 w-5" />
           </div>
@@ -60,23 +61,27 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
           />
         </div>
 
-        {/* Cart button */}
-        <Button
-          onClick={openCart}
-          className="relative h-10 rounded-full px-4 md:px-5 shadow-sm hover:shadow-md transition-shadow"
-          size="default"
-        >
-          <ShoppingCart className="h-4 w-4 md:mr-2" />
-          <span className="hidden md:inline font-medium">Keranjang</span>
-          {totalItems > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -top-1.5 -right-1.5 h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold"
-            >
-              {totalItems}
-            </Badge>
-          )}
-        </Button>
+        {/* Right actions: theme toggle + cart */}
+        <div className="flex items-center gap-1.5">
+          <ThemeToggle />
+          <Button
+            onClick={openCart}
+            className="relative h-10 rounded-full px-4 md:px-5 shadow-sm hover:shadow-md transition-shadow"
+            size="default"
+            aria-label={`Keranjang belanja${totalItems > 0 ? ` (${totalItems} item)` : ""}`}
+          >
+            <ShoppingCart className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline font-medium">Keranjang</span>
+            {totalItems > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1.5 -right-1.5 h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold"
+              >
+                {totalItems}
+              </Badge>
+            )}
+          </Button>
+        </div>
       </div>
     </header>
   );
