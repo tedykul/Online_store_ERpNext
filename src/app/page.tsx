@@ -9,6 +9,8 @@ import { CartSheet } from "@/components/grocery/cart-sheet";
 import { CheckoutDialog } from "@/components/grocery/checkout-dialog";
 import { ProductDetailDialog } from "@/components/grocery/product-detail-dialog";
 import { WishlistSheet } from "@/components/grocery/wishlist-sheet";
+import { RecentlyViewedSection } from "@/components/grocery/recently-viewed-section";
+import { useRecentlyViewed } from "@/hooks/use-recently-viewed";
 import { AdvancedFilter, DEFAULT_FILTER, applyFilter, type FilterState } from "@/components/grocery/advanced-filter";
 import { Footer } from "@/components/grocery/footer";
 import { AboutSection } from "@/components/grocery/about-section";
@@ -37,10 +39,12 @@ export default function HomePage() {
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const productSectionRef = useRef<HTMLDivElement>(null);
+  const { add: addRecentlyViewed } = useRecentlyViewed();
 
   const handleOpenDetail = (product: Product) => {
     setDetailProduct(product);
     setDetailOpen(true);
+    addRecentlyViewed(product);
   };
 
   // Fetch categories once
@@ -167,6 +171,9 @@ export default function HomePage() {
               onChange={handleCategoryChange}
             />
           </div>
+
+          {/* Recently viewed products (hidden until user opens at least 1 detail) */}
+          <RecentlyViewedSection onProductClick={handleOpenDetail} />
 
           <ProductGrid
             products={filteredProducts}
