@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/grocery/product-grid";
 import { CartSheet } from "@/components/grocery/cart-sheet";
 import { CheckoutDialog } from "@/components/grocery/checkout-dialog";
 import { ProductDetailDialog } from "@/components/grocery/product-detail-dialog";
+import { AdvancedFilter, DEFAULT_FILTER, applyFilter, type FilterState } from "@/components/grocery/advanced-filter";
 import { Footer } from "@/components/grocery/footer";
 import { AboutSection } from "@/components/grocery/about-section";
 import { FaqSection } from "@/components/grocery/faq-section";
@@ -27,6 +28,7 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("popular");
+  const [filter, setFilter] = useState<FilterState>(DEFAULT_FILTER);
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
@@ -75,7 +77,7 @@ export default function HomePage() {
     setLoading(true);
   };
 
-  // Filter + sort client-side (search + sort)
+  // Filter + sort client-side (search + advanced filter + sort)
   const filteredProducts = useMemo(() => {
     let list = products;
     if (searchQuery.trim()) {
@@ -87,6 +89,8 @@ export default function HomePage() {
           p.category.toLowerCase().includes(q)
       );
     }
+    // Apply advanced filter (price range, organic, on-sale, tags)
+    list = applyFilter(list, filter);
     const sorted = [...list];
     switch (sort) {
       case "price-asc":
@@ -107,7 +111,7 @@ export default function HomePage() {
         });
     }
     return sorted;
-  }, [products, searchQuery, sort]);
+  }, [products, searchQuery, sort, filter]);
 
   const scrollToProducts = () => {
     productSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -146,18 +150,21 @@ export default function HomePage() {
                   Pilih kategori atau cari produk favoritmu
                 </p>
               </div>
-              {/* Sort dropdown */}
-              <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-                <SelectTrigger className="w-[160px] h-9 rounded-full text-sm">
-                  <SelectValue placeholder="Urutkan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="popular">Terpopuler</SelectItem>
-                  <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                  <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                  <SelectItem value="name">Nama A-Z</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* Sort dropdown + Advanced filter */}
+              <div className="flex items-center gap-2">
+                <AdvancedFilter products={products} filter={filter} onChange={setFilter} />
+                <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+                  <SelectTrigger className="w-[160px] h-9 rounded-full text-sm">
+                    <SelectValue placeholder="Urutkan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="popular">Terpopuler</SelectItem>
+                    <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                    <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                    <SelectItem value="name">Nama A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <CategoryTabs
