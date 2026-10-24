@@ -53,6 +53,14 @@ export interface PageContent {
   aboutValue4Desc: string | null;
   footerBrandText: string | null;
   footerTagline: string | null;
+  // Branding
+  brandName: string | null;
+  metaDescription: string | null;
+  socialInstagram: string | null;
+  socialFacebook: string | null;
+  socialTwitter: string | null;
+  socialTiktok: string | null;
+  socialWhatsapp: string | null;
   faqs: { id: string; q: string; a: string }[];
   testimonials: {
     id: string;
@@ -82,6 +90,9 @@ const NULL_CONTENT = {
   aboutValue3Title: null, aboutValue3Desc: null,
   aboutValue4Title: null, aboutValue4Desc: null,
   footerBrandText: null, footerTagline: null,
+  brandName: null, metaDescription: null,
+  socialInstagram: null, socialFacebook: null, socialTwitter: null,
+  socialTiktok: null, socialWhatsapp: null,
 };
 
 /** Fetch all page content from DB. Safe to call from server component. */

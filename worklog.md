@@ -265,3 +265,22 @@ Stage Summary:
 - 1 commit. Sprint 10 complete.
 - Backward compatible: new dialog + API only.
 - New: /api/orders/history, order-history-dialog component.
+
+---
+Task ID: sprint11-branding
+Agent: main (Z.ai Code)
+Task: Branding Lite — brand name + social links + meta description (admin editable)
+
+Work Log:
+- Phase 0: Audited all "SayurBox" references (25+ locations) + social media placeholder links.
+- Phase 1: Added 7 brand fields to SiteSetting Prisma model (brandName, metaDescription, socialInstagram, socialFacebook, socialTwitter, socialTiktok, socialWhatsapp). Updated seed script. Updated content API whitelist. Updated page-content.ts type + NULL_CONTENT.
+- Phase 2: Created BrandSettingsEditor component (brand name + meta description + 5 social URL fields). Added "Branding" tab to admin overlay (Palette icon, 11 tabs total).
+- Phase 3: Migrated Header (brandName prop → logo text + aria-label). Footer (brandName → logo text + copyright). layout.tsx (generateMetadata → dynamic title/description from DB). All with "SayurBox" fallback.
+- Phase 4: Social links in footer now filter by URL availability. Only shows icons that have URLs configured. Links open in new tab with rel=noopener. No more disabled placeholders.
+- Phase 5: Verified end-to-end: API update brandName → page title/header/footer/copyright all reflect new name. Social link active when URL provided. Admin Branding tab shows current values. Zero errors. Reset works.
+
+Stage Summary:
+- 1 commit. Sprint 11 complete.
+- Backward compatible: all brand fields optional with "SayurBox" fallback. Social links hidden when null. No existing behavior changed.
+- New: BrandSettingsEditor, 7 Prisma fields, generateMetadata, Header brandName prop, Footer social link activation.
+- Owner can now rebrand (name + social links + SEO) without developer — all via admin dashboard.

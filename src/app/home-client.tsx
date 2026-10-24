@@ -139,7 +139,11 @@ export function HomeClient({ content }: HomeClientProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <Header
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        brandName={content.brandName ?? "SayurBox"}
+      />
 
       <main className="flex-1">
         <Hero onShopNow={scrollToProducts} content={content} />

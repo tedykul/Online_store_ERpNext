@@ -13,6 +13,12 @@ interface FooterProps {
     contactEmail: string | null;
     contactAddress: string | null;
     contactHours: string | null;
+    brandName: string | null;
+    socialInstagram: string | null;
+    socialFacebook: string | null;
+    socialTwitter: string | null;
+    socialTiktok: string | null;
+    socialWhatsapp: string | null;
   };
   /** Open admin overlay. */
   onOpenAdmin?: () => void;
@@ -29,12 +35,20 @@ interface FooterProps {
  * Social media links remain as placeholders (no real social accounts yet).
  */
 export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: FooterProps = {}) {
+  const brandName = content?.brandName ?? "SayurBox";
   const brandText = content?.footerBrandText ?? "Marketplace sayur & buah segar langsung dari petani lokal. Mendukung ekonomi petani Indonesia.";
   const tagline = content?.footerTagline ?? "Sayur & Buah Segar";
   const phone = content?.contactPhone ?? "0800-1234-5678";
   const email = content?.contactEmail ?? "halo@sayurbox.id";
   const address = content?.contactAddress ?? "Jl. Petani Sejahtera No. 88, Jakarta Selatan";
   const hours = content?.contactHours ?? "Setiap hari, 08.00 - 21.00 WIB";
+
+  // Social links — activate if URL provided, otherwise show disabled
+  const socialLinks = [
+    { Icon: Facebook, label: "Facebook", url: content?.socialFacebook },
+    { Icon: Instagram, label: "Instagram", url: content?.socialInstagram },
+    { Icon: Twitter, label: "Twitter", url: content?.socialTwitter },
+  ].filter((s) => s.url); // Only show links that have URLs
 
   const handleNavClick = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -74,29 +88,29 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Leaf className="h-4 w-4" />
             </div>
-            <span className="text-lg font-bold">SayurBox</span>
+            <span className="text-lg font-bold">{brandName}</span>
           </div>
           <p className="text-sm text-muted-foreground">
             {brandText}
           </p>
-          <div className="flex gap-2">
-            {[
-              { Icon: Facebook, label: "Facebook" },
-              { Icon: Instagram, label: "Instagram" },
-              { Icon: Twitter, label: "Twitter" },
-            ].map(({ Icon, label }) => (
-              <a
-                key={label}
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                aria-label={`SayurBox di ${label} (segera hadir)`}
-                title={`${label} — segera hadir`}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground cursor-not-allowed"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
-          </div>
+          {/* Social media — only show if URLs configured in admin */}
+          {socialLinks.length > 0 && (
+            <div className="flex gap-2">
+              {socialLinks.map(({ Icon, label, url }) => (
+                <a
+                  key={label}
+                  href={url!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${brandName} di ${label}`}
+                  title={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Navigasi */}
@@ -213,7 +227,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
       <div className="border-t border-border/60 py-4">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} SayurBox. Powered by Next.js + ERPNext.</p>
+          <p>© {new Date().getFullYear()} {brandName}. Powered by Next.js + ERPNext.</p>
           <div className="flex items-center gap-4">
             <a
               href="#faq"

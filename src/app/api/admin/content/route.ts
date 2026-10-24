@@ -53,6 +53,9 @@ export async function POST(req: NextRequest) {
       "aboutValue3Title", "aboutValue3Desc",
       "aboutValue4Title", "aboutValue4Desc",
       "footerBrandText", "footerTagline",
+      // Branding (Sprint 11)
+      "brandName", "metaDescription",
+      "socialInstagram", "socialFacebook", "socialTwitter", "socialTiktok", "socialWhatsapp",
     ];
     const data: Record<string, string | null> = {};
     for (const key of allowedFields) {

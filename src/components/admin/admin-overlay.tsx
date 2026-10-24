@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Lock, Loader2, AlertCircle, LogOut,
-  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom, ScrollText, Package,
+  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom, ScrollText, Package, Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { CategoryEditor } from "./sections/category-editor";
 import { FooterEditor } from "./sections/footer-editor";
 import { AuditLogViewer } from "./sections/audit-log-viewer";
 import { OrderEditor } from "./sections/order-editor";
+import { BrandSettingsEditor } from "./sections/brand-settings-editor";
 import { toast } from "sonner";
 
 // ============================================================
@@ -30,7 +31,7 @@ import { toast } from "sonner";
 // After login: sidebar tabs + content editor per section.
 // ============================================================
 
-type Tab = "orders" | "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer" | "audit";
+type Tab = "orders" | "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer" | "branding" | "audit";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "orders", label: "Pesanan", icon: Package },
@@ -42,6 +43,7 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "about", label: "Tentang", icon: Users },
   { id: "categories", label: "Kategori", icon: Layers },
   { id: "footer", label: "Footer", icon: PanelBottom },
+  { id: "branding", label: "Branding", icon: Palette },
   { id: "audit", label: "Audit Log", icon: ScrollText },
 ];
 
@@ -181,6 +183,7 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
                   {activeTab === "about" && <AboutEditor />}
                   {activeTab === "categories" && <CategoryEditor />}
                   {activeTab === "footer" && <FooterEditor />}
+                  {activeTab === "branding" && <BrandSettingsEditor />}
                   {activeTab === "audit" && <AuditLogViewer />}
                 </div>
               </div>

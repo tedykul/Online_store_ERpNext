@@ -12,9 +12,11 @@ import { MainNav, MobileNav } from "./main-nav";
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  /** Brand name from DB (defaults to "SayurBox") */
+  brandName?: string;
 }
 
-export function Header({ searchQuery, onSearchChange }: HeaderProps) {
+export function Header({ searchQuery, onSearchChange, brandName = "SayurBox" }: HeaderProps) {
   const totalItems = useCartStore((s) => s.getTotalItems());
   const openCart = useCartStore((s) => s.openCart);
   const wishlistCount = useWishlistStore((s) => s.getCount());
@@ -42,12 +44,12 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
       {/* Main header */}
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6">
         {/* Logo */}
-        <a href="#beranda" className="flex shrink-0 items-center gap-2" aria-label="SayurBox beranda">
+        <a href="#beranda" className="flex shrink-0 items-center gap-2" aria-label={`${brandName} beranda`}>
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Leaf className="h-5 w-5" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-lg font-bold tracking-tight text-foreground">SayurBox</span>
+            <span className="text-lg font-bold tracking-tight text-foreground">{brandName}</span>
             <span className="text-[10px] text-muted-foreground">Sayur & Buah Segar</span>
           </div>
         </a>

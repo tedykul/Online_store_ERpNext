@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CookieConsent } from "@/components/grocery/cookie-consent";
+import { db } from "@/lib/db";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,29 +17,46 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "SayurBox — Toko Online Sayur & Buah Segar",
-  description: "Belanja sayuran dan buah segar langsung dari petani lokal. Antar cepat, kualitas terjamin. Terintegrasi dengan ERPNext.",
-  keywords: ["grocery", "sayur", "buah", "online", "segar", "ERPNext", "toko online"],
-  authors: [{ name: "SayurBox" }],
-  icons: {
-    icon: "/logo.svg",
-    shortcut: "/logo.svg",
-    apple: "/logo.svg",
-  },
-  manifest: "/manifest.json",
-  openGraph: {
-    title: "SayurBox — Toko Online Sayur & Buah Segar",
-    description: "Belanja sayuran dan buah segar langsung dari petani lokal.",
-    siteName: "SayurBox",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "SayurBox — Toko Online Sayur & Buah Segar",
-    description: "Belanja sayuran dan buah segar langsung dari petani lokal.",
-  },
-};
+// Dynamic metadata from DB (brand name + meta description editable via admin)
+export async function generateMetadata(): Promise<Metadata> {
+  let brandName = "SayurBox";
+  let metaDescription = "Belanja sayuran dan buah segar langsung dari petani lokal. Antar cepat, kualitas terjamin.";
+
+  try {
+    const setting = await db.siteSetting.findUnique({ where: { id: "singleton" } });
+    if (setting) {
+      if (setting.brandName) brandName = setting.brandName;
+      if (setting.metaDescription) metaDescription = setting.metaDescription;
+    }
+  } catch {
+    // Fallback to defaults if DB unavailable
+  }
+
+  const title = `${brandName} — Toko Online Sayur & Buah Segar`;
+  return {
+    title,
+    description: metaDescription,
+    keywords: ["grocery", "sayur", "buah", "online", "segar", "ERPNext", "toko online"],
+    authors: [{ name: brandName }],
+    icons: {
+      icon: "/logo.svg",
+      shortcut: "/logo.svg",
+      apple: "/logo.svg",
+    },
+    manifest: "/manifest.json",
+    openGraph: {
+      title,
+      description: metaDescription,
+      siteName: brandName,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: metaDescription,
+    },
+  };
+}
 
 export default function RootLayout({
   children,

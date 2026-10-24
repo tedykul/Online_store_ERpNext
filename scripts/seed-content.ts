@@ -70,6 +70,15 @@ async function main() {
       footerBrandText:
         "Marketplace sayur & buah segar langsung dari petani lokal. Mendukung ekonomi petani Indonesia.",
       footerTagline: "Sayur & Buah Segar",
+      // Branding (Sprint 11)
+      brandName: "SayurBox",
+      metaDescription:
+        "Belanja sayuran dan buah segar langsung dari petani lokal. Antar cepat, kualitas terjamin. Terintegrasi dengan ERPNext.",
+      socialInstagram: null,
+      socialFacebook: null,
+      socialTwitter: null,
+      socialTiktok: null,
+      socialWhatsapp: null,
     },
   });
   console.log("  ✓ SiteSetting seeded:", setting.id);
