@@ -81,7 +81,15 @@ export interface CheckoutResponse {
   success: boolean;
   /** ERPNext Sales Order name if successful */
   salesOrderName?: string;
+  /** Customer-facing tracking ID (e.g., "SB3X9K") */
+  trackingId?: string;
   message: string;
   /** Mock mode indicator */
   mock?: boolean;
+  /** Estimated delivery info */
+  estimatedDelivery?: {
+    dateLabel: string;
+    timeWindow: string;
+    sameDay: boolean;
+  };
 }

@@ -209,3 +209,52 @@ model AdminAuditLog {
   @@index([action])
   @@index([ip])
 }
+
+// ============================================================
+// Orders — customer orders for tracking + admin management.
+// ============================================================
+// Order: header record (1 per checkout). itemsJson: line items as
+// JSON string (avoids separate table for simplicity).
+// trackingId: customer-facing ID (6-char uppercase alphanumeric,
+//   easy to share via WhatsApp).
+// status: pending → confirmed → preparing → out_for_delivery →
+//   delivered (or cancelled). Admin updates via dashboard.
+// erpSalesOrderName: link to ERPNext Sales Order (null in mock mode).
+// ============================================================
+
+model Order {
+  id              String   @id @default(cuid())
+  /// Customer-facing tracking ID (6-char uppercase alphanumeric)
+  trackingId      String   @unique
+  /// Customer info (snapshot at order time)
+  customerName    String
+  customerEmail   String?
+  customerPhone   String
+  customerAddress String
+  customerCity    String?
+  customerNotes   String?
+  /// Order details (JSON string of items array)
+  itemsJson       String
+  subtotal        Int      // in IDR
+  shipping        Int      // in IDR
+  total           Int      // in IDR
+  deliveryMethod  String   // "delivery" | "pickup"
+  paymentMethod   String   // "cod" | "transfer" | "ewallet"
+  /// Status workflow: pending → confirmed → preparing →
+  /// out_for_delivery → delivered | cancelled
+  status          String   @default("pending")
+  /// Link to ERPNext Sales Order (null in mock mode)
+  erpSalesOrderName String?
+  /// Estimated delivery time (ISO string)
+  estimatedDelivery String?
+  /// JSON array of {status, timestamp} for history tracking
+  statusHistoryJson String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([trackingId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerPhone])
+  @@index([customerEmail])
+}
