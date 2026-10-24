@@ -48,3 +48,19 @@ model ContactMessage {
   @@index([status])
   @@index([createdAt])
 }
+
+/// Email subscribers from the footer newsletter signup form.
+/// Unique email constraint prevents duplicates.
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  /// Status: active | unsubscribed
+  status    String   @default("active")
+  /// Source of subscription: footer | promo | manual
+  source    String   @default("footer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

@@ -1,7 +1,8 @@
 "use client";
 
-import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp } from "lucide-react";
+import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NewsletterForm } from "./newsletter-form";
 
 /**
  * Footer — bottom of page.
@@ -22,6 +23,25 @@ export function Footer() {
 
   return (
     <footer className="mt-auto border-t border-border/60 bg-secondary/30">
+      {/* Newsletter strip */}
+      <div className="border-b border-border/60 bg-primary/5">
+        <div className="mx-auto grid max-w-7xl items-center gap-4 px-4 py-6 md:grid-cols-2 md:py-8">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Send className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold md:text-lg">Dapatkan Promo & Tips Sehat 🌱</h3>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                Berlangganan newsletter untuk info diskon, resep sehat, dan tips pilih sayur segar.
+              </p>
+            </div>
+          </div>
+          <NewsletterForm />
+        </div>
+      </div>
+
+      {/* Main footer grid */}
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         {/* Brand */}
         <div className="space-y-3">
