@@ -119,7 +119,11 @@ export default function HomePage() {
         </div>
 
         {/* Products section */}
-        <section ref={productSectionRef} className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+        <section
+          id="belanja"
+          ref={productSectionRef}
+          className="mx-auto max-w-7xl px-4 py-8 md:py-12 scroll-mt-24"
+        >
           <div className="mb-6 flex flex-col gap-4">
             <div className="flex items-end justify-between gap-3">
               <div>

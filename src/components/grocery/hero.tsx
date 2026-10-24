@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export function Hero({ onShopNow }: { onShopNow: () => void }) {
   return (
-    <section className="relative overflow-hidden border-b border-border/40">
+    <section id="beranda" className="relative overflow-hidden border-b border-border/40 scroll-mt-24">
       {/* Decorative gradient blobs */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />

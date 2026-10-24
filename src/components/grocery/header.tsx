@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MainNav, MobileNav } from "./main-nav";
 
 interface HeaderProps {
   searchQuery: string;
@@ -42,14 +43,17 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Leaf className="h-5 w-5" />
           </div>
-          <div className="flex flex-col leading-none">
+          <div className="hidden sm:flex flex-col leading-none">
             <span className="text-lg font-bold tracking-tight text-foreground">SayurBox</span>
             <span className="text-[10px] text-muted-foreground">Sayur & Buah Segar</span>
           </div>
         </a>
 
-        {/* Search bar */}
-        <div className="relative flex-1 max-w-xl">
+        {/* Desktop navigation */}
+        <MainNav />
+
+        {/* Search bar (flex-1 so it grows) */}
+        <div className="relative flex-1 max-w-xl ml-auto">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -61,7 +65,7 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
           />
         </div>
 
-        {/* Right actions: theme toggle + cart */}
+        {/* Right actions: theme toggle + cart (desktop) + hamburger (mobile) */}
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
           <Button
@@ -81,6 +85,7 @@ export function Header({ searchQuery, onSearchChange }: HeaderProps) {
               </Badge>
             )}
           </Button>
+          <MobileNav />
         </div>
       </div>
     </header>
