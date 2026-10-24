@@ -7,6 +7,7 @@ import { CategoryTabs } from "@/components/grocery/category-tabs";
 import { ProductGrid } from "@/components/grocery/product-grid";
 import { CartSheet } from "@/components/grocery/cart-sheet";
 import { CheckoutDialog } from "@/components/grocery/checkout-dialog";
+import { ProductDetailDialog } from "@/components/grocery/product-detail-dialog";
 import { Footer } from "@/components/grocery/footer";
 import { AboutSection } from "@/components/grocery/about-section";
 import { FaqSection } from "@/components/grocery/faq-section";
@@ -28,7 +29,14 @@ export default function HomePage() {
   const [sort, setSort] = useState<SortKey>("popular");
 
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const productSectionRef = useRef<HTMLDivElement>(null);
+
+  const handleOpenDetail = (product: Product) => {
+    setDetailProduct(product);
+    setDetailOpen(true);
+  };
 
   // Fetch categories once
   useEffect(() => {
@@ -159,7 +167,12 @@ export default function HomePage() {
             />
           </div>
 
-          <ProductGrid products={filteredProducts} loading={loading} source={source} />
+          <ProductGrid
+            products={filteredProducts}
+            loading={loading}
+            source={source}
+            onOpenDetail={handleOpenDetail}
+          />
         </section>
 
         {/* About section */}
@@ -177,6 +190,11 @@ export default function HomePage() {
       {/* Floating UI */}
       <CartSheet onCheckout={() => setCheckoutOpen(true)} />
       <CheckoutDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
+      <ProductDetailDialog
+        product={detailProduct}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
     </div>
   );
 }

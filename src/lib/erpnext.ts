@@ -1,5 +1,5 @@
 import type { Product, Category } from "@/types/grocery";
-import { MOCK_PRODUCTS, MOCK_CATEGORIES } from "./mock-data";
+import { MOCK_PRODUCTS, MOCK_PRODUCTS_ENRICHED, MOCK_CATEGORIES } from "./mock-data";
 
 // ============================================================
 // ERPNext Client — talks to Frappe REST API
@@ -66,8 +66,10 @@ export async function fetchProducts(category?: string): Promise<{
   source: "erpnext" | "mock";
 }> {
   if (!isErpnextConfigured()) {
-    // Mock mode — filter locally
-    const products = category ? MOCK_PRODUCTS.filter((p) => p.category === category) : MOCK_PRODUCTS;
+    // Mock mode — return enriched products (with rating, benefits, etc.)
+    const products = category
+      ? MOCK_PRODUCTS_ENRICHED.filter((p) => p.category === category)
+      : MOCK_PRODUCTS_ENRICHED;
     return { products, source: "mock" };
   }
 
@@ -121,7 +123,9 @@ export async function fetchProducts(category?: string): Promise<{
     return { products, source: "erpnext" };
   } catch (err) {
     console.error("[ERPNext] fetchProducts failed, falling back to mock:", err);
-    const products = category ? MOCK_PRODUCTS.filter((p) => p.category === category) : MOCK_PRODUCTS;
+    const products = category
+      ? MOCK_PRODUCTS_ENRICHED.filter((p) => p.category === category)
+      : MOCK_PRODUCTS_ENRICHED;
     return { products, source: "mock" };
   }
 }

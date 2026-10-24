@@ -8,9 +8,11 @@ interface ProductGridProps {
   products: Product[];
   loading: boolean;
   source: "erpnext" | "mock" | null;
+  /** Forwarded to each ProductCard. Optional for backward compat. */
+  onOpenDetail?: (product: Product) => void;
 }
 
-export function ProductGrid({ products, loading, source }: ProductGridProps) {
+export function ProductGrid({ products, loading, source, onOpenDetail }: ProductGridProps) {
   if (loading) {
     return (
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -72,7 +74,7 @@ export function ProductGrid({ products, loading, source }: ProductGridProps) {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {products.map((p, i) => (
-          <ProductCard key={p.id} product={p} index={i} />
+          <ProductCard key={p.id} product={p} index={i} onOpenDetail={onOpenDetail} />
         ))}
       </div>
     </div>

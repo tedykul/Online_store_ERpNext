@@ -31,6 +31,18 @@ export interface Product {
   onSale?: boolean;
   /** Tags for filtering: "lokal", "impor", "segar", etc. */
   tags?: string[];
+  /** Average customer rating (0-5). Optional — defaults to derived value. */
+  rating?: number;
+  /** Number of customer reviews. Optional. */
+  reviewCount?: number;
+  /** Long-form description shown in product detail modal. Optional. */
+  longDescription?: string;
+  /** Key nutrition facts or benefits, shown as bullet list in detail modal. Optional. */
+  benefits?: string[];
+  /** Storage tip shown in detail modal. Optional. */
+  storageTip?: string;
+  /** Origin region/city. Optional. */
+  origin?: string;
 }
 
 export interface Category {

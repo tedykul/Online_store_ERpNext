@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus, Minus, Leaf, Tag } from "lucide-react";
+import { Plus, Minus, Leaf, Star, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/lib/store/cart";
@@ -9,7 +9,14 @@ import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
 import { cn } from "@/lib/utils";
 
-export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+interface ProductCardProps {
+  product: Product;
+  index?: number;
+  /** Called when user clicks the card (not the action buttons). Optional for backward compat. */
+  onOpenDetail?: (product: Product) => void;
+}
+
+export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem);
   const items = useCartStore((s) => s.items);
   const updateQty = useCartStore((s) => s.updateQty);
@@ -20,6 +27,10 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
     product.oldPrice && product.oldPrice > product.price
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
       : 0;
+  const rating = product.rating ?? 0;
+
+  // Clicking the card body opens detail (unless on action button).
+  const handleCardClick = () => onOpenDetail?.(product);
 
   return (
     <motion.div
@@ -29,8 +40,14 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.4) }}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all hover:shadow-lg hover:border-primary/40"
     >
-      {/* Image area with emoji */}
-      <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/10">
+      {/* Image area with emoji — clickable to open detail */}
+      <button
+        type="button"
+        onClick={handleCardClick}
+        disabled={!onOpenDetail}
+        className="relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/10 cursor-pointer disabled:cursor-default"
+        aria-label={`Lihat detail ${product.name}`}
+      >
         {/* Badges */}
         <div className="absolute left-2 top-2 z-10 flex flex-col gap-1">
           {product.onSale && discount > 0 && (
@@ -44,6 +61,13 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             </Badge>
           )}
         </div>
+
+        {/* Hover hint */}
+        {onOpenDetail && !outOfStock && (
+          <div className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-sm">
+            <Eye className="h-3.5 w-3.5" />
+          </div>
+        )}
 
         {/* Big emoji */}
         <div className="flex h-full w-full items-center justify-center">
@@ -67,13 +91,34 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             </Badge>
           </div>
         )}
-      </div>
+      </button>
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col gap-2 p-3">
+      {/* Body — clickable to open detail */}
+      <div
+        onClick={handleCardClick}
+        role={onOpenDetail ? "button" : undefined}
+        tabIndex={onOpenDetail ? 0 : undefined}
+        onKeyDown={(e) => {
+          if (onOpenDetail && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
+        className="flex flex-1 cursor-pointer flex-col gap-2 p-3"
+      >
         <div className="flex items-start justify-between gap-2">
           <h3 className="line-clamp-1 text-sm font-semibold leading-tight">{product.name}</h3>
         </div>
+
+        {/* Rating (compact) */}
+        {rating > 0 && (
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+            <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+            <span>· {product.reviewCount ?? 0} ulasan</span>
+          </div>
+        )}
+
         <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{product.description}</p>
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
@@ -89,27 +134,30 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
             </div>
           </div>
 
-          {outOfStock ? (
-            <Button disabled size="sm" variant="secondary" className="h-8 rounded-lg text-xs">
-              Habis
-            </Button>
-          ) : inCart ? (
-            <QtyStepper
-              qty={inCart.quantity}
-              max={product.stock}
-              onDec={() => updateQty(product.id, inCart.quantity - 1)}
-              onInc={() => updateQty(product.id, inCart.quantity + 1)}
-            />
-          ) : (
-            <Button
-              size="sm"
-              onClick={() => addItem(product, 1)}
-              className="h-8 rounded-lg px-3 shadow-sm transition-transform hover:scale-105"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span className="ml-1 text-xs">Tambah</span>
-            </Button>
-          )}
+          {/* Stop click propagation so action buttons don't trigger detail */}
+          <div onClick={(e) => e.stopPropagation()}>
+            {outOfStock ? (
+              <Button disabled size="sm" variant="secondary" className="h-8 rounded-lg text-xs">
+                Habis
+              </Button>
+            ) : inCart ? (
+              <QtyStepper
+                qty={inCart.quantity}
+                max={product.stock}
+                onDec={() => updateQty(product.id, inCart.quantity - 1)}
+                onInc={() => updateQty(product.id, inCart.quantity + 1)}
+              />
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => addItem(product, 1)}
+                className="h-8 rounded-lg px-3 shadow-sm transition-transform hover:scale-105"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span className="ml-1 text-xs">Tambah</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

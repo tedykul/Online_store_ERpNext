@@ -341,6 +341,92 @@ export const MOCK_PRODUCTS: Product[] = [
   },
 ];
 
+// ============================================================
+// Enrichment — derive optional fields (rating, reviewCount,
+// longDescription, benefits, storageTip, origin) for the detail
+// modal. Keeps base product records short while letting the modal
+// show rich, contextual content. Pure function; safe to extend.
+// ============================================================
+
+const BENEFITS_BY_CATEGORY: Record<string, string[]> = {
+  Sayuran: [
+    "Kaya serat untuk pencernaan sehat",
+    "Sumber vitamin & mineral alami",
+    "Rendah kalori, cocok untuk diet",
+    "Antioksidan tinggi melawan radikal bebas",
+  ],
+  Buah: [
+    "Boost imunitas dengan vitamin C",
+    "Sumber energi alami dari fruktosa",
+    "Menyehatkan kulit dari dalam",
+    "Serat tinggi untuk kenyang lebih lama",
+  ],
+  Herbal: [
+    "Bahan alami untuk jamu tradisional",
+    "Anti-inflamasi alami",
+    "Membantu menjaga kesehatan tubuh",
+    "Aroma harum untuk masakan",
+  ],
+  Paket: [
+    "Hemat hingga 20% dibanding beli satuan",
+    "Variasi produk untuk seminggu",
+    "Pilihan nutrisi lengkap & seimbang",
+    "Praktis — tinggal masak tanpa pilih satu-satu",
+  ],
+};
+
+const STORAGE_TIP_BY_CATEGORY: Record<string, string> = {
+  Sayuran: "Simpan di kulkas bagian sayur (suhu 4-8°C). Cuci sebelum dikonsumsi, jangan sebelum disimpan agar tidak cepat layu.",
+  Buah: "Simpan di tempat sejuk dan kering. Buah yang sudah matang bisa masuk kulkas untuk perpanjang umur 3-5 hari.",
+  Herbal: "Bungkus dengan kertas tissue, masuk ke kantong plastik berlubang, simpan di kulkas. Tahan hingga 5-7 hari.",
+  Paket: "Pisahkan sayur dan buah saat penyimpanan. Sayur ke kulkas, buah ke tempat sejuk agar tidak cepat masak.",
+};
+
+const ORIGIN_BY_TAG: Record<string, string> = {
+  lokal: "Petani lokal Indonesia",
+  impor: "Impor premium",
+  organik: "Kebun organik bersertifikat",
+};
+
+/** Derive rating between 4.2 - 4.9 based on itemCode hash (deterministic) */
+function deriveRating(itemCode: string): number {
+  let hash = 0;
+  for (let i = 0; i < itemCode.length; i++) {
+    hash = (hash * 31 + itemCode.charCodeAt(i)) >>> 0;
+  }
+  return 4.2 + (hash % 8) / 10; // 4.2 - 4.9
+}
+
+/** Derive review count between 24 - 480 deterministically */
+function deriveReviewCount(itemCode: string): number {
+  let hash = 0;
+  for (let i = 0; i < itemCode.length; i++) {
+    hash = (hash * 17 + itemCode.charCodeAt(i)) >>> 0;
+  }
+  return 24 + (hash % 457); // 24 - 480
+}
+
+/** Enrich each product with derived optional fields (mutates copy, not source). */
+const ENRICHED_PRODUCTS: Product[] = MOCK_PRODUCTS.map((p) => {
+  const tags = p.tags || [];
+  const originTag = tags.find((t) => ORIGIN_BY_TAG[t]);
+  return {
+    ...p,
+    rating: p.rating ?? deriveRating(p.itemCode),
+    reviewCount: p.reviewCount ?? deriveReviewCount(p.itemCode),
+    longDescription:
+      p.longDescription ??
+      `${p.description} Dipanen dan dikurasi langsung oleh tim SayurBox untuk memastikan kualitas terbaik sampai di meja makan keluarga Anda.`,
+    benefits: p.benefits ?? BENEFITS_BY_CATEGORY[p.category] ?? [],
+    storageTip: p.storageTip ?? STORAGE_TIP_BY_CATEGORY[p.category] ?? "Simpan di tempat sejuk dan kering.",
+    origin: p.origin ?? (originTag ? ORIGIN_BY_TAG[originTag] : "Petani mitra SayurBox"),
+  };
+});
+
+// Override the export so consumers (page.tsx via API) get enriched data.
+// MOCK_PRODUCTS is kept raw for backward compatibility (tests, etc.).
+export { ENRICHED_PRODUCTS as MOCK_PRODUCTS_ENRICHED };
+
 /** Helper to format IDR currency */
 export function formatIDR(amount: number): string {
   return new Intl.NumberFormat("id-ID", {
