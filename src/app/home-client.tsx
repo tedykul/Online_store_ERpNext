@@ -18,6 +18,8 @@ import { TestimonialsSection } from "@/components/grocery/testimonials-section";
 import { FaqSection } from "@/components/grocery/faq-section";
 import { ContactSection } from "@/components/grocery/contact-section";
 import { BackToTop } from "@/components/grocery/back-to-top";
+import { ServiceWorkerRegistration } from "@/components/grocery/sw-registration";
+import { PWAInstallPrompt } from "@/components/grocery/pwa-install-prompt";
 import { PromoBanner } from "@/components/grocery/promo-banner";
 import { AdminOverlay } from "@/components/admin/admin-overlay";
 import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
@@ -248,6 +250,10 @@ export function HomeClient({ content }: HomeClientProps) {
         onTrackOrder={handleTrackOrder}
       />
       <BackToTop />
+
+      {/* PWA: service worker registration + install prompt */}
+      <ServiceWorkerRegistration />
+      <PWAInstallPrompt />
 
       {/* Admin overlay (hidden by default, Ctrl+Shift+A or footer button) */}
       <AdminOverlay open={adminOpen} onOpenChange={setAdminOpen} />
