@@ -19,6 +19,14 @@ model User {
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // NextAuth (Plan B) — admin authentication fields
+  passwordHash String?
+  role         String   @default("viewer")
+  active       Boolean  @default(true)
+  lastLoginAt  DateTime?
+
+  auditLogs AdminAuditLog[]
 }
 
 model Post {
@@ -200,23 +208,24 @@ model CategorySetting {
 /// Audit log entries for all admin API actions.
 model AdminAuditLog {
   id        String   @id @default(cuid())
-  /// Action type: "login_success" | "login_failed" | "create" | "update" | "delete" | "rate_limit_hit"
   action    String
-  /// Target of action: "faq:abc123" | "content:hero" | "testimonial:xyz" | "login"
   target    String
-  /// IP address of requester (for cross-referencing with karyawan)
   ip        String?
-  /// User-Agent string (browser/device info)
   userAgent String?
-  /// Whether action succeeded (false for failed login, etc.)
   success   Boolean  @default(true)
-  /// Optional detail message (e.g., validation error)
   detail    String?
   createdAt DateTime @default(now())
+
+  // NextAuth — user tracking fields (nullable for backward compat)
+  userId    String?
+  userEmail String?
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
   @@index([action])
   @@index([ip])
+  @@index([userId])
 }
 
 // ============================================================

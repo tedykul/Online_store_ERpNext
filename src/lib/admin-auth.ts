@@ -1,20 +1,13 @@
 import { headers } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // ============================================================
-// Admin auth — simple password gate via Bearer token.
-// ============================================================
-// Pattern: client sends password as `Authorization: Bearer <password>`.
-// Server compares to ADMIN_PASSWORD env var using constant-time compare
-// to prevent timing attacks. Returns true if match.
-//
-// This is intentionally simple — suitable for internal admin tools
-// with trusted users. For public-facing admin, upgrade to NextAuth.js
-// (separate sprint).
+// Admin auth — NextAuth session + password gate fallback.
 // ============================================================
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
-/** Constant-time string comparison to prevent timing attacks. */
 function safeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
@@ -24,27 +17,56 @@ function safeCompare(a: string, b: string): boolean {
   return diff === 0;
 }
 
-/**
- * Verify admin password from Authorization header.
- * Returns true if valid, false otherwise.
- * Reads `Authorization: Bearer <password>` from request headers.
- */
-export async function verifyAdmin(): Promise<boolean> {
-  if (!ADMIN_PASSWORD) {
-    console.error("[admin-auth] ADMIN_PASSWORD env var not set");
-    return false;
-  }
-  const headersList = await headers();
-  const auth = headersList.get("authorization") || "";
-  if (!auth.startsWith("Bearer ")) return false;
-  const token = auth.slice(7).trim();
-  return safeCompare(token, ADMIN_PASSWORD);
+export interface AuthResult {
+  userId: string;
+  email: string;
+  name?: string | null;
+  role: string;
+  method: "nextauth" | "password_gate";
 }
 
-/**
- * Verify admin password from a plain string (for login endpoint).
- * Used by POST /api/admin/login which receives password in body.
- */
+export async function verifyAuth(): Promise<AuthResult | null> {
+  // 1. Try NextAuth session
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.email) {
+      return {
+        userId: session.user.id || "",
+        email: session.user.email,
+        name: session.user.name,
+        role: (session.user as { role?: string }).role || "viewer",
+        method: "nextauth",
+      };
+    }
+  } catch (err) {
+    console.error("[admin-auth] NextAuth session check failed:", err);
+  }
+
+  // 2. Fallback: password gate (Bearer token = ADMIN_PASSWORD)
+  if (ADMIN_PASSWORD) {
+    const headersList = await headers();
+    const auth = headersList.get("authorization") || "";
+    if (auth.startsWith("Bearer ")) {
+      const token = auth.slice(7).trim();
+      if (safeCompare(token, ADMIN_PASSWORD)) {
+        return {
+          userId: "",
+          email: "admin@password-gate",
+          role: "admin",
+          method: "password_gate" as const,
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+export async function verifyAdmin(): Promise<boolean> {
+  const result = await verifyAuth();
+  return result !== null;
+}
+
 export function verifyPassword(password: string): boolean {
   if (!ADMIN_PASSWORD) {
     console.error("[admin-auth] ADMIN_PASSWORD env var not set");

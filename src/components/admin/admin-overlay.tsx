@@ -1,15 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Lock, Loader2, AlertCircle, LogOut,
-  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare, Layers, PanelBottom, ScrollText, Package, Palette,
+  X, Lock, Loader2, AlertCircle, LogOut, Mail, UserCog,
+  Home, Sparkles, Phone, HelpCircle, Users, MessageSquare,
+  Layers, PanelBottom, PanelTop, ScrollText, Package, Palette,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getAdminToken, clearAdminToken, loginAdmin } from "@/lib/admin-client";
+import { Badge } from "@/components/ui/badge";
+import {
+  getAdminToken,
+  loginAdminNextAuth,
+  loginAdminLegacy,
+  logoutAdmin,
+  checkAuthStatus,
+  setCurrentUserId,
+  type AdminUser,
+  type AdminRole,
+} from "@/lib/admin-client";
 import { HeroPromoContactEditor } from "./sections/hero-promo-contact-editor";
 import { FaqEditor } from "./sections/faq-editor";
 import { TestimonialEditor } from "./sections/testimonial-editor";
@@ -19,6 +32,9 @@ import { FooterEditor } from "./sections/footer-editor";
 import { AuditLogViewer } from "./sections/audit-log-viewer";
 import { OrderEditor } from "./sections/order-editor";
 import { BrandSettingsEditor } from "./sections/brand-settings-editor";
+import { ProductEditor } from "./sections/product-editor";
+import { UserEditor } from "./sections/user-editor";
+import { HeaderEditor } from "./sections/header-editor";
 import { toast } from "sonner";
 
 // ============================================================
@@ -27,14 +43,54 @@ import { toast } from "sonner";
 // Mount in page.tsx (hidden by default). Open via:
 //   - Footer admin button (gear icon)
 //   - Keyboard shortcut Ctrl+Shift+A
-// Password gate → if no token in sessionStorage, show login form.
-// After login: sidebar tabs + content editor per section.
+// Login gate (email + password) → if no token in sessionStorage,
+// show login form. Empty email = legacy password-only gate.
+//
+// Outer component wraps everything in SessionProvider (NextAuth)
+// so child sections can use useSession(). Inner component holds
+// the actual state + UI.
 // ============================================================
 
-type Tab = "orders" | "hero" | "promo" | "contact" | "faq" | "testimonials" | "about" | "categories" | "footer" | "branding" | "audit";
+interface AdminOverlayProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
-const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
+export function AdminOverlay(props: AdminOverlayProps) {
+  return (
+    <SessionProvider>
+      <AdminOverlayInner {...props} />
+    </SessionProvider>
+  );
+}
+
+type Tab =
+  | "orders"
+  | "products"
+  | "header"
+  | "hero"
+  | "promo"
+  | "contact"
+  | "faq"
+  | "testimonials"
+  | "about"
+  | "categories"
+  | "footer"
+  | "branding"
+  | "users"
+  | "audit";
+
+interface TabDef {
+  id: Tab;
+  label: string;
+  icon: typeof Home;
+  adminOnly?: boolean;
+}
+
+const TABS: TabDef[] = [
   { id: "orders", label: "Pesanan", icon: Package },
+  { id: "products", label: "Produk", icon: ShoppingCart },
+  { id: "header", label: "Header", icon: PanelTop },
   { id: "hero", label: "Hero", icon: Home },
   { id: "promo", label: "Promo", icon: Sparkles },
   { id: "contact", label: "Kontak", icon: Phone },
@@ -44,21 +100,42 @@ const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "categories", label: "Kategori", icon: Layers },
   { id: "footer", label: "Footer", icon: PanelBottom },
   { id: "branding", label: "Branding", icon: Palette },
+  { id: "users", label: "Users", icon: UserCog, adminOnly: true },
   { id: "audit", label: "Audit Log", icon: ScrollText },
 ];
 
-interface AdminOverlayProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
+function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
+  const { data: session } = useSession();
   // Lazy init: read token from sessionStorage on client, false on SSR.
   const [authed, setAuthed] = useState(() => !!getAdminToken());
+  const [user, setUser] = useState<AdminUser | null>(null);
   // mounted: false on SSR, true on client. Used to skip rendering
   // during hydration (avoid flash of login form when token exists).
   const [mounted] = useState(() => typeof window !== "undefined");
   const [activeTab, setActiveTab] = useState<Tab>("orders");
+
+  // On mount: if token exists, validate via /api/admin/auth/me.
+  // If valid, populate user + keep authed=true. If invalid, clear.
+  useEffect(() => {
+    if (!mounted || !getAdminToken()) return;
+    let cancelled = false;
+    checkAuthStatus().then((u) => {
+      if (cancelled) return;
+      if (u) {
+        setUser(u);
+        setCurrentUserId(u.id);
+        setAuthed(true);
+      } else {
+        // Token invalid or endpoint missing — fall back to legacy
+        // authed=true so admin can still use the password-gate UI.
+        // (Session may still be valid for /api/admin/* via bearer.)
+        setAuthed(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted]);
 
   // Keyboard shortcut: Ctrl+Shift+A toggles admin
   useEffect(() => {
@@ -75,14 +152,17 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onOpenChange]);
 
-  const handleLogout = () => {
-    clearAdminToken();
+  const handleLogout = async () => {
+    await logoutAdmin();
+    setUser(null);
     setAuthed(false);
     toast.success("Logged out dari admin");
   };
 
   // Don't render anything until mounted (avoid hydration flash)
   if (!mounted || !open) return null;
+
+  const visibleTabs = TABS.filter((t) => !t.adminOnly || user?.role === "super_admin" || user?.role === "admin");
 
   return (
     <AnimatePresence>
@@ -98,7 +178,11 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
       >
         {!authed ? (
           <LoginGate
-            onSuccess={() => setAuthed(true)}
+            onSuccess={(u) => {
+              setUser(u);
+              if (u?.id) setCurrentUserId(u.id);
+              setAuthed(true);
+            }}
             onClose={() => onOpenChange(false)}
           />
         ) : (
@@ -110,13 +194,25 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
                   S
                 </div>
                 <div>
-                  <h1 className="text-sm font-bold leading-tight">SayurBox Admin</h1>
+                  <h1 className="text-sm font-bold leading-tight">SayurLogi Admin</h1>
                   <p className="text-[10px] text-muted-foreground leading-tight">
                     Content Management
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {/* Current user display (name + role badge) */}
+                {user && (
+                  <div className="hidden md:flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold">
+                      {(user.name || user.email).charAt(0).toUpperCase()}
+                    </div>
+                    <div className="leading-tight">
+                      <p className="text-[11px] font-semibold">{user.name || user.email}</p>
+                      <RoleBadge role={user.role} />
+                    </div>
+                  </div>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -152,7 +248,7 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
               {/* Sidebar */}
               <nav className="w-16 md:w-48 shrink-0 border-r border-border bg-secondary/30 overflow-y-auto scrollbar-grocery">
                 <ul className="p-2 space-y-1">
-                  {TABS.map((tab) => (
+                  {visibleTabs.map((tab) => (
                     <li key={tab.id}>
                       <button
                         onClick={() => setActiveTab(tab.id)}
@@ -175,6 +271,8 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
               <div className="flex-1 overflow-y-auto scrollbar-grocery p-4 md:p-6">
                 <div className="mx-auto max-w-3xl">
                   {activeTab === "orders" && <OrderEditor />}
+                  {activeTab === "products" && <ProductEditor />}
+                  {activeTab === "header" && <HeaderEditor />}
                   {activeTab === "hero" && <HeroPromoContactEditor section="hero" />}
                   {activeTab === "promo" && <HeroPromoContactEditor section="promo" />}
                   {activeTab === "contact" && <HeroPromoContactEditor section="contact" />}
@@ -184,6 +282,7 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
                   {activeTab === "categories" && <CategoryEditor />}
                   {activeTab === "footer" && <FooterEditor />}
                   {activeTab === "branding" && <BrandSettingsEditor />}
+                  {activeTab === "users" && <UserEditor />}
                   {activeTab === "audit" && <AuditLogViewer />}
                 </div>
               </div>
@@ -196,15 +295,38 @@ export function AdminOverlay({ open, onOpenChange }: AdminOverlayProps) {
 }
 
 // ============================================================
-// LoginGate — password form
+// RoleBadge — colored pill for admin role
+// ============================================================
+function RoleBadge({ role }: { role: AdminRole }) {
+  const label =
+    role === "super_admin" ? "Super Admin" : role === "admin" ? "Admin" : "Staff";
+  const cls =
+    role === "super_admin"
+      ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
+      : role === "admin"
+      ? "bg-blue-500/15 text-blue-700 dark:text-blue-300"
+      : "bg-slate-500/15 text-slate-700 dark:text-slate-300";
+  return (
+    <Badge variant="secondary" className={`text-[9px] px-1 py-0 ${cls}`}>
+      {label}
+    </Badge>
+  );
+}
+
+// ============================================================
+// LoginGate — email + password form
+// ============================================================
+// Email field is optional. Empty email → legacy password gate
+// (password only). Filled email → NextAuth credentials login.
 // ============================================================
 function LoginGate({
   onSuccess,
   onClose,
 }: {
-  onSuccess: () => void;
+  onSuccess: (user: AdminUser | null) => void;
   onClose: () => void;
 }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -217,13 +339,16 @@ function LoginGate({
     }
     setLoading(true);
     setError("");
-    const result = await loginAdmin(password);
+    // Email empty → legacy gate. Email filled → NextAuth.
+    const result = email.trim()
+      ? await loginAdminNextAuth(email.trim(), password)
+      : await loginAdminLegacy(password);
     setLoading(false);
     if (result.success) {
-      onSuccess();
+      onSuccess(result.user ?? null);
       toast.success("Login berhasil!");
     } else {
-      setError(result.message || "Password salah");
+      setError(result.message || "Login gagal");
     }
   };
 
@@ -241,7 +366,7 @@ function LoginGate({
             </div>
             <div>
               <h2 className="text-base font-bold">Admin Login</h2>
-              <p className="text-xs text-muted-foreground">SayurBox Content Manager</p>
+              <p className="text-xs text-muted-foreground">SayurLogi Content Manager</p>
             </div>
           </div>
           <button
@@ -254,6 +379,31 @@ function LoginGate({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="admin-email" className="text-xs font-medium">
+              Email <span className="text-muted-foreground font-normal">(opsional)</span>
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="admin-email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError("");
+                }}
+                placeholder="kamu@sayurlogi.id (kosongkan untuk password gate)"
+                disabled={loading}
+                className="pl-9"
+                autoComplete="email"
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Kosongkan email untuk login pakai password admin lama.
+            </p>
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="admin-password" className="text-xs font-medium">
               Password Admin
@@ -268,7 +418,7 @@ function LoginGate({
               }}
               placeholder="Masukkan password..."
               disabled={loading}
-              autoFocus
+              autoFocus={!email}
               aria-invalid={!!error}
             />
           </div>
