@@ -138,7 +138,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           </motion.div>
         </div>
 
-        {/* Right visual — emoji collage */}
+        {/* Right visual — realistic floating product photos */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -146,41 +146,79 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           className="relative hidden md:block"
         >
           <div className="relative mx-auto aspect-square w-full max-w-md">
-            {/* Central circle */}
-            <div className="absolute inset-8 rounded-full bg-gradient-to-br from-primary/15 via-lime-200/30 to-amber-200/20" />
-            <div className="absolute inset-16 rounded-full bg-gradient-to-tr from-emerald-300/30 to-primary/10" />
+            {/* Soft gradient background circles */}
+            <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/15 via-lime-200/30 to-amber-200/20 blur-sm" />
+            <div className="absolute inset-12 rounded-full bg-gradient-to-tr from-emerald-300/25 to-primary/10" />
 
-            {/* Floating emoji "produce" */}
+            {/* Floating realistic product photos */}
             {[
-              { e: "🥬", x: "8%", y: "15%", s: "text-6xl", d: 0 },
-              { e: "🍅", x: "65%", y: "8%", s: "text-5xl", d: 0.2 },
-              { e: "🍎", x: "78%", y: "45%", s: "text-6xl", d: 0.4 },
-              { e: "🥕", x: "60%", y: "75%", s: "text-5xl", d: 0.6 },
-              { e: "🍇", x: "18%", y: "78%", s: "text-5xl", d: 0.8 },
-              { e: "🌽", x: "2%", y: "48%", s: "text-4xl", d: 1 },
-              { e: "🥦", x: "40%", y: "40%", s: "text-7xl", d: 0.3 },
-              { e: "🍓", x: "42%", y: "5%", s: "text-4xl", d: 0.5 },
+              { src: "/products/tomat.png",   alt: "Tomat Merah Segar",     x: "5%",  y: "12%", size: "h-28 w-28", d: 0,   rotate: -8, badge: "-18%" },
+              { src: "/products/apel.png",    alt: "Apel Fuji",              x: "62%", y: "5%",  size: "h-24 w-24", d: 0.3, rotate: 6,  badge: "-18%" },
+              { src: "/products/brokoli.png", alt: "Brokoli Segar",          x: "72%", y: "42%", size: "h-28 w-28", d: 0.5, rotate: -4, badge: "-17%" },
+              { src: "/products/anggur.png",  alt: "Anggur Merah",           x: "55%", y: "72%", size: "h-26 w-26", d: 0.7, rotate: 8,  badge: "-13%" },
+              { src: "/products/wortel.png",  alt: "Wortel Lokal",           x: "12%", y: "75%", size: "h-24 w-24", d: 0.9, rotate: -6, badge: null },
+              { src: "/products/bayam.png",   alt: "Bayam Hijau Organik",    x: "0%",  y: "42%", size: "h-22 w-22", d: 1.1, rotate: 5,  badge: "Organik" },
             ].map((item, i) => (
               <motion.div
                 key={i}
-                className={`absolute ${item.s}`}
+                className="absolute"
                 style={{ left: item.x, top: item.y }}
-                initial={{ opacity: 0, y: 20, rotate: -10 }}
-                animate={{ opacity: 1, y: 0, rotate: 0 }}
-                transition={{ delay: 0.3 + item.d * 0.15, duration: 0.5 }}
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.3 + item.d * 0.12, duration: 0.6, type: "spring", stiffness: 200 }}
               >
-                <motion.span
-                  className="inline-block drop-shadow-md"
-                  animate={{ y: [0, -8, 0] }}
+                <motion.div
+                  animate={{ y: [0, -10, 0], rotate: [item.rotate, item.rotate + 2, item.rotate] }}
                   transition={{
-                    duration: 3 + item.d,
+                    duration: 3.5 + item.d,
                     repeat: Infinity,
                     ease: "easeInOut",
+                    delay: item.d,
                   }}
+                  className="relative"
                 >
-                  {item.e}
-                </motion.span>
+                  {/* Product photo with rounded corners + shadow */}
+                  <div className={`${item.size} overflow-hidden rounded-2xl border-2 border-white/80 shadow-xl bg-white/50 backdrop-blur-sm`}>
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      className="h-full w-full object-cover"
+                      loading="eager"
+                    />
+                  </div>
+                  {/* Badge (discount or organic) */}
+                  {item.badge && (
+                    <div className={`absolute -top-2 -right-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white shadow-md ${
+                      item.badge === "Organik"
+                        ? "bg-primary"
+                        : "bg-rose-500"
+                    }`}>
+                      {item.badge}
+                    </div>
+                  )}
+                </motion.div>
               </motion.div>
+            ))}
+
+            {/* Decorative sparkle dots */}
+            {[
+              { x: "45%", y: "20%", d: 0 },
+              { x: "30%", y: "55%", d: 0.5 },
+              { x: "85%", y: "65%", d: 1 },
+              { x: "50%", y: "88%", d: 1.5 },
+            ].map((dot, i) => (
+              <motion.div
+                key={`dot-${i}`}
+                className="absolute h-2 w-2 rounded-full bg-primary/40"
+                style={{ left: dot.x, top: dot.y }}
+                animate={{ scale: [0, 1, 0], opacity: [0, 0.6, 0] }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: dot.d,
+                  ease: "easeInOut",
+                }}
+              />
             ))}
           </div>
         </motion.div>
