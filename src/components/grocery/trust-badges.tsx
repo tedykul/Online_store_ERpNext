@@ -81,17 +81,17 @@ export function TrustBadges({ variant = "compact", className }: TrustBadgesProps
         ))}
       </div>
 
-      {/* Payment methods */}
-      <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
-        <span className="text-[10px] text-muted-foreground mr-1">Metode pembayaran:</span>
+      {/* Payment methods — single row, no wrap, always aligned */}
+      <div className="flex items-center justify-center gap-1.5 pt-1">
+        <span className="text-[10px] text-muted-foreground whitespace-nowrap mr-0.5">Metode pembayaran:</span>
         {PAYMENT_METHODS.map((m) => (
           <span
             key={m.label}
-            className="inline-flex items-center gap-0.5 rounded-md border border-border/40 bg-background px-1.5 py-0.5 text-[10px] font-medium"
+            className="inline-flex items-center gap-0.5 rounded-md border border-border/40 bg-background px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap"
             title={m.label}
           >
             <span aria-hidden="true">{m.emoji}</span>
-            <span className="hidden sm:inline">{m.label}</span>
+            <span>{m.label}</span>
           </span>
         ))}
       </div>
