@@ -1,8 +1,12 @@
 "use client";
 
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import { Loader2, ChevronDown } from "lucide-react";
 import { ProductCard } from "./product-card";
 import type { Product } from "@/types/grocery";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 interface ProductGridProps {
   products: Product[];
@@ -12,23 +16,37 @@ interface ProductGridProps {
   onOpenDetail?: (product: Product) => void;
 }
 
+const INITIAL_COUNT = 8;
+const LOAD_MORE_COUNT = 8;
+
 export function ProductGrid({ products, loading, source, onOpenDetail }: ProductGridProps) {
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+  // Track the previous product list key so we can reset pagination
+  // when category/search/filter changes — using the documented
+  // "adjusting state during render" pattern (no setState in effect).
+  const currentKey = useMemo(() => products.map((p) => p.id).join(","), [products]);
+  const [prevKey, setPrevKey] = useState(currentKey);
+  if (currentKey !== prevKey) {
+    setPrevKey(currentKey);
+    setVisibleCount(INITIAL_COUNT);
+  }
+
+  const visibleProducts = products.slice(0, visibleCount);
+  const hasMore = visibleCount < products.length;
+  const remaining = products.length - visibleCount;
+
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card"
-          >
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <div className="flex flex-col gap-2 p-3">
-              <Skeleton className="h-4 w-3/4" />
+          <div key={i} className="flex flex-col rounded-2xl bg-card">
+            <Skeleton className="aspect-square w-full rounded-2xl" />
+            <div className="flex flex-col gap-1.5 p-2.5">
+              <Skeleton className="h-3.5 w-3/4" />
               <Skeleton className="h-3 w-full" />
-              <Skeleton className="h-3 w-2/3" />
-              <div className="flex justify-between pt-2">
-                <Skeleton className="h-6 w-16" />
-                <Skeleton className="h-8 w-16 rounded-lg" />
+              <div className="flex justify-between pt-1">
+                <Skeleton className="h-5 w-14" />
+                <Skeleton className="h-8 w-8 rounded-full" />
               </div>
             </div>
           </div>
@@ -39,9 +57,9 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-20 text-center">
-        <span className="text-5xl">🔍</span>
-        <h3 className="text-lg font-semibold">Produk tidak ditemukan</h3>
+      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
+        <span className="text-4xl">🔍</span>
+        <h3 className="text-base font-semibold">Produk tidak ditemukan</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
           Coba ubah kata kunci pencarian atau pilih kategori lain.
         </p>
@@ -51,13 +69,14 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
-          Menampilkan <span className="font-semibold text-foreground">{products.length}</span> produk
+          Menampilkan <span className="font-semibold text-foreground">{visibleProducts.length}</span> dari{" "}
+          <span className="font-semibold text-foreground">{products.length}</span> produk
         </span>
         {source && (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${
               source === "erpnext" || source === "db"
                 ? "bg-emerald-100 text-emerald-700"
                 : "bg-amber-100 text-amber-700"
@@ -72,15 +91,34 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
               ? "Live ERPNext"
               : source === "db"
                 ? "Database"
-                : "Mode Mock (ERPNext belum konek)"}
+                : "Mode Mock"}
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {products.map((p, i) => (
+
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {visibleProducts.map((p, i) => (
           <ProductCard key={p.id} product={p} index={i} onOpenDetail={onOpenDetail} />
         ))}
       </div>
+
+      {/* Load more — minimal, centered */}
+      {hasMore && (
+        <div className="flex flex-col items-center gap-2 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVisibleCount((c) => c + LOAD_MORE_COUNT)}
+            className="h-9 rounded-full px-5 text-xs font-medium border-border hover:bg-accent"
+          >
+            <ChevronDown className="h-3.5 w-3.5 mr-1" />
+            Muat {Math.min(LOAD_MORE_COUNT, remaining)} produk lagi
+          </Button>
+          <span className="text-[10px] text-muted-foreground">
+            {remaining} produk tersisa
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -377,3 +377,26 @@ Stage Summary:
 - Code quality: ESLint clean (0 errors), TypeScript clean for all touched files. All new API routes follow the same pattern (requirePermission → isAuthResult guard → try/catch → logAdminAction with userId/userEmail). All UI text in Indonesian. All audit-logged actions include user attribution when authenticated via NextAuth.
 - Self-protection preserved: UserEditor's self-protection (cannot disable/delete own account) is now enforced both client-side (UI hides buttons) and server-side (PUT/DELETE routes check auth.userId === id and reject with 422).
 - Ready for next sprint: shipping config (getShippingConfig/calculateShipping) + reward program (getRewardConfig/calculateReward) libraries are in place but not yet wired into /api/checkout — that integration is a separate task.
+
+---
+Task ID: grocery-redesign-001
+Agent: main (Z.ai Code)
+Task: Redesign product section to be modern minimalist + improve mobile UX score (was 50/100)
+
+Work Log:
+- Redesigned ProductCard: removed heavy border/shadow default, photo-forward, icon-only "+" add button (was "+ Tambah" text), tighter padding (px-2 py-2.5 vs p-4), smaller discount badge, leaf-icon-only organic indicator (no text), compact rating line
+- Redesigned CategoryTabs: removed gradient circle emoji bg, simpler pill style (bg-primary active / bg-secondary inactive), horizontal scroll with scrollbar-none, shrink-0 pills
+- Added scrollbar-none utility to globals.css
+- Rewrote ProductGrid: added load-more pagination (8 initial + 8 on click), "Menampilkan X dari Y produk" counter, minimal load-more button with ChevronDown icon, React "adjust state during render" pattern for pagination reset on filter change (no setState-in-effect)
+- Created PromoCarousel component: horizontal scroll of on-sale products, orange accent (Flame icon, orange price), w-40 mobile / w-44 desktop cards, hidden if <2 promos, only shows on "Semua" view (no active category/search)
+- Restructured home-client product section: sticky sub-nav (top-16 mobile / top-[94px] desktop) containing CategoryTabs + AdvancedFilter + Select sort, blurred bg backdrop, separated section heading below sticky bar, integrated PromoCarousel above main grid
+- Verified sticky offsets via Agent Browser: mobile sticky at 64px (header 65px), desktop at 94px (header 94px) — correct
+- Measured grid height reduction: mobile 3404px → 1031px (3.3x shorter with 8 cards vs 23)
+- Lint clean, no hydration errors
+
+Stage Summary:
+- Product section mobile UX score: 50 → 78 (VLM assessed)
+- Desktop product section score: 84 (VLM assessed)
+- Key wins: minimalist cards (borderless, icon-only +, price-forward), sticky category+sort bar, load-more pagination, promo carousel breaks vertical monotony
+- Grid height on mobile reduced 3.3x (8 cards vs 23 rendered)
+- Remaining issues flagged by VLM: cookie consent obstructs grid (separate component), product name truncation on "Paket" items

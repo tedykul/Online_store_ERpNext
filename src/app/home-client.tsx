@@ -21,6 +21,7 @@ import { BackToTop } from "@/components/grocery/back-to-top";
 import { ServiceWorkerRegistration } from "@/components/grocery/sw-registration";
 import { PWAInstallPrompt } from "@/components/grocery/pwa-install-prompt";
 import { PromoBanner } from "@/components/grocery/promo-banner";
+import { PromoCarousel } from "@/components/grocery/promo-carousel";
 import { AdminOverlay } from "@/components/admin/admin-overlay";
 import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
 import { OrderHistoryDialog } from "@/components/grocery/order-history-dialog";
@@ -161,49 +162,64 @@ export function HomeClient({ content }: HomeClientProps) {
         <section
           id="belanja"
           ref={productSectionRef}
-          className="mx-auto max-w-7xl px-4 py-8 md:py-12 scroll-mt-24"
+          className="scroll-mt-24"
         >
-          <div className="mb-6 flex flex-col gap-4">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Belanja Pilihan</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Pilih kategori atau cari produk favoritmu
-                </p>
-              </div>
-              {/* Sort dropdown + Advanced filter */}
-              <div className="flex items-center gap-2">
-                <AdvancedFilter products={products} filter={filter} onChange={setFilter} />
-                <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-                  <SelectTrigger className="w-[160px] h-9 rounded-full text-sm">
-                    <SelectValue placeholder="Urutkan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="popular">Terpopuler</SelectItem>
-                    <SelectItem value="price-asc">Harga Terendah</SelectItem>
-                    <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
-                    <SelectItem value="name">Nama A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
+          {/* Sticky sub-nav: category pills + sort/filter. Sticks under the main header.
+              Mobile header ≈ 65px (top-16), desktop header ≈ 94px (top-[94px]). */}
+          <div className="sticky top-16 md:top-[94px] z-30 border-b border-border/40 bg-background/85 backdrop-blur-lg supports-[backdrop-filter]:bg-background/70">
+            <div className="mx-auto max-w-7xl px-4 py-3">
+              <div className="flex items-center gap-3">
+                {/* Category tabs — horizontal scroll */}
+                <div className="min-w-0 flex-1">
+                  <CategoryTabs
+                    categories={categories}
+                    active={activeCategory}
+                    onChange={handleCategoryChange}
+                  />
+                </div>
+                {/* Sort + filter — compact */}
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <AdvancedFilter products={products} filter={filter} onChange={setFilter} />
+                  <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+                    <SelectTrigger className="w-[120px] h-8 rounded-full text-xs md:w-[140px] md:h-9 md:text-sm">
+                      <SelectValue placeholder="Urutkan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="popular">Terpopuler</SelectItem>
+                      <SelectItem value="price-asc">Harga Terendah</SelectItem>
+                      <SelectItem value="price-desc">Harga Tertinggi</SelectItem>
+                      <SelectItem value="name">Nama A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-
-            <CategoryTabs
-              categories={categories}
-              active={activeCategory}
-              onChange={handleCategoryChange}
-            />
           </div>
 
-          {/* Recently viewed products (hidden until user opens at least 1 detail) */}
-          <RecentlyViewedSection onProductClick={handleOpenDetail} />
+          {/* Section heading + content */}
+          <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
+            <div className="mb-5">
+              <h2 className="text-xl font-bold tracking-tight md:text-2xl">Belanja Pilihan</h2>
+              <p className="text-xs text-muted-foreground mt-0.5 md:text-sm">
+                Pilih kategori atau cari produk favoritmu
+              </p>
+            </div>
 
-          <ProductGrid
-            products={filteredProducts}
-            loading={loading}
-            source={source}
-            onOpenDetail={handleOpenDetail}
-          />
+            {/* Promo carousel — horizontal scroll, breaks vertical monotony */}
+            {!loading && !activeCategory && !searchQuery && (
+              <PromoCarousel products={products} onOpenDetail={handleOpenDetail} />
+            )}
+
+            {/* Recently viewed products (hidden until user opens at least 1 detail) */}
+            <RecentlyViewedSection onProductClick={handleOpenDetail} />
+
+            <ProductGrid
+              products={filteredProducts}
+              loading={loading}
+              source={source}
+              onOpenDetail={handleOpenDetail}
+            />
+          </div>
         </section>
 
         {/* About section */}

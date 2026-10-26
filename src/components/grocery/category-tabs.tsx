@@ -12,13 +12,12 @@ interface CategoryTabsProps {
 
 export function CategoryTabs({ categories, active, onChange }: CategoryTabsProps) {
   return (
-    <div className="flex flex-wrap gap-2 sm:gap-3">
+    <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1">
       <CategoryPill
         active={active === null}
         onClick={() => onChange(null)}
         emoji="🛒"
         label="Semua"
-        gradient="from-slate-500 to-slate-700"
       />
       {categories.map((c) => (
         <CategoryPill
@@ -27,7 +26,6 @@ export function CategoryTabs({ categories, active, onChange }: CategoryTabsProps
           onClick={() => onChange(c.id)}
           emoji={c.emoji}
           label={c.name}
-          gradient={c.gradient}
         />
       ))}
     </div>
@@ -39,33 +37,24 @@ function CategoryPill({
   onClick,
   emoji,
   label,
-  gradient,
 }: {
   active: boolean;
   onClick: () => void;
   emoji: string;
   label: string;
-  gradient: string;
 }) {
   return (
     <motion.button
       whileTap={{ scale: 0.96 }}
       onClick={onClick}
       className={cn(
-        "group relative flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
+        "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all whitespace-nowrap",
         active
-          ? "border-primary bg-primary text-primary-foreground shadow-md"
-          : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-accent/50"
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "bg-secondary text-foreground hover:bg-accent"
       )}
     >
-      <span
-        className={cn(
-          "flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br text-base transition-transform group-hover:scale-110",
-          gradient
-        )}
-      >
-        {emoji}
-      </span>
+      <span className="text-sm">{emoji}</span>
       {label}
     </motion.button>
   );
