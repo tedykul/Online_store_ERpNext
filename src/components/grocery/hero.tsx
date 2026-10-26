@@ -138,88 +138,49 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           </motion.div>
         </div>
 
-        {/* Right visual — realistic floating product photos */}
+        {/* Right visual — clean masonry grid of product photos */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="relative order-1 md:order-2"
         >
-          <div className="relative mx-auto aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md">
-            {/* Soft gradient background circles */}
-            <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/15 via-lime-200/30 to-amber-200/20 blur-sm" />
-            <div className="absolute inset-12 rounded-full bg-gradient-to-tr from-emerald-300/25 to-primary/10" />
-
-            {/* Floating realistic product photos */}
-            {[
-              { src: "/products/tomat.png",   alt: "Tomat Merah Segar",     x: "5%",  y: "12%", size: "h-28 w-28", d: 0,   rotate: -8, badge: "-18%" },
-              { src: "/products/apel.png",    alt: "Apel Fuji",              x: "62%", y: "5%",  size: "h-24 w-24", d: 0.3, rotate: 6,  badge: "-18%" },
-              { src: "/products/brokoli.png", alt: "Brokoli Segar",          x: "72%", y: "42%", size: "h-28 w-28", d: 0.5, rotate: -4, badge: "-17%" },
-              { src: "/products/anggur.png",  alt: "Anggur Merah",           x: "55%", y: "72%", size: "h-26 w-26", d: 0.7, rotate: 8,  badge: "-13%" },
-              { src: "/products/wortel.png",  alt: "Wortel Lokal",           x: "12%", y: "75%", size: "h-24 w-24", d: 0.9, rotate: -6, badge: null },
-              { src: "/products/bayam.png",   alt: "Bayam Hijau Organik",    x: "0%",  y: "42%", size: "h-22 w-22", d: 1.1, rotate: 5,  badge: "Organik" },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                className="absolute"
-                style={{ left: item.x, top: item.y }}
-                initial={{ opacity: 0, y: 30, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ delay: 0.3 + item.d * 0.12, duration: 0.6, type: "spring", stiffness: 200 }}
-              >
+          <div className="relative mx-auto w-full max-w-xs sm:max-w-sm md:max-w-md">
+            {/* Grid 3×2 — staggered fade-in, no floating */}
+            <div className="grid grid-cols-3 gap-2.5">
+              {[
+                { src: "/products/tomat.png",   alt: "Tomat Merah Segar",  badge: "-18%", badgeColor: "bg-orange-500" },
+                { src: "/products/apel.png",    alt: "Apel Fuji",           badge: "-18%", badgeColor: "bg-orange-500" },
+                { src: "/products/brokoli.png", alt: "Brokoli Segar",       badge: "-17%", badgeColor: "bg-orange-500" },
+                { src: "/products/anggur.png",  alt: "Anggur Merah",        badge: "-13%", badgeColor: "bg-orange-500" },
+                { src: "/products/wortel.png",  alt: "Wortel Lokal",        badge: null,   badgeColor: "" },
+                { src: "/products/bayam.png",   alt: "Bayam Hijau Organik", badge: "Organik", badgeColor: "bg-primary" },
+              ].map((item, i) => (
                 <motion.div
-                  animate={{ y: [0, -10, 0], rotate: [item.rotate, item.rotate + 2, item.rotate] }}
-                  transition={{
-                    duration: 3.5 + item.d,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: item.d,
-                  }}
-                  className="relative"
+                  key={i}
+                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.2 + i * 0.08, duration: 0.5, ease: "easeOut" }}
+                  className="relative aspect-square overflow-hidden rounded-2xl border-2 border-white shadow-lg bg-white group"
                 >
-                  {/* Product photo with rounded corners + shadow */}
-                  <div className={`${item.size} overflow-hidden rounded-2xl border-2 border-white/80 shadow-xl bg-white/50 backdrop-blur-sm`}>
-                    <img
-                      src={item.src}
-                      alt={item.alt}
-                      className="h-full w-full object-cover"
-                      loading="eager"
-                    />
-                  </div>
-                  {/* Badge (discount or organic) */}
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="eager"
+                  />
+                  {/* Badge */}
                   {item.badge && (
-                    <div className={`absolute -top-2 -right-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white shadow-md ${
-                      item.badge === "Organik"
-                        ? "bg-primary"
-                        : "bg-rose-500"
-                    }`}>
+                    <div className={`absolute top-1.5 left-1.5 rounded-lg ${item.badgeColor} px-1.5 py-0.5 text-[9px] font-bold text-white shadow-md`}>
                       {item.badge}
                     </div>
                   )}
                 </motion.div>
-              </motion.div>
-            ))}
+              ))}
+            </div>
 
-            {/* Decorative sparkle dots */}
-            {[
-              { x: "45%", y: "20%", d: 0 },
-              { x: "30%", y: "55%", d: 0.5 },
-              { x: "85%", y: "65%", d: 1 },
-              { x: "50%", y: "88%", d: 1.5 },
-            ].map((dot, i) => (
-              <motion.div
-                key={`dot-${i}`}
-                className="absolute h-2 w-2 rounded-full bg-orange-400/60"
-                style={{ left: dot.x, top: dot.y }}
-                animate={{ scale: [0, 1, 0], opacity: [0, 0.6, 0] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: dot.d,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
+            {/* Subtle gradient glow behind grid */}
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-primary/10 via-orange-300/10 to-amber-200/10 blur-xl" />
           </div>
         </motion.div>
       </div>
