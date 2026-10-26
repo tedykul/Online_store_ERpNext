@@ -48,60 +48,71 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
 
   return (
     <section id="beranda" className="relative overflow-hidden border-b border-border/40 scroll-mt-24">
-      {/* Subtle noise texture */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+      {/* ============ Background: scattered vegetables full-bleed ============ */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/hero-produce-scattered.png"
+          alt="Sayur dan buah segar berlimpah dari petani lokal"
+          className="h-full w-full object-cover"
+          loading="eager"
+        />
+        {/* Gradient overlays for text legibility — dark vignette top + bottom, light center */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/60 to-background/85" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70" />
+      </div>
 
-      {/* Decorative gradient blobs */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
+      {/* Decorative gradient blobs (subtle, behind text) */}
+      <div className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute top-20 right-0 h-80 w-80 rounded-full bg-orange-300/15 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-lime-300/15 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-20">
-        {/* Left content */}
-        <div className="flex flex-col gap-5">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 md:py-24">
+        <div className="flex flex-col items-center gap-5 text-center">
           {/* Badge — premium pill with border + shadow */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-semibold text-primary backdrop-blur-sm shadow-sm"
+            className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-background/80 backdrop-blur-md px-4 py-2 text-xs font-semibold text-primary shadow-sm"
           >
             <Sprout className="h-4 w-4" />
             {badge}
           </motion.div>
 
-          {/* Headline — weight contrast: setup thin, highlight bold + tracking for premium feel */}
+          {/* Headline — centered, large, on top of scattered vegetables */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-6xl md:tracking-tighter"
+            className="text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-7xl md:tracking-tighter drop-shadow-lg"
           >
-            <span className="font-bold text-muted-foreground">{titleA}</span>{" "}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-black">
+            <span className="font-bold text-foreground/90 drop-shadow-md">{titleA}</span>{" "}
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-black drop-shadow-md">
               {titleHighlight}
             </span>{" "}
-            <span className="font-bold">{titleB}</span>
+            <span className="font-bold text-foreground drop-shadow-md">{titleB}</span>
           </motion.h1>
 
-          {/* Body text — darker, larger, constrained width */}
-          <motion.p
+          {/* Body text — centered, backdrop blur for legibility */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-md text-base text-foreground/75 leading-relaxed md:text-lg"
+            className="max-w-xl"
           >
-            {subtitle}
-          </motion.p>
+            <p className="text-base text-foreground/85 leading-relaxed md:text-lg rounded-xl bg-background/40 backdrop-blur-sm px-4 py-2 inline-block">
+              {subtitle}
+            </p>
+          </motion.div>
 
-          {/* Social proof bar — trust signals inline */}
+          {/* Social proof bar — trust signals inline, glassmorphism pill */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-foreground/60"
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-foreground/80 rounded-full bg-background/60 backdrop-blur-md px-4 py-2 shadow-sm border border-border/40"
           >
             <span className="flex items-center gap-1">
               <span className="flex">
@@ -127,66 +138,30 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-3 pt-1"
+            className="flex flex-wrap justify-center gap-3 pt-1"
           >
-            <Button size="lg" className="rounded-full px-7 h-12 text-base shadow-lg shadow-orange-500/30 bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 group" onClick={onShopNow}>
+            <Button size="lg" className="rounded-full px-7 h-12 text-base shadow-xl shadow-orange-500/40 bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 group" onClick={onShopNow}>
               {ctaPrimary}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full px-7 h-12 text-base border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400 dark:hover:bg-orange-950/30"
+              className="rounded-full px-7 h-12 text-base border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400 dark:hover:bg-orange-950/30 bg-background/80 backdrop-blur-md"
               onClick={handleViewPromo}
             >
               {ctaSecondary}
             </Button>
           </motion.div>
 
-          {/* Mobile hero image preview — compact, above trust badges.
-              Desktop has the full image on right; mobile needs emotional hook.
-              Portrait-ish crop (4:3) focuses on basket + vegetables. */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative md:hidden mt-1"
-          >
-            <div className="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/40 shadow-primary/20">
-              <img
-                src="/hero-produce-basket.png"
-                alt="Keranjang penuh sayur dan buah segar dari petani lokal"
-                className="aspect-[5/4] w-full object-cover object-center"
-                loading="eager"
-              />
-              {/* Subtle gradient overlay for text legibility if needed */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-              {/* SayurLogi branding overlay — bottom left, like FreshCart reference */}
-              <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-white/90 backdrop-blur-md px-2.5 py-1.5 shadow-md">
-                <Leaf className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-extrabold text-foreground">SayurLogi</span>
-              </div>
-            </div>
-            {/* "100% Segar" sticker — top right */}
-            <div className="absolute -top-2 -right-2 flex flex-col items-center justify-center rounded-xl bg-orange-500 px-2.5 py-1.5 text-white shadow-lg ring-2 ring-white">
-              <span className="text-xs font-extrabold leading-none">100%</span>
-              <span className="text-[8px] font-semibold leading-tight">SEGAR</span>
-            </div>
-            {/* "Antar 2 Jam" badge — bottom right */}
-            <div className="absolute -bottom-2 -right-2 flex items-center gap-1 rounded-lg bg-white/95 backdrop-blur-md px-2.5 py-1.5 shadow-lg border border-orange-200/60">
-              <Truck className="h-3.5 w-3.5 text-orange-500" />
-              <span className="text-[11px] font-bold text-foreground">Antar 2 Jam</span>
-            </div>
-          </motion.div>
-
-          {/* Trust badges — colored icon circles */}
+          {/* Trust badges — colored icon circles, glassmorphism */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-2 grid grid-cols-3 gap-3 text-center"
+            className="mt-4 grid w-full max-w-2xl grid-cols-3 gap-3 text-center"
           >
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-background/80 backdrop-blur-md p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30">
               <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 ring-1 ring-inset ring-primary/10">
                 <Truck className="h-4 w-4 text-primary" />
@@ -194,7 +169,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               <span className="text-xs font-bold">Antar Cepat</span>
               <span className="text-[10px] text-muted-foreground">2 jam sampai</span>
             </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-orange-500/30">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-background/80 backdrop-blur-md p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-orange-500/30">
               <div className="absolute inset-x-0 top-0 h-1 bg-orange-500" />
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-inset ring-orange-500/10">
                 <ShieldCheck className="h-4 w-4 text-orange-500" />
@@ -202,7 +177,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               <span className="text-xs font-bold">Kualitas</span>
               <span className="text-[10px] text-muted-foreground">100% segar</span>
             </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-card to-muted p-3 text-center ring-1 ring-primary/30 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/50 ring-2 ring-primary/20">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-background/80 backdrop-blur-md p-3 text-center ring-1 ring-primary/30 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/50 ring-2 ring-primary/20">
               <div className="absolute inset-x-0 top-0 h-1.5 bg-amber-500" />
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15 ring-1 ring-inset ring-amber-500/20">
                 <Sprout className="h-5 w-5 text-amber-600" />
@@ -212,81 +187,6 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             </div>
           </motion.div>
         </div>
-
-        {/* Right visual — full image (no circular crop) with subtle animation */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="relative order-1 mb-2 hidden md:block md:order-2"
-        >
-          <div className="relative mx-auto w-full max-w-sm">
-            {/* Gradient glow behind */}
-            <div className="pointer-events-none absolute inset-0 -z-10 scale-110">
-              <div className="absolute top-1/2 left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-3xl" />
-            </div>
-
-            {/* Full image with rounded corners + breathing animation */}
-            <motion.div
-              animate={{ scale: [1, 1.03, 1], y: [0, -6, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative"
-            >
-              <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
-                <img
-                  src="/hero-produce-basket.png"
-                  alt="Keranjang penuh sayur dan buah segar dari petani lokal"
-                  className="w-full h-auto object-cover"
-                  loading="eager"
-                />
-                {/* SayurLogi branding overlay — bottom left, like FreshCart reference */}
-                <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-xl bg-white/90 backdrop-blur-md px-3 py-2 shadow-lg">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                    <Leaf className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="flex flex-col leading-none">
-                    <span className="text-sm font-extrabold text-foreground">SayurLogi</span>
-                    <span className="text-[8px] text-muted-foreground uppercase tracking-wider">Sayur & Buah Segar</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Badge — "100% Segar" integrated as overlay sticker */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0, rotate: -20 }}
-              animate={{ opacity: 1, scale: 1, rotate: -8 }}
-              transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 200 }}
-              className="absolute -top-4 -right-4 z-10"
-            >
-              <motion.div
-                animate={{ rotate: [-8, -5, -8] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="flex flex-col items-center justify-center rounded-2xl bg-orange-500 px-3.5 py-2.5 text-white shadow-xl ring-2 ring-white"
-              >
-                <span className="text-base font-extrabold leading-none">100%</span>
-                <span className="text-[9px] font-semibold leading-tight mt-0.5">SEGAR</span>
-              </motion.div>
-            </motion.div>
-
-            {/* Badge — "Antar 2 Jam" as overlay card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.5, type: "spring", stiffness: 200 }}
-              className="absolute -bottom-4 -left-4 z-10"
-            >
-              <motion.div
-                animate={{ y: [0, 6, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-                className="flex items-center gap-1.5 rounded-2xl bg-white/95 backdrop-blur-md px-3.5 py-2.5 shadow-xl border border-orange-200/60"
-              >
-                <Truck className="h-4 w-4 text-orange-500" />
-                <span className="text-xs font-bold text-foreground">Antar 2 Jam</span>
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
