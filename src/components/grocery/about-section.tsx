@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sprout, Handshake, Truck, Leaf, Users, Clock, Award, Heart } from "lucide-react";
+import { Sprout, Handshake, Truck, Leaf, Users, Clock, Award, Heart, Quote } from "lucide-react";
 
 interface AboutContent {
   aboutBadge: string | null;
@@ -40,11 +40,13 @@ interface AboutSectionProps {
  */
 export function AboutSection({ content }: AboutSectionProps = {}) {
   const c = content || {};
+
+  // Stats — Lucide icons in colored circles (no emoji)
   const stats = [
-    { icon: Users, value: c.aboutStat1Value ?? "5.000+", label: c.aboutStat1Label ?? "Pelanggan Bahagia", emoji: "😊" },
-    { icon: Sprout, value: c.aboutStat2Value ?? "120+", label: c.aboutStat2Label ?? "Petani Mitra", emoji: "👨‍🌾" },
-    { icon: Truck, value: c.aboutStat3Value ?? "15", label: c.aboutStat3Label ?? "Kota Terjangkau", emoji: "🚚" },
-    { icon: Award, value: c.aboutStat4Value ?? "4.9/5", label: c.aboutStat4Label ?? "Rating Pengguna", emoji: "⭐" },
+    { icon: Users, value: c.aboutStat1Value ?? "5.000+", label: c.aboutStat1Label ?? "Pelanggan Bahagia", color: "bg-primary/10 text-primary" },
+    { icon: Sprout, value: c.aboutStat2Value ?? "120+", label: c.aboutStat2Label ?? "Petani Mitra", color: "bg-orange-500/10 text-orange-500" },
+    { icon: Truck, value: c.aboutStat3Value ?? "15", label: c.aboutStat3Label ?? "Kota Terjangkau", color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400" },
+    { icon: Award, value: c.aboutStat4Value ?? "4.9/5", label: c.aboutStat4Label ?? "Rating Pengguna", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
   ];
 
   const values = [
@@ -104,9 +106,9 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
           </p>
         </motion.div>
 
-        {/* Story + Image collage */}
+        {/* Story + Visual — gap-12 for more breathing room */}
         <div className="mt-12 grid items-center gap-8 md:grid-cols-2 md:gap-12">
-          {/* Story text */}
+          {/* Story text — with pull quote highlight */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -114,10 +116,19 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-bold">{c.aboutStoryH3 ?? "Misi Kami 🌱"}</h3>
+            <h3 className="text-2xl font-bold tracking-tight">{c.aboutStoryH3 ?? "Misi Kami 🌱"}</h3>
             <p className="text-muted-foreground leading-relaxed">
               {c.aboutStoryP1 ?? "Indonesia adalah negara agraris yang kaya, tapi banyak petani masih kesulitan menjual hasil panen dengan harga layak. Sementara itu, konsumen kota sulit mendapatkan sayur & buah benar-benar segar."}
             </p>
+
+            {/* Pull quote — visual break between paragraphs */}
+            <div className="my-4 flex items-start gap-3 rounded-2xl border-l-4 border-orange-500 bg-orange-500/5 p-4">
+              <Quote className="h-5 w-5 shrink-0 text-orange-500 mt-0.5" />
+              <p className="text-sm font-semibold text-foreground italic leading-relaxed">
+                "Petani mendapat harga adil, konsumen mendapat produk segar. Win-win untuk semua."
+              </p>
+            </div>
+
             <p className="text-muted-foreground leading-relaxed">
               {c.aboutStoryP2 ?? "SayurLogi menjembatani kedua pihak: petani mendapat harga adil, konsumen mendapat produk segar dengan harga jujur. Win-win untuk semua."}
             </p>
@@ -135,7 +146,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             </div>
           </motion.div>
 
-          {/* Visual collage */}
+          {/* Visual — gradient pattern with tagline (replaces emoji collage) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -143,29 +154,49 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="relative aspect-square w-full max-w-md mx-auto"
           >
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 via-lime-200/30 to-amber-200/20 blur-2xl" />
-            <div className="relative grid h-full grid-cols-2 gap-3">
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-1 items-center justify-center rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-500/20 text-5xl backdrop-blur-sm">
-                  👨‍🌾
+            {/* Gradient glow background */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-2xl" />
+
+            {/* Premium gradient card with tagline */}
+            <div className="relative flex h-full flex-col items-center justify-center gap-6 rounded-3xl border border-border/40 bg-gradient-to-br from-primary/5 via-orange-500/5 to-amber-500/5 p-8 text-center">
+              {/* Top icon cluster */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-md">
+                  <Sprout className="h-7 w-7" />
                 </div>
-                <div className="flex flex-1 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 text-5xl backdrop-blur-sm">
-                  🚚
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500 shadow-md">
+                  <Truck className="h-7 w-7" />
+                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 shadow-md">
+                  <Heart className="h-7 w-7" />
                 </div>
               </div>
-              <div className="flex flex-col gap-3 pt-6">
-                <div className="flex flex-1 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400/20 to-red-500/20 text-5xl backdrop-blur-sm">
-                  🥕
-                </div>
-                <div className="flex flex-1 items-center justify-center rounded-2xl bg-gradient-to-br from-lime-400/20 to-green-500/20 text-5xl backdrop-blur-sm">
-                  🥬
-                </div>
+
+              {/* Tagline */}
+              <div className="space-y-2">
+                <p className="text-2xl font-extrabold tracking-tight text-foreground">
+                  Dari Kebun
+                  <span className="text-orange-500"> → </span>
+                  ke Meja Makan
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                  Rantai pasok terpendek untuk kesegaran maksimal. Tanpa perantara, tanpa bahan kimia.
+                </p>
+              </div>
+
+              {/* Flow diagram */}
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <span className="rounded-lg bg-primary/10 px-3 py-1.5 text-primary">🌱 Petani</span>
+                <span className="text-orange-500">→</span>
+                <span className="rounded-lg bg-orange-500/10 px-3 py-1.5 text-orange-500">🚚 SayurLogi</span>
+                <span className="text-orange-500">→</span>
+                <span className="rounded-lg bg-amber-500/10 px-3 py-1.5 text-amber-600">🏠 Kamu</span>
               </div>
             </div>
           </motion.div>
         </div>
 
-        {/* Stats */}
+        {/* Stats — Lucide icons in colored circles (no emoji) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -180,18 +211,21 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
-              <span className="text-3xl" aria-hidden="true">{stat.emoji}</span>
-              <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
+              {/* Icon in colored circle — replaces emoji */}
+              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.color}`}>
+                <stat.icon className="h-6 w-6" />
+              </div>
+              <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl tabular-nums">
                 {stat.value}
               </span>
-              <span className="text-xs text-muted-foreground md:text-sm">{stat.label}</span>
+              <span className="text-xs text-muted-foreground md:text-sm font-medium">{stat.label}</span>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Values */}
+        {/* Values — bigger icon circles + ring border */}
         <div className="mt-16">
           <motion.h3
             initial={{ opacity: 0, y: 16 }}
@@ -212,10 +246,11 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
               >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${value.color}`}>
-                  <value.icon className="h-6 w-6" />
+                {/* Bigger icon circle (h-14 w-14) + ring border for depth */}
+                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${value.color} ring-1 ring-inset ring-current/10`}>
+                  <value.icon className="h-7 w-7" />
                 </div>
-                <h4 className="text-base font-semibold">{value.title}</h4>
+                <h4 className="text-base font-bold tracking-tight">{value.title}</h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">{value.desc}</p>
               </motion.div>
             ))}
