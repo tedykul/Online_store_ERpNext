@@ -138,66 +138,93 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           </motion.div>
         </div>
 
-        {/* Right visual — fresh produce wreath with subtle animation */}
+        {/* Right visual — transparent produce wreath with rotating + floating animation */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
+          initial={{ opacity: 0, scale: 0.85 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
           className="relative order-1 md:order-2"
         >
-          <div className="relative mx-auto w-full max-w-xs sm:max-w-sm md:max-w-md">
-            {/* Main produce image with subtle infinite breathing animation */}
+          <div className="relative mx-auto w-full max-w-xs sm:max-w-sm md:max-w-lg">
+            {/* Soft gradient glow behind — blenda dengan background */}
+            <div className="pointer-events-none absolute inset-0 -z-10 scale-110">
+              <div className="absolute top-1/2 left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-3xl" />
+              <div className="absolute top-1/4 right-1/4 h-32 w-32 rounded-full bg-orange-400/15 blur-2xl" />
+              <div className="absolute bottom-1/4 left-1/4 h-28 w-28 rounded-full bg-primary/15 blur-2xl" />
+            </div>
+
+            {/* Main produce image — slow rotation + breathing, circular crop */}
             <motion.div
-              animate={{ scale: [1, 1.03, 1] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative"
+              animate={{ rotate: [0, 3, 0, -3, 0], scale: [1, 1.04, 1] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="relative mx-auto w-full aspect-square max-w-sm md:max-w-md"
             >
-              <div className="overflow-hidden rounded-3xl shadow-2xl border-4 border-white">
+              <div className="absolute inset-0 rounded-full overflow-hidden shadow-2xl">
                 <img
                   src="/hero-produce.png"
                   alt="Sayur dan buah segar dari petani lokal"
-                  className="w-full h-auto object-cover"
+                  className="h-full w-full object-cover"
                   loading="eager"
                 />
               </div>
+              {/* Ring border for premium look */}
+              <div className="pointer-events-none absolute inset-0 rounded-full ring-4 ring-white/60 shadow-2xl" />
             </motion.div>
 
-            {/* Floating badge — "100% Segar" */}
+            {/* Floating badge — "100% Segar" — orbit animation */}
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 200 }}
-              className="absolute -top-3 -right-3 z-10"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.5, type: "spring", stiffness: 200 }}
+              className="absolute top-2 right-2 z-10"
             >
               <motion.div
-                animate={{ y: [0, -6, 0] }}
+                animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="flex flex-col items-center justify-center rounded-full bg-orange-500 px-4 py-3 text-white shadow-xl"
+                className="flex flex-col items-center justify-center rounded-full bg-orange-500 px-4 py-3 text-white shadow-xl ring-4 ring-white/50"
               >
                 <span className="text-lg font-extrabold leading-none">100%</span>
                 <span className="text-[10px] font-semibold leading-tight mt-0.5">Segar</span>
               </motion.div>
             </motion.div>
 
-            {/* Floating badge — "Antar 2 Jam" */}
+            {/* Floating badge — "Antar 2 Jam" — counter-orbit */}
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.5, type: "spring", stiffness: 200 }}
-              className="absolute -bottom-3 -left-3 z-10"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7, duration: 0.5, type: "spring", stiffness: 200 }}
+              className="absolute bottom-4 left-0 z-10"
             >
               <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="flex items-center gap-1.5 rounded-2xl bg-white px-3 py-2 shadow-xl border border-border/40"
+                animate={{ y: [0, 10, 0], rotate: [0, -3, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                className="flex items-center gap-1.5 rounded-2xl bg-white/90 backdrop-blur-md px-3 py-2 shadow-xl border border-orange-200/60"
               >
                 <Truck className="h-4 w-4 text-orange-500" />
                 <span className="text-xs font-bold text-foreground">Antar 2 Jam</span>
               </motion.div>
             </motion.div>
 
-            {/* Subtle gradient glow behind image */}
-            <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/15 via-orange-300/10 to-amber-200/10 blur-2xl scale-110" />
+            {/* Sparkle dots — orange accent */}
+            {[
+              { x: "15%", y: "20%", d: 0, s: "h-2 w-2" },
+              { x: "85%", y: "60%", d: 0.5, s: "h-1.5 w-1.5" },
+              { x: "70%", y: "15%", d: 1, s: "h-2.5 w-2.5" },
+              { x: "25%", y: "80%", d: 1.5, s: "h-1.5 w-1.5" },
+            ].map((dot, i) => (
+              <motion.div
+                key={`dot-${i}`}
+                className={`absolute ${dot.s} rounded-full bg-orange-400`}
+                style={{ left: dot.x, top: dot.y }}
+                animate={{ scale: [0, 1.2, 0], opacity: [0, 0.7, 0] }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  delay: dot.d,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
           </div>
         </motion.div>
       </div>
