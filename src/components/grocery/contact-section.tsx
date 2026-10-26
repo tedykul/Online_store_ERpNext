@@ -2,46 +2,37 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, Send, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Send,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ArrowUpRight,
+  Lightbulb,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type Status = "idle" | "loading" | "success";
 
 interface ContactInfo {
-  icon: typeof Mail;
+  icon: LucideIcon;
   label: string;
   value: string;
   href?: string;
+  // Per-card accent system — color-coded for rapid scanning
+  accent: string; // solid bar color, e.g. "bg-primary"
+  iconBg: string; // icon container bg + text, e.g. "bg-primary/10 text-primary ring-primary/10"
 }
-
-const CONTACT_INFOS: ContactInfo[] = [
-  {
-    icon: Phone,
-    label: "Telepon",
-    value: "0800-1234-5678",
-    href: "tel:080012345678",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: "halo@sayurbox.id",
-    href: "mailto:halo@sayurbox.id",
-  },
-  {
-    icon: MapPin,
-    label: "Alamat",
-    value: "Jl. Petani Sejahtera No. 88, Jakarta Selatan",
-  },
-  {
-    icon: Clock,
-    label: "Jam Operasional",
-    value: "Setiap hari, 08.00 - 21.00 WIB",
-  },
-];
 
 interface ContactSectionProps {
   /** Admin-editable content from DB. Null fields fall back to defaults. */
@@ -60,10 +51,36 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
   const hours = content?.contactHours ?? "Setiap hari, 08.00 - 21.00 WIB";
 
   const contactInfos: ContactInfo[] = [
-    { icon: Phone, label: "Telepon", value: phone, href: `tel:${phone.replace(/[^0-9+]/g, "")}` },
-    { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
-    { icon: MapPin, label: "Alamat", value: address },
-    { icon: Clock, label: "Jam Operasional", value: hours },
+    {
+      icon: Phone,
+      label: "Telepon",
+      value: phone,
+      href: `tel:${phone.replace(/[^0-9+]/g, "")}`,
+      accent: "bg-primary",
+      iconBg: "bg-primary/10 text-primary ring-primary/10",
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: email,
+      href: `mailto:${email}`,
+      accent: "bg-cyan-500",
+      iconBg: "bg-cyan-500/10 text-cyan-600 ring-cyan-500/10",
+    },
+    {
+      icon: MapPin,
+      label: "Alamat",
+      value: address,
+      accent: "bg-amber-500",
+      iconBg: "bg-amber-500/10 text-amber-600 ring-amber-500/10",
+    },
+    {
+      icon: Clock,
+      label: "Jam Operasional",
+      value: hours,
+      accent: "bg-violet-500",
+      iconBg: "bg-violet-500/10 text-violet-600 ring-violet-500/10",
+    },
   ];
 
   const [status, setStatus] = useState<Status>("idle");
@@ -107,7 +124,6 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
       } else {
         setStatus("idle");
         toast.error(data.message || "Gagal mengirim pesan");
-        // map server-side errors back to fields
         if (data.errors) {
           const fieldErrors: Record<string, string> = {};
           for (const err of data.errors) fieldErrors[err.field] = err.message;
@@ -122,7 +138,6 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
 
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm({ ...form, [field]: value });
-    // clear field error on edit
     if (errors[field]) setErrors({ ...errors, [field]: "" });
   };
 
@@ -150,57 +165,95 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
               Sampaikan ke Kami
             </span>
           </h2>
-          <p className="mt-4 text-base text-muted-foreground md:text-lg text-balance">
+          <p className="mt-4 text-base text-foreground/80 md:text-lg text-balance">
             Tim customer service kami siap membantu. Isi form di bawah atau hubungi langsung via kontak kami.
           </p>
         </motion.div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-5 lg:gap-12">
-          {/* Contact info cards */}
+          {/* ============ Left: Contact info cards ============ */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-2 space-y-4"
+            className="lg:col-span-2 space-y-3"
           >
-            {contactInfos.map((info, i) => (
-              <div
-                key={info.label}
-                className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <info.icon className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {info.label}
-                  </p>
-                  {info.href ? (
-                    <a
-                      href={info.href}
-                      className="mt-0.5 block text-sm font-semibold text-foreground hover:text-primary transition-colors break-words"
+            {/* Sub-heading for info group — section separation */}
+            <h3 className="px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Kontak Langsung
+            </h3>
+
+            {contactInfos.map((info, i) => {
+              const InfoIcon = info.icon;
+              const isInteractive = !!info.href;
+              return (
+                <motion.a
+                  key={info.label}
+                  href={info.href || undefined}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-30px" }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className={cn(
+                    "group relative flex items-center gap-4 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300",
+                    isInteractive && "hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30 active:scale-[0.99] active:bg-accent/40 cursor-pointer"
+                  )}
+                >
+                  {/* Solid colored left accent bar — per info type */}
+                  <div className={cn("absolute inset-y-0 left-0 w-1", info.accent)} />
+
+                  {/* Icon — color-coded per type, with ring for depth */}
+                  <div
+                    className={cn(
+                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ml-1",
+                      info.iconBg
+                    )}
+                  >
+                    <InfoIcon className="h-5 w-5" />
+                  </div>
+
+                  {/* Label + value */}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {info.label}
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-0.5 text-sm font-semibold break-words",
+                        isInteractive ? "text-foreground group-hover:text-primary transition-colors" : "text-foreground"
+                      )}
                     >
                       {info.value}
-                    </a>
-                  ) : (
-                    <p className="mt-0.5 text-sm font-semibold text-foreground break-words">{info.value}</p>
+                    </p>
+                  </div>
+
+                  {/* Tappable hint — only for interactive items */}
+                  {isInteractive && (
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-50 transition-all group-hover:opacity-100 group-hover:text-primary" />
                   )}
+                </motion.a>
+              );
+            })}
+
+            {/* Tips card — elevated, matching design system (no dashed border) */}
+            <div className="group relative mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-4 ring-1 ring-primary/20 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+              <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
+                  <Lightbulb className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-primary">Tips Cepat</p>
+                  <p className="mt-1 text-xs text-foreground/70 leading-relaxed">
+                    Untuk pertanyaan umum (cara pesan, pengiriman, pembayaran), cek dulu section FAQ di atas. Mungkin jawabannya sudah ada!
+                  </p>
                 </div>
               </div>
-            ))}
-
-            {/* Social proof / quick note */}
-            <div className="rounded-2xl bg-primary/5 border border-primary/20 p-5">
-              <p className="text-sm font-medium text-primary">💡 Tips Cepat</p>
-              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Untuk pertanyaan umum (cara pesan, pengiriman, pembayaran), cek dulu
-                section FAQ di atas. Mungkin jawabannya sudah ada! 😊
-              </p>
             </div>
           </motion.div>
 
-          {/* Contact form */}
+          {/* ============ Right: Contact form ============ */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -208,11 +261,18 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="lg:col-span-3"
           >
-            <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-sm md:p-8">
+            {/* Sub-heading for form group — section separation */}
+            <h3 className="mb-3 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Kirim Pesan
+            </h3>
+
+            {/* Form container — elevated card matching design system */}
+            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted p-6 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] md:p-8">
+              {/* Solid top accent — primary green for emphasis */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+
               {status === "success" ? (
-                <SuccessState
-                  onReset={() => setStatus("idle")}
-                />
+                <SuccessState onReset={() => setStatus("idle")} />
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -281,10 +341,11 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
                       value={form.message}
                       onChange={(e) => handleChange("message", e.target.value)}
                       placeholder="Tulis pesan atau pertanyaanmu di sini..."
-                      rows={5}
+                      rows={4}
                       disabled={status === "loading"}
                       aria-invalid={!!errors.message}
                       maxLength={2000}
+                      className="resize-none"
                     />
                     <div className="mt-1 text-right text-xs text-muted-foreground">
                       {form.message.length}/2000
@@ -352,13 +413,13 @@ function SuccessState({ onReset }: { onReset: () => void }) {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10"
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/10"
       >
         <CheckCircle2 className="h-9 w-9 text-primary" />
       </motion.div>
       <div>
         <h3 className="text-xl font-bold">Pesan Terkirim! 🎉</h3>
-        <p className="mt-1 text-sm text-muted-foreground max-w-sm">
+        <p className="mt-1 text-sm text-foreground/70 max-w-sm">
           Terima kasih sudah menghubungi kami. Tim customer service akan membalas
           dalam 1x24 jam via email.
         </p>
