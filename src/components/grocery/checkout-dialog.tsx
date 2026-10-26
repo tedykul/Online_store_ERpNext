@@ -100,194 +100,234 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDia
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto scrollbar-grocery sm:max-w-lg">
-        {/* Always-present description for a11y (suppresses Radix warning
-            when step switches to loading/success without DialogDescription) */}
+      <DialogContent className="flex max-h-[92vh] flex-col overflow-hidden p-0 sm:max-w-lg gap-0">
+        {/* Always-present description for a11y */}
         <DialogDescription className="sr-only">
           Dialog checkout SayurLogi
         </DialogDescription>
 
+        {/* Design system accent bar */}
+        <div className="h-1 bg-primary shrink-0" />
+
         {/* Step indicator (3-step progress: form -> loading -> success) */}
-        <CheckoutSteps current={step} />
+        <div className="px-5 pt-4 shrink-0">
+          <CheckoutSteps current={step} />
+        </div>
 
         {step === "success" && result ? (
-          <SuccessView
-            result={result}
-            deliveryMethod={deliveryMethod}
-            onClose={() => handleClose(false)}
-            onTrackOrder={onTrackOrder}
-          />
+          <div className="flex-1 overflow-y-auto scrollbar-grocery">
+            <SuccessView
+              result={result}
+              deliveryMethod={deliveryMethod}
+              onClose={() => handleClose(false)}
+              onTrackOrder={onTrackOrder}
+            />
+          </div>
         ) : step === "loading" ? (
-          <LoadingView />
+          <div className="flex-1 overflow-y-auto scrollbar-grocery">
+            <LoadingView />
+          </div>
         ) : (
           <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
+            <DialogHeader className="px-5 pt-3 pb-2 shrink-0">
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
+                  <Package className="h-4 w-4" />
+                </div>
                 Checkout Pesanan
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-foreground/70">
                 Lengkapi data pengiriman untuk menyelesaikan pesanan.
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Customer info */}
-              <div className="grid gap-3">
-                <Field label="Nama Lengkap" required>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Budi Santoso"
-                    required
-                  />
-                </Field>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="No. Telepon" required>
-                    <Input
-                      type="tel"
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      placeholder="0812xxxxxxx"
-                      required
-                    />
-                  </Field>
-                  <Field label="Email">
-                    <Input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="budi@email.com"
-                    />
-                  </Field>
-                </div>
-                <Field label="Alamat Pengiriman" required>
-                  <Textarea
-                    value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    placeholder="Jl. Mawar No. 12, RT 02/RW 05..."
-                    rows={2}
-                    required
-                  />
-                </Field>
-                <Field label="Kota">
-                  <Input
-                    value={form.city}
-                    onChange={(e) => setForm({ ...form, city: e.target.value })}
-                    placeholder="Jakarta Selatan"
-                  />
-                </Field>
-                <Field label="Catatan (opsional)">
-                  <Input
-                    value={form.notes}
-                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Tinggalkan di pos satpam..."
-                  />
-                </Field>
-              </div>
-
-              <Separator />
-
-              {/* Delivery method */}
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold">Metode Pengiriman</Label>
-                <RadioGroup
-                  value={deliveryMethod}
-                  onValueChange={(v) => setDeliveryMethod(v as "delivery" | "pickup")}
-                  className="grid grid-cols-2 gap-2"
-                >
-                  <RadioCard
-                    value="delivery"
-                    icon={<Truck className="h-4 w-4" />}
-                    title="Antar"
-                    desc={freeShipping ? "Gratis ongkir" : formatIDR(shipping)}
-                  />
-                  <RadioCard
-                    value="pickup"
-                    icon={<Store className="h-4 w-4" />}
-                    title="Ambil Sendiri"
-                    desc="Gratis"
-                  />
-                </RadioGroup>
-                {/* Estimated delivery time — updates when method changes */}
-                <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
-              </div>
-
-              {/* Payment method */}
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold">Metode Pembayaran</Label>
-                <RadioGroup
-                  value={paymentMethod}
-                  onValueChange={(v) => setPaymentMethod(v as "cod" | "transfer" | "ewallet")}
-                  className="grid grid-cols-3 gap-2"
-                >
-                  <RadioCard
-                    value="cod"
-                    icon={<Banknote className="h-4 w-4" />}
-                    title="COD"
-                    desc="Bayar di tempat"
-                    compact
-                  />
-                  <RadioCard
-                    value="transfer"
-                    icon={<CreditCard className="h-4 w-4" />}
-                    title="Transfer"
-                    desc="BCA, Mandiri"
-                    compact
-                  />
-                  <RadioCard
-                    value="ewallet"
-                    icon={<Wallet className="h-4 w-4" />}
-                    title="E-Wallet"
-                    desc="GoPay/OVO"
-                    compact
-                  />
-                </RadioGroup>
-              </div>
-
-              <Separator />
-
-              {/* Order summary */}
-              <div className="rounded-xl border border-border/60 bg-secondary/30 p-3 text-sm">
-                <div className="mb-2 font-semibold">Ringkasan Pesanan</div>
-                <div className="max-h-32 space-y-1 overflow-y-auto scrollbar-grocery pr-1">
-                  {items.map((item) => (
-                    <div key={item.product.id} className="flex justify-between text-xs text-muted-foreground">
-                      <span className="line-clamp-1">
-                        {item.product.emoji} {item.product.name} × {item.quantity}
-                      </span>
-                      <span className="ml-2 shrink-0">{formatIDR(item.product.price * item.quantity)}</span>
+            <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
+              {/* Scrollable form content */}
+              <div className="flex-1 overflow-y-auto scrollbar-grocery px-5 pb-4 space-y-4">
+                {/* ============ Section: Customer info — elevated card ============ */}
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+                  <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px]">1</span>
+                    Data Penerima
+                  </h3>
+                  <div className="grid gap-2.5">
+                    <Field label="Nama Lengkap" required>
+                      <Input
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        placeholder="Budi Santoso"
+                        required
+                        className="h-10"
+                      />
+                    </Field>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <Field label="No. Telepon" required>
+                        <Input
+                          type="tel"
+                          value={form.phone}
+                          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                          placeholder="0812xxxxxxx"
+                          required
+                          className="h-10"
+                        />
+                      </Field>
+                      <Field label="Email">
+                        <Input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          placeholder="budi@email.com"
+                          className="h-10"
+                        />
+                      </Field>
                     </div>
-                  ))}
-                </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Subtotal</span>
-                  <span>{formatIDR(totalPrice)}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Ongkir</span>
-                  <span className={freeShipping ? "text-primary font-medium" : ""}>
-                    {freeShipping ? "GRATIS" : formatIDR(shipping)}
-                  </span>
-                </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between text-base font-bold">
-                  <span>Total</span>
-                  <span className="text-primary">{formatIDR(grandTotal)}</span>
-                </div>
+                    <Field label="Alamat Pengiriman" required>
+                      <Textarea
+                        value={form.address}
+                        onChange={(e) => setForm({ ...form, address: e.target.value })}
+                        placeholder="Jl. Mawar No. 12, RT 02/RW 05..."
+                        rows={2}
+                        required
+                        className="resize-none"
+                      />
+                    </Field>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <Field label="Kota">
+                        <Input
+                          value={form.city}
+                          onChange={(e) => setForm({ ...form, city: e.target.value })}
+                          placeholder="Jakarta Selatan"
+                          className="h-10"
+                        />
+                      </Field>
+                      <Field label="Catatan (opsional)">
+                        <Input
+                          value={form.notes}
+                          onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                          placeholder="Tinggalkan di pos satpam..."
+                          className="h-10"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </section>
+
+                {/* ============ Section: Delivery method — elevated card ============ */}
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-cyan-500" />
+                  <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-white text-[10px]">2</span>
+                    Metode Pengiriman
+                  </h3>
+                  <RadioGroup
+                    value={deliveryMethod}
+                    onValueChange={(v) => setDeliveryMethod(v as "delivery" | "pickup")}
+                    className="grid grid-cols-2 gap-2"
+                  >
+                    <RadioCard
+                      value="delivery"
+                      icon={<Truck className="h-4 w-4" />}
+                      title="Antar"
+                      desc={freeShipping ? "Gratis ongkir" : formatIDR(shipping)}
+                      accent="cyan"
+                    />
+                    <RadioCard
+                      value="pickup"
+                      icon={<Store className="h-4 w-4" />}
+                      title="Ambil Sendiri"
+                      desc="Gratis"
+                      accent="cyan"
+                    />
+                  </RadioGroup>
+                  <div className="mt-2">
+                    <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
+                  </div>
+                </section>
+
+                {/* ============ Section: Payment method — elevated card ============ */}
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-amber-500" />
+                  <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white text-[10px]">3</span>
+                    Metode Pembayaran
+                  </h3>
+                  <RadioGroup
+                    value={paymentMethod}
+                    onValueChange={(v) => setPaymentMethod(v as "cod" | "transfer" | "ewallet")}
+                    className="grid grid-cols-3 gap-2"
+                  >
+                    <RadioCard
+                      value="cod"
+                      icon={<Banknote className="h-4 w-4" />}
+                      title="COD"
+                      desc="Bayar di tempat"
+                      compact
+                      accent="amber"
+                    />
+                    <RadioCard
+                      value="transfer"
+                      icon={<CreditCard className="h-4 w-4" />}
+                      title="Transfer"
+                      desc="BCA, Mandiri"
+                      compact
+                      accent="amber"
+                    />
+                    <RadioCard
+                      value="ewallet"
+                      icon={<Wallet className="h-4 w-4" />}
+                      title="E-Wallet"
+                      desc="GoPay/OVO"
+                      compact
+                      accent="amber"
+                    />
+                  </RadioGroup>
+                </section>
+
+                {/* ============ Order summary — elevated card ============ */}
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/8 via-primary/5 to-card p-4 ring-1 ring-primary/20 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-foreground">Ringkasan Pesanan</h3>
+                  <div className="max-h-32 space-y-1 overflow-y-auto scrollbar-grocery pr-1 mb-2">
+                    {items.map((item) => (
+                      <div key={item.product.id} className="flex justify-between text-xs text-foreground/70">
+                        <span className="line-clamp-1">
+                          {item.product.emoji} {item.product.name} × {item.quantity}
+                        </span>
+                        <span className="ml-2 shrink-0 font-medium">{formatIDR(item.product.price * item.quantity)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between text-xs text-foreground/70">
+                    <span>Subtotal</span>
+                    <span className="font-medium">{formatIDR(totalPrice)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-foreground/70">
+                    <span>Ongkir</span>
+                    <span className={freeShipping ? "text-primary font-bold" : "font-medium"}>
+                      {freeShipping ? "GRATIS" : formatIDR(shipping)}
+                    </span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-base font-bold">Total</span>
+                    <span className="text-xl font-extrabold text-primary tabular-nums">{formatIDR(grandTotal)}</span>
+                  </div>
+                </section>
               </div>
 
-              <Button
-                type="submit"
-                className="h-12 w-full rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
-                disabled={items.length === 0}
-              >
-                Buat Pesanan — {formatIDR(grandTotal)}
-              </Button>
-
-              {/* Trust badges — reassure user before clicking submit */}
-              <TrustBadges variant="compact" className="pt-1" />
+              {/* ============ Fixed footer with submit button — always visible ============ */}
+              <div className="border-t border-border/60 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/85 p-3 shrink-0 shadow-[0_-2px_8px_-4px_rgba(0,0,0,0.1)] pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                <Button
+                  type="submit"
+                  className="h-12 w-full rounded-xl text-base font-bold shadow-md transition-transform hover:scale-[1.01] active:scale-100"
+                  disabled={items.length === 0}
+                >
+                  Buat Pesanan — {formatIDR(grandTotal)}
+                </Button>
+                <TrustBadges variant="compact" className="pt-2" />
+              </div>
             </form>
           </>
         )}
@@ -321,21 +361,33 @@ function RadioCard({
   title,
   desc,
   compact,
+  accent = "primary",
 }: {
   value: string;
   icon: React.ReactNode;
   title: string;
   desc: string;
   compact?: boolean;
+  accent?: "primary" | "cyan" | "amber";
 }) {
+  const accentRing = {
+    primary: "has-[:checked]:ring-primary has-[:checked]:bg-primary/5",
+    cyan: "has-[:checked]:ring-cyan-500 has-[:checked]:bg-cyan-500/5",
+    amber: "has-[:checked]:ring-amber-500 has-[:checked]:bg-amber-500/5",
+  }[accent];
+  const accentText = {
+    primary: "text-primary",
+    cyan: "text-cyan-600 dark:text-cyan-400",
+    amber: "text-amber-600 dark:text-amber-400",
+  }[accent];
   return (
     <Label
       htmlFor={`r-${value}`}
-      className="flex cursor-pointer flex-col gap-1 rounded-xl border border-border bg-card p-2.5 transition-all hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+      className={`flex cursor-pointer flex-col gap-1 rounded-lg bg-gradient-to-br from-card to-muted/30 p-2.5 ring-1 ring-border/50 transition-all hover:ring-border hover:shadow-sm ${accentRing} has-[:checked]:ring-2`}
     >
       <div className="flex items-center gap-2">
         <RadioGroupItem value={value} id={`r-${value}`} className="sr-only" />
-        <span className="text-primary">{icon}</span>
+        <span className={accentText}>{icon}</span>
         <span className={`font-semibold ${compact ? "text-xs" : "text-sm"}`}>{title}</span>
       </div>
       <span className="text-[10px] text-muted-foreground">{desc}</span>
