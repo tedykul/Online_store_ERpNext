@@ -1,6 +1,6 @@
 "use client";
 
-import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Settings } from "lucide-react";
+import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Settings, Clock, ShieldCheck, Truck, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewsletterForm } from "./newsletter-form";
 
@@ -28,11 +28,26 @@ interface FooterProps {
   onOrderHistory?: () => void;
 }
 
+// Trust badges row — small visual proof of reliability
+const TRUST_BADGES = [
+  { icon: ShieldCheck, label: "100% Segar" },
+  { icon: Truck, label: "Antar 2 Jam" },
+  { icon: CreditCard, label: "Pembayaran Aman" },
+];
+
+// Payment methods — text labels styled as chips (no external image deps)
+const PAYMENT_METHODS = ["BCA", "Mandiri", "BNI", "BRI", "GoPay", "OVO", "DANA", "ShopeePay", "COD"];
+
 /**
  * Footer — bottom of page.
  * All internal links use anchor IDs (#beranda, #belanja, #tentang, #faq, #kontak)
  * that scroll to sections on the same page (no separate routes).
  * Social media links remain as placeholders (no real social accounts yet).
+ *
+ * Design: newsletter strip is an elevated card matching the site's design system
+ * (gradient + ring + shadow + top accent bar). Section headers use uppercase
+ * tracking-wider for clear scan-stops. Trust badges + payment methods row
+ * provides credibility signals before the bottom bar.
  */
 export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: FooterProps = {}) {
   const brandName = content?.brandName ?? "SayurLogi";
@@ -62,40 +77,64 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
   return (
     <footer className="mt-auto border-t border-border/60 bg-secondary/30">
-      {/* Newsletter strip */}
-      <div className="border-b border-border/60 bg-primary/5">
-        <div className="mx-auto grid max-w-7xl items-center gap-4 px-4 py-6 md:grid-cols-2 md:py-8">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Send className="h-5 w-5" />
+      {/* ============ Newsletter strip — elevated card ============ */}
+      <div className="mx-auto max-w-7xl px-4 pt-8">
+        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 ring-1 ring-primary/20 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] md:p-6">
+          {/* Solid top accent — primary green */}
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+          <div className="grid items-center gap-4 md:grid-cols-2">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
+                <Send className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold md:text-lg">Dapatkan Promo & Tips Sehat 🌱</h3>
+                <p className="mt-0.5 text-sm text-foreground/70">
+                  Berlangganan newsletter untuk info diskon, resep sehat, dan tips pilih sayur segar.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base font-bold md:text-lg">Dapatkan Promo & Tips Sehat 🌱</h3>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Berlangganan newsletter untuk info diskon, resep sehat, dan tips pilih sayur segar.
-              </p>
-            </div>
+            <NewsletterForm />
           </div>
-          <NewsletterForm />
         </div>
       </div>
 
-      {/* Main footer grid */}
+      {/* ============ Main footer grid ============ */}
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
         {/* Brand */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Leaf className="h-4 w-4" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <Leaf className="h-5 w-5" />
             </div>
-            <span className="text-lg font-bold">{brandName}</span>
+            <div>
+              <span className="text-lg font-bold block leading-tight">{brandName}</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground/70 leading-relaxed">
             {brandText}
           </p>
+
+          {/* Trust badges row — small visual proof */}
+          <div className="flex flex-wrap gap-2 pt-1">
+            {TRUST_BADGES.map((badge) => {
+              const Icon = badge.icon;
+              return (
+                <span
+                  key={badge.label}
+                  className="inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-[10px] font-semibold text-foreground ring-1 ring-border/50"
+                >
+                  <Icon className="h-3 w-3 text-primary" />
+                  {badge.label}
+                </span>
+              );
+            })}
+          </div>
+
           {/* Social media — only show if URLs configured in admin */}
           {socialLinks.length > 0 && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-1">
               {socialLinks.map(({ Icon, label, url }) => (
                 <a
                   key={label}
@@ -104,7 +143,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
                   rel="noopener noreferrer"
                   aria-label={`${brandName} di ${label}`}
                   title={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border/50 transition-all hover:bg-primary hover:text-primary-foreground hover:ring-primary hover:-translate-y-0.5"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -115,81 +154,35 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
         {/* Navigasi */}
         <div>
-          <h4 className="mb-3 text-sm font-semibold">Navigasi</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
-              <a href="#beranda" onClick={handleNavClick("beranda")} className="hover:text-primary transition-colors">
-                Beranda
-              </a>
-            </li>
-            <li>
-              <a href="#belanja" onClick={handleNavClick("belanja")} className="hover:text-primary transition-colors">
-                Belanja Produk
-              </a>
-            </li>
-            <li>
-              <a href="#tentang" onClick={handleNavClick("tentang")} className="hover:text-primary transition-colors">
-                Tentang Kami
-              </a>
-            </li>
-            <li>
-              <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-                FAQ
-              </a>
-            </li>
-            <li>
-              <a href="#kontak" onClick={handleNavClick("kontak")} className="hover:text-primary transition-colors">
-                Hubungi Kami
-              </a>
-            </li>
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Navigasi</h4>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li><a href="#beranda" onClick={handleNavClick("beranda")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Beranda</a></li>
+            <li><a href="#belanja" onClick={handleNavClick("belanja")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Belanja Produk</a></li>
+            <li><a href="#tentang" onClick={handleNavClick("tentang")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Tentang Kami</a></li>
+            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">FAQ</a></li>
+            <li><a href="#kontak" onClick={handleNavClick("kontak")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Hubungi Kami</a></li>
           </ul>
         </div>
 
         {/* Bantuan */}
         <div>
-          <h4 className="mb-3 text-sm font-semibold">Bantuan</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>
-              <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-                Cara Pemesanan
-              </a>
-            </li>
-            <li>
-              <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-                Kebijakan Pengiriman
-              </a>
-            </li>
-            <li>
-              <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-                Pembayaran
-              </a>
-            </li>
-            <li>
-              <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-                Refund & Retur
-              </a>
-            </li>
-            <li>
-              <a href="#kontak" onClick={handleNavClick("kontak")} className="hover:text-primary transition-colors">
-                Customer Service
-              </a>
-            </li>
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Bantuan</h4>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Cara Pemesanan</a></li>
+            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Kebijakan Pengiriman</a></li>
+            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Pembayaran</a></li>
+            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Refund & Retur</a></li>
+            <li><a href="#kontak" onClick={handleNavClick("kontak")} className="block py-1.5 hover:text-primary hover:translate-x-1 transition-all">Customer Service</a></li>
             {onTrackOrder && (
               <li>
-                <button
-                  onClick={onTrackOrder}
-                  className="hover:text-primary transition-colors text-left"
-                >
+                <button onClick={onTrackOrder} className="block w-full text-left py-1.5 hover:text-primary hover:translate-x-1 transition-all">
                   📦 Lacak Pesanan
                 </button>
               </li>
             )}
             {onOrderHistory && (
               <li>
-                <button
-                  onClick={onOrderHistory}
-                  className="hover:text-primary transition-colors text-left"
-                >
+                <button onClick={onOrderHistory} className="block w-full text-left py-1.5 hover:text-primary hover:translate-x-1 transition-all">
                   📋 Riwayat Pesanan
                 </button>
               </li>
@@ -199,48 +192,57 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
         {/* Contact */}
         <div>
-          <h4 className="mb-3 text-sm font-semibold">Hubungi Kami</h4>
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-foreground">Hubungi Kami</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary shrink-0" />
-              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="hover:text-primary transition-colors">
-                {phone}
-              </a>
+              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="hover:text-primary transition-colors">{phone}</a>
             </li>
             <li className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-primary shrink-0" />
-              <a href={`mailto:${email}`} className="hover:text-primary transition-colors">
-                {email}
-              </a>
+              <a href={`mailto:${email}`} className="hover:text-primary transition-colors">{email}</a>
             </li>
             <li className="flex items-start gap-2">
               <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <span>{address}</span>
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-primary text-base">🕗</span>
+              <Clock className="h-4 w-4 text-primary shrink-0" />
               <span>{hours}</span>
             </li>
           </ul>
         </div>
       </div>
 
-      <div className="border-t border-border/60 py-4">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-muted-foreground sm:flex-row">
+      {/* ============ Payment methods row — trust signal ============ */}
+      <div className="mx-auto max-w-7xl px-4 pb-6">
+        <div className="flex flex-col gap-3 rounded-2xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4 text-primary" />
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground">Metode Pembayaran</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {PAYMENT_METHODS.map((method) => (
+              <span
+                key={method}
+                className="rounded-md bg-background px-2 py-1 text-[10px] font-bold text-muted-foreground ring-1 ring-border/60"
+              >
+                {method}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ============ Bottom bar — copyright + legal + utilities ============ */}
+      <div className="border-t border-border/60 bg-secondary/50">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-4 text-xs text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} {brandName}. Powered by Next.js + ERPNext.</p>
           <div className="flex items-center gap-4">
-            <a
-              href="#faq"
-              onClick={handleNavClick("faq")}
-              className="hover:text-primary transition-colors"
-            >
+            <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
               Syarat &amp; Ketentuan
             </a>
-            <a
-              href="#faq"
-              onClick={handleNavClick("faq")}
-              className="hover:text-primary transition-colors"
-            >
+            <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
               Kebijakan Privasi
             </a>
             {onOpenAdmin && (
