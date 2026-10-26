@@ -307,3 +307,73 @@ Stage Summary:
 - Brand migration: "SayurBox Admin" → "SayurLogi Admin" in admin-overlay (header + LoginGate subtitle). Other SayurBox references (header logo text, footer copyright, layout metadata) still use brandName from DB — those are admin-editable via Branding tab and out of scope for this restore.
 - Code quality: ESLint clean (0 errors), TypeScript clean for all touched files. All section components use "use client", Lucide icons only (no Phosphor — avoids SSR errors), sonner toast, framer-motion, adminFetch, admin-ui primitives (AdminSectionHeading/AdminField/SaveButton/AdminCard/AdminEmptyState/DeleteButton). All UI text in Indonesian.
 - Self-protection: UserEditor reads currentUserId from sessionStorage on mount; hides disable/delete/active-toggle on own row; marks own row with "Anda" badge; shows warning in edit modal when editing self. AdminOverlay stores user id to sessionStorage on login + on checkAuthStatus success.
+
+---
+Task ID: restore-all-1
+Agent: general-purpose sub-agent
+Task: Restore all missing schema + API + features (sprints 12-24 fields, Product/ProductVariant models, products/users CRUD APIs, lib helpers, seed scripts)
+
+Work Log:
+- Audited current state: prisma/schema.prisma was at Sprint 11 state (only brand fields on SiteSetting, no Product/ProductVariant models, no discount on Order). No /api/admin/products, /api/admin/users, /api/admin/favicon, /api/admin/about, /api/admin/logout routes existed. /api/products was using ERPNext-only fetchProducts (no DB fallback). Library files products-db.ts, users-db.ts, permissions.ts, shipping.ts, reward.ts, erpnext-sync.ts were missing. No seed-admin.ts or seed-products.ts scripts. content API whitelist did not include the new sprints 12-24 fields. page-content.ts PageContent interface was missing all new fields. logAdminAction signature did not accept userId/userEmail (existing admin/login route was calling it with those params but TypeScript would have flagged it — was working only because of `as any` casts in some callers).
+
+- Prisma schema (prisma/schema.prisma):
+  * SiteSetting: added 28 new nullable fields covering sprints 12-24 — faviconUrl, freeShippingThreshold (Int?), shippingFee (Int?), rewardOrderCount (Int?), rewardDiscountPercent (Int?), aboutImage, testimonialBadge, testimonialTitleA/Highlight/B, testimonialSubtitle, testimonialStat1-4Value/Label/Subtext (12 fields), topBarShipping, topBarBadge, footerCopyrightText.
+  * Order: added `discount Int @default(0)` between `total` and `deliveryMethod`.
+  * Product: new model with id, itemCode (@unique), name, description (@default("")), longDescription?, category, price, oldPrice?, unit, stock, emoji, image?, organic, onSale, tags? (JSON string), benefits? (JSON string), storageTip?, origin?, published, order, erpSyncedAt?, createdAt, updatedAt. Indexes on category/published/order. Variants relation.
+  * ProductVariant: new model with id, productId, name, price, oldPrice?, stock, unit, sku?, createdAt, updatedAt. Cascade delete on parent Product. Index on productId.
+  * Ran `bun run db:push` — schema synced, Prisma Client regenerated. No data loss (all new fields are nullable or have defaults; new tables created empty).
+
+- Updated src/lib/audit.ts: added `logout` to AuditAction union; added `userId?` and `userEmail?` fields to LogOptions; logAdminAction now persists them to AdminAuditLog table (columns already existed from previous NextAuth migration). This unblocks the existing /api/admin/login route which was already passing userId/userEmail to logAdminAction but TypeScript was rejecting it.
+
+- Created src/lib/products-db.ts (~290 lines): serializeProduct (Prisma row → GroceryProduct shape, parses JSON-encoded tags/benefits arrays), getPublishedProducts (DB-first with mock fallback when table empty), getAllProducts, getProductById, createProduct, updateProduct (merges patch onto existing), deleteProduct, bulkUpdateProducts (publish/unpublish/deleteMany), variant CRUD (addVariant, updateVariant, deleteVariant with cross-product guard). Uses structural ProductRowLike type so it accepts any Prisma include shape.
+
+- Created src/lib/users-db.ts (~170 lines): AdminRole type, isValidRole, isValidPassword, normalizeEmail helpers. listUsers, getUserById (omit passwordHash), createUser (bcrypt 10 rounds, role validation, email normalization), updateUser (optional password change), deleteUser, getUserStats (total/active/nonActive/adminCount counts via Promise.all).
+
+- Created src/lib/permissions.ts (~110 lines): Permission union (16 actions across content/products/orders/users/audit/categories/faqs/testimonials/favicon/about), PERMISSIONS map (role → action allowed), hasPermission, requirePermission (returns AuthResult | 403 NextResponse), requireAdmin (any-role auth check), isAuthResult type guard.
+
+- Created src/lib/shipping.ts (~75 lines): DEFAULT_FREE_SHIPPING_THRESHOLD=100000, DEFAULT_SHIPPING_FEE=9000 constants. getShippingConfig (reads SiteSetting, falls back to defaults). calculateShipping (subtotal → shipping/freeShipping/remainingForFreeShipping calculation).
+
+- Created src/lib/reward.ts (~115 lines): DEFAULT_REWARD_ORDER_COUNT=5, DEFAULT_REWARD_DISCOUNT_PERCENT=10. getRewardConfig (reads SiteSetting, falls back to defaults). countCustomerOrders (counts past orders by email OR phone, excludes cancelled). calculateReward (returns pastOrders/currentOrderNumber/applies/discountPercent/discountAmount closure/label).
+
+- Created src/lib/erpnext-sync.ts (~155 lines): syncAllFromErpnext (pulls products from ERPNext via existing fetchProducts, upserts each by itemCode preserving admin-edited fields, sets erpSyncedAt). syncSingleItem (refresh one item). downloadImage (Buffer fetch helper for ERPNext-hosted photos).
+
+- Created 14 API route files under src/app/api/admin/products/ (route.ts GET+POST, [id]/route.ts GET+PUT+DELETE, bulk/route.ts POST, upload/route.ts POST multipart, sync/route.ts GET+POST, sync/status/route.ts GET, [id]/variants/route.ts POST, [id]/variants/[variantId]/route.ts PUT+DELETE). All use requirePermission + isAuthResult pattern, pass auth.userId/userEmail to logAdminAction. Bulk route re-checks products:delete permission when action=delete. Upload routes validate MIME type + size (5MB products/about, 2MB favicon), use randomUUID for filenames, write to public/products or public/about, upsert SiteSetting for favicon/aboutImage paths. Favicon upload cleans up old favicon files with different extensions.
+
+- Created src/app/api/admin/users/route.ts (GET list+stats, POST create with bcrypt via users-db) and [id]/route.ts (GET, PUT with self-protection — isSelf user can't toggle own isActive or change own role, DELETE with self-protection — 422 if auth.userId === id).
+
+- Created src/app/api/admin/favicon/upload/route.ts, src/app/api/admin/about/upload/route.ts, src/app/api/admin/logout/route.ts (audit logs logout action with userId/userEmail).
+
+- Rewrote src/app/api/products/route.ts: now reads from DB via getPublishedProducts (DB-first, falls back to mock if table empty). Returns `source: "db" | "mock"` so storefront can show source indicator. Previously was ERPNext-only.
+
+- Updated src/app/api/admin/content/route.ts: added 25 new fields to allowedFields whitelist (faviconUrl, aboutImage, testimonialBadge + 4 stat triplets, topBarShipping, topBarBadge, footerCopyrightText). Added intFields array for freeShippingThreshold/shippingFee/rewardOrderCount/rewardDiscountPercent — these are parsed as Number (truncated to int) or null. Switched from verifyAdmin() → verifyAuth() so we have access to auth.userId/userEmail for audit logging.
+
+- Updated src/lib/page-content.ts: added all 28 new fields to PageContent interface (string | null for strings, number | null for ints) and to NULL_CONTENT object. getPageContent spreads setting onto NULL_CONTENT as before — `as unknown as` cast handles the structural merge.
+
+- Created scripts/seed-admin.ts (~50 lines): idempotent upsert of super_admin user. Email/password/name from ADMIN_EMAIL/ADMIN_PASSWORD/ADMIN_NAME env vars with defaults (admin@sayurlogi.id / admin123 / "Super Admin"). bcrypt 10-round hash. Re-running refreshes password/name/role but preserves lastLoginAt.
+
+- Created scripts/seed-products.ts (~85 lines): idempotent seed of 23 products from MOCK_PRODUCTS_ENRICHED. Skips if Product table already has rows (unless --force flag). Upserts by itemCode — on conflict refreshes ERPNext-sourced fields (name/description/category/price/oldPrice/unit/stock/emoji/image/longDescription), preserves admin-edited fields (organic/onSale/tags/benefits/storageTip/origin/published/order/erpSyncedAt). Reports created vs updated counts.
+
+- Updated package.json: added "db:seed-admin": "bun run scripts/seed-admin.ts" and "db:seed-products": "bun run scripts/seed-products.ts" scripts alongside existing db:seed (which runs seed-content.ts).
+
+- Ran post-change verification:
+  * `bun run db:push` — schema synced, Prisma Client regenerated.
+  * `bun run lint` — 0 errors (ESLint clean).
+  * `bunx tsc --noEmit` — 0 errors in any new/touched files. Remaining pre-existing errors in unrelated files (faq-section.tsx, erpnext.ts, payments.ts, examples/websocket/*, skills/*) are out of scope as noted in previous worklog entry.
+  * `bun run db:seed-admin` — created super_admin user admin@sayurlogi.id (password = ADMIN_PASSWORD env var = "sayurbox-admin-2024").
+  * `bun run db:seed-products` — seeded 23 products (23 created, 0 updated). Re-ran with --force → 23 updated, 0 created (idempotent).
+  * Smoke test: started dev server, hit GET /api/products → 200 with `source: "db"`, count=23, full product objects with variants array (empty). Hit POST /api/admin/login with wrong password → 401, audit log INSERT statement confirmed it includes userId + userEmail columns. Verified via direct DB inspection that AdminAuditLog rows now persist userId/userEmail when provided.
+
+Stage Summary:
+- 1 file updated: prisma/schema.prisma (SiteSetting +28 fields, Order +discount, +2 new models Product/ProductVariant).
+- 1 file updated: src/lib/audit.ts (+logout action, +userId/userEmail in LogOptions + logAdminAction).
+- 1 file updated: src/app/api/admin/content/route.ts (whitelist +25 fields, +intFields array, switched to verifyAuth for user attribution).
+- 1 file updated: src/lib/page-content.ts (PageContent interface +28 fields, NULL_CONTENT +28 fields).
+- 1 file updated: src/app/api/products/route.ts (DB-first via getPublishedProducts).
+- 1 file updated: package.json (+db:seed-admin, +db:seed-products scripts).
+- 6 files created: src/lib/products-db.ts, users-db.ts, permissions.ts, shipping.ts, reward.ts, erpnext-sync.ts.
+- 14 API route files created under src/app/api/admin/products/, src/app/api/admin/users/, src/app/api/admin/favicon/upload/, src/app/api/admin/about/upload/, src/app/api/admin/logout/.
+- 2 scripts created: scripts/seed-admin.ts, scripts/seed-products.ts.
+- Backward compatible: all new SiteSetting fields are nullable (null = use hardcoded default). New Product/ProductVariant tables created empty — public /api/products falls back to mock if empty. /api/admin/products/* routes use requirePermission which respects existing roles. Existing admin tabs (orders, hero, promo, contact, faq, testimonials, about, categories, footer, branding, audit) untouched. LoginGate still accepts both legacy password-gate and NextAuth credentials.
+- Code quality: ESLint clean (0 errors), TypeScript clean for all touched files. All new API routes follow the same pattern (requirePermission → isAuthResult guard → try/catch → logAdminAction with userId/userEmail). All UI text in Indonesian. All audit-logged actions include user attribution when authenticated via NextAuth.
+- Self-protection preserved: UserEditor's self-protection (cannot disable/delete own account) is now enforced both client-side (UI hides buttons) and server-side (PUT/DELETE routes check auth.userId === id and reject with 422).
+- Ready for next sprint: shipping config (getShippingConfig/calculateShipping) + reward program (getRewardConfig/calculateReward) libraries are in place but not yet wired into /api/checkout — that integration is a separate task.

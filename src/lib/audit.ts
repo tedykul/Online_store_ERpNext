@@ -14,6 +14,7 @@ import { db } from "@/lib/db";
 
 export type AuditAction =
   | "login_success"
+  | "logout"
   | "login_failed"
   | "login_rate_limited"
   | "create"
@@ -28,6 +29,10 @@ interface LogOptions {
   target: string;
   success?: boolean;
   detail?: string;
+  /** Optional user id (NextAuth). Stored on AdminAuditLog.userId. */
+  userId?: string;
+  /** Optional user email (NextAuth). Stored on AdminAuditLog.userEmail. */
+  userEmail?: string;
 }
 
 /**
@@ -64,6 +69,8 @@ export async function logAdminAction({
   target,
   success = true,
   detail,
+  userId,
+  userEmail,
 }: LogOptions): Promise<void> {
   try {
     const [ip, userAgent] = await Promise.all([getClientIp(), getUserAgent()]);
@@ -75,6 +82,8 @@ export async function logAdminAction({
         userAgent: userAgent?.substring(0, 500), // cap length
         success,
         detail: detail?.substring(0, 500),
+        userId: userId || null,
+        userEmail: userEmail || null,
       },
     });
   } catch (err) {

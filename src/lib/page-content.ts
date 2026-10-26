@@ -61,6 +61,34 @@ export interface PageContent {
   socialTwitter: string | null;
   socialTiktok: string | null;
   socialWhatsapp: string | null;
+  // Sprints 12-24 — favicon, shipping, reward, about image,
+  // testimonial, top bar, footer copyright.
+  faviconUrl: string | null;
+  freeShippingThreshold: number | null;
+  shippingFee: number | null;
+  rewardOrderCount: number | null;
+  rewardDiscountPercent: number | null;
+  aboutImage: string | null;
+  testimonialBadge: string | null;
+  testimonialTitleA: string | null;
+  testimonialTitleHighlight: string | null;
+  testimonialTitleB: string | null;
+  testimonialSubtitle: string | null;
+  testimonialStat1Value: string | null;
+  testimonialStat1Label: string | null;
+  testimonialStat1Subtext: string | null;
+  testimonialStat2Value: string | null;
+  testimonialStat2Label: string | null;
+  testimonialStat2Subtext: string | null;
+  testimonialStat3Value: string | null;
+  testimonialStat3Label: string | null;
+  testimonialStat3Subtext: string | null;
+  testimonialStat4Value: string | null;
+  testimonialStat4Label: string | null;
+  testimonialStat4Subtext: string | null;
+  topBarShipping: string | null;
+  topBarBadge: string | null;
+  footerCopyrightText: string | null;
   faqs: { id: string; q: string; a: string }[];
   testimonials: {
     id: string;
@@ -93,6 +121,22 @@ const NULL_CONTENT = {
   brandName: null, metaDescription: null,
   socialInstagram: null, socialFacebook: null, socialTwitter: null,
   socialTiktok: null, socialWhatsapp: null,
+  // Sprints 12-24
+  faviconUrl: null,
+  freeShippingThreshold: null,
+  shippingFee: null,
+  rewardOrderCount: null,
+  rewardDiscountPercent: null,
+  aboutImage: null,
+  testimonialBadge: null,
+  testimonialTitleA: null, testimonialTitleHighlight: null, testimonialTitleB: null,
+  testimonialSubtitle: null,
+  testimonialStat1Value: null, testimonialStat1Label: null, testimonialStat1Subtext: null,
+  testimonialStat2Value: null, testimonialStat2Label: null, testimonialStat2Subtext: null,
+  testimonialStat3Value: null, testimonialStat3Label: null, testimonialStat3Subtext: null,
+  testimonialStat4Value: null, testimonialStat4Label: null, testimonialStat4Subtext: null,
+  topBarShipping: null, topBarBadge: null,
+  footerCopyrightText: null,
 };
 
 /** Fetch all page content from DB. Safe to call from server component. */

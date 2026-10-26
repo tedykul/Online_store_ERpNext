@@ -145,6 +145,35 @@ model SiteSetting {
   socialTiktok     String?
   socialWhatsapp   String? // wa.me link
 
+  // Sprints 12-24 — favicon, shipping, reward, about image, testimonial,
+  // top bar, footer copyright.
+  faviconUrl              String?
+  freeShippingThreshold   Int?
+  shippingFee             Int?
+  rewardOrderCount        Int?
+  rewardDiscountPercent   Int?
+  aboutImage              String?
+  testimonialBadge        String?
+  testimonialTitleA       String?
+  testimonialTitleHighlight String?
+  testimonialTitleB       String?
+  testimonialSubtitle     String?
+  testimonialStat1Value   String?
+  testimonialStat1Label   String?
+  testimonialStat1Subtext String?
+  testimonialStat2Value   String?
+  testimonialStat2Label   String?
+  testimonialStat2Subtext String?
+  testimonialStat3Value   String?
+  testimonialStat3Label   String?
+  testimonialStat3Subtext String?
+  testimonialStat4Value   String?
+  testimonialStat4Label   String?
+  testimonialStat4Subtext String?
+  topBarShipping          String?
+  topBarBadge             String?
+  footerCopyrightText     String?
+
   updatedAt DateTime @updatedAt
 }
 
@@ -256,6 +285,8 @@ model Order {
   subtotal        Int      // in IDR
   shipping        Int      // in IDR
   total           Int      // in IDR
+  /// Discount applied (reward / promo) in IDR. Defaults to 0.
+  discount        Int      @default(0)
   deliveryMethod  String   // "delivery" | "pickup"
   paymentMethod   String   // "cod" | "transfer" | "ewallet"
   /// Status workflow: pending → confirmed → preparing →
@@ -307,4 +338,75 @@ model Payment {
   @@index([orderId])
   @@index([status])
   @@index([trackingId])
+}
+
+// ============================================================
+// Products — admin-managed product catalog (DB-first, with ERPNext
+// sync as a secondary source). Stored separately from ERPNext Item
+// so admin can edit/publish/organize without affecting ERPNext.
+// ============================================================
+// itemCode: unique business key (maps to ERPNext item_code)
+// variants: optional SKU-level variants (e.g. 250gr, 500gr, 1kg)
+// published: visibility on public storefront (hidden = admin-only)
+// order: manual ordering on storefront (asc)
+// ============================================================
+
+model Product {
+  id              String   @id @default(cuid())
+  /// Business key — unique. Maps to ERPNext item_code when synced.
+  itemCode        String   @unique
+  name            String
+  description     String   @default("")
+  /// Long-form description shown in detail modal (markdown/plain text).
+  longDescription String?
+  category        String   @default("Lainnya")
+  /// Price in IDR
+  price           Int      @default(0)
+  /// Old price for discount display. Null = no discount shown.
+  oldPrice        Int?
+  unit            String   @default("pcs")
+  stock           Int      @default(0)
+  emoji           String   @default("🛒")
+  /// Image URL (relative path like /products/tomat.png, or absolute URL)
+  image           String?
+  organic         Boolean  @default(false)
+  onSale          Boolean  @default(false)
+  /// JSON-encoded string array of tags: ["lokal","segar","organik"]
+  tags            String?
+  /// JSON-encoded string array of benefit bullet points
+  benefits        String?
+  storageTip      String?
+  origin          String?
+  published       Boolean  @default(true)
+  order           Int      @default(0)
+  /// Last ERPNext sync timestamp (null = never synced)
+  erpSyncedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  variants        ProductVariant[]
+
+  @@index([category])
+  @@index([published])
+  @@index([order])
+}
+
+/// Product variants — optional SKU-level child rows.
+/// e.g. Product "Beras Organik" → variants 250gr, 500gr, 1kg.
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  name        String
+  price       Int      @default(0)
+  oldPrice    Int?
+  stock       Int      @default(0)
+  unit        String   @default("pcs")
+  /// SKU code (optional)
+  sku         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }

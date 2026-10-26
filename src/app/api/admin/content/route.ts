@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyAdmin } from "@/lib/admin-auth";
+import { verifyAuth } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,8 @@ export async function GET() {
 // Body: partial SiteSetting fields (only provided fields are updated).
 // Requires auth.
 export async function POST(req: NextRequest) {
-  if (!(await verifyAdmin())) {
+  const auth = await verifyAuth();
+  if (!auth) {
     await logAdminAction({
       action: "unauthorized_attempt",
       target: "content:update",
@@ -56,13 +57,45 @@ export async function POST(req: NextRequest) {
       // Branding (Sprint 11)
       "brandName", "metaDescription",
       "socialInstagram", "socialFacebook", "socialTwitter", "socialTiktok", "socialWhatsapp",
+      // Sprints 12-24 — favicon, shipping, reward, about image,
+      // testimonial, top bar, footer copyright.
+      "faviconUrl",
+      "aboutImage",
+      "testimonialBadge",
+      "testimonialTitleA", "testimonialTitleHighlight", "testimonialTitleB",
+      "testimonialSubtitle",
+      "testimonialStat1Value", "testimonialStat1Label", "testimonialStat1Subtext",
+      "testimonialStat2Value", "testimonialStat2Label", "testimonialStat2Subtext",
+      "testimonialStat3Value", "testimonialStat3Label", "testimonialStat3Subtext",
+      "testimonialStat4Value", "testimonialStat4Label", "testimonialStat4Subtext",
+      "topBarShipping", "topBarBadge",
+      "footerCopyrightText",
     ];
-    const data: Record<string, string | null> = {};
+    // Integer fields — parsed as Number, persisted as Int? on SiteSetting.
+    const intFields = [
+      "freeShippingThreshold",
+      "shippingFee",
+      "rewardOrderCount",
+      "rewardDiscountPercent",
+    ];
+
+    const data: Record<string, string | number | null> = {};
     for (const key of allowedFields) {
       if (key in body) {
         const val = body[key];
         // Allow null (reset to default) or string
         data[key] = val === null || val === "" ? null : String(val);
+      }
+    }
+    for (const key of intFields) {
+      if (key in body) {
+        const val = body[key];
+        if (val === null || val === "" || val === undefined) {
+          data[key] = null;
+        } else {
+          const n = Number(val);
+          data[key] = Number.isFinite(n) ? Math.trunc(n) : null;
+        }
       }
     }
 
@@ -85,6 +118,8 @@ export async function POST(req: NextRequest) {
       action: "update",
       target: `content:${Object.keys(data).join(",")}`,
       success: true,
+      userId: auth.userId || undefined,
+      userEmail: auth.email,
     });
 
     return NextResponse.json({
