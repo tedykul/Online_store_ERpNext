@@ -84,7 +84,7 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
             </Button>
           </div>
         ) : (
-          <ScrollArea className="flex-1 scrollbar-grocery">
+          <ScrollArea className="flex-1 scrollbar-grocery max-h-[50vh]">
             <div className="flex flex-col gap-3 p-4">
               <AnimatePresence initial={false}>
                 {items.map((item) => (
@@ -164,9 +164,9 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
           </ScrollArea>
         )}
 
-        {/* Footer summary */}
+        {/* Footer summary — shrink-0 so it never gets pushed off screen */}
         {items.length > 0 && (
-          <SheetFooter className="border-t border-border/60 p-4">
+          <SheetFooter className="border-t border-border/60 p-4 shrink-0">
             <div className="mb-3 space-y-2 text-sm">
               {/* Delivery estimate */}
               <DeliveryEstimateDisplay method="delivery" variant="card" />
