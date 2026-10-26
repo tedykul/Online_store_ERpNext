@@ -40,9 +40,9 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.4) }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all hover:shadow-lg hover:border-primary/40"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/30"
     >
-      {/* Image area with emoji — clickable to open detail */}
+      {/* Image area */}
       <div
         role={onOpenDetail ? "button" : undefined}
         tabIndex={onOpenDetail ? 0 : undefined}
@@ -56,56 +56,52 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
         className={`relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/40 to-secondary/10 ${onOpenDetail ? "cursor-pointer" : "cursor-default"}`}
         aria-label={`Lihat detail ${product.name}`}
       >
-        {/* Badges */}
-        <div className="absolute left-2 top-2 z-10 flex flex-col gap-1">
+        {/* Badges — bigger + bolder */}
+        <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1.5">
           {product.onSale && discount > 0 && (
-            <Badge variant="destructive" className="rounded-md text-[10px] font-bold shadow-sm">
+            <Badge variant="destructive" className="rounded-lg px-2.5 py-1 text-xs font-bold shadow-md">
               -{discount}%
             </Badge>
           )}
           {product.organic && (
-            <Badge className="rounded-md bg-primary text-primary-foreground text-[10px] font-bold shadow-sm">
-              <Leaf className="h-2.5 w-2.5 mr-0.5" /> Organik
+            <Badge className="rounded-lg bg-primary text-primary-foreground px-2.5 py-1 text-xs font-bold shadow-md">
+              <Leaf className="h-3 w-3 mr-0.5" /> Organik
             </Badge>
           )}
         </div>
 
-        {/* Wishlist heart button (top-right, always visible) */}
         <WishlistButton product={product} size="sm" variant="overlay" />
 
-        {/* Hover hint (bottom-right) */}
         {onOpenDetail && !outOfStock && (
-          <div className="absolute bottom-2 left-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 transition-opacity group-hover:opacity-100 backdrop-blur-sm">
-            <Eye className="h-3.5 w-3.5" />
+          <div className="absolute bottom-2.5 left-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110 backdrop-blur-sm shadow-md">
+            <Eye className="h-4 w-4" />
           </div>
         )}
 
-        {/* Big emoji / product photo */}
         <ProductImage
           product={product}
-          emojiClassName="text-7xl"
+          emojiClassName="text-7xl transition-transform duration-500 group-hover:scale-110"
           animateOnHover
           className="aspect-square"
         />
 
-        {/* Stock overlay */}
         {outOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
-            <span className="rounded-full bg-destructive px-4 py-1 text-xs font-bold text-destructive-foreground">
+            <span className="rounded-full bg-destructive px-4 py-1.5 text-xs font-bold text-destructive-foreground shadow-lg">
               Stok Habis
             </span>
           </div>
         )}
         {product.stock > 0 && product.stock <= 10 && (
-          <div className="absolute bottom-2 right-2 z-10">
-            <Badge variant="secondary" className="rounded-md bg-amber-500/90 text-white text-[10px] font-bold shadow-sm">
+          <div className="absolute bottom-2.5 right-2.5 z-10">
+            <Badge variant="secondary" className="rounded-lg bg-amber-500/90 text-white text-[10px] font-bold shadow-md px-2 py-0.5">
               Sisa {product.stock}
             </Badge>
           </div>
         )}
       </div>
 
-      {/* Body — clickable to open detail */}
+      {/* Body — clean layout, no description */}
       <div
         onClick={handleCardClick}
         role={onOpenDetail ? "button" : undefined}
@@ -116,24 +112,20 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
             handleCardClick();
           }
         }}
-        className="flex flex-1 cursor-pointer flex-col gap-2 p-3"
+        className="flex flex-1 cursor-pointer flex-col gap-2 p-4"
       >
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 text-sm font-semibold leading-tight">{product.name}</h3>
-        </div>
+        <h3 className="line-clamp-1 text-sm font-bold leading-tight tracking-tight">{product.name}</h3>
 
         {/* Rating (compact) */}
         {rating > 0 && (
           <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+            <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
             <span>· {product.reviewCount ?? 0} ulasan</span>
           </div>
         )}
 
-        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">{product.description}</p>
-
-        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
           <div className="flex flex-col">
             {product.oldPrice && (
               <span className="text-[11px] text-muted-foreground line-through">
@@ -141,12 +133,11 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
               </span>
             )}
             <div className="flex items-baseline gap-1">
-              <span className="text-base font-bold text-primary">{formatIDR(product.price)}</span>
+              <span className="text-lg font-extrabold text-foreground tracking-tight">{formatIDR(product.price)}</span>
               <span className="text-[10px] text-muted-foreground">/{product.unit}</span>
             </div>
           </div>
 
-          {/* Stop click propagation so action buttons don't trigger detail */}
           <div onClick={(e) => e.stopPropagation()}>
             {outOfStock ? (
               <Button disabled size="sm" variant="secondary" className="h-8 rounded-lg text-xs">
@@ -163,10 +154,10 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
               <Button
                 size="sm"
                 onClick={() => addItem(product, 1)}
-                className="h-8 rounded-lg px-3 shadow-sm transition-transform hover:scale-105"
+                className="h-9 rounded-lg px-3.5 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span className="ml-1 text-xs">Tambah</span>
+                <span className="ml-1 text-xs font-semibold">Tambah</span>
               </Button>
             )}
           </div>
