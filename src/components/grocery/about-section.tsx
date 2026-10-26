@@ -42,11 +42,12 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
   const c = content || {};
 
   // Stats — Lucide icons in colored circles (no emoji)
+  // `bar` = solid color for top accent (icon bg is /10 opacity, too faint for accent)
   const stats = [
-    { icon: Users, value: c.aboutStat1Value ?? "5.000+", label: c.aboutStat1Label ?? "Pelanggan Bahagia", color: "bg-primary/10 text-primary" },
-    { icon: Sprout, value: c.aboutStat2Value ?? "120+", label: c.aboutStat2Label ?? "Petani Mitra", color: "bg-orange-500/10 text-orange-500" },
-    { icon: Truck, value: c.aboutStat3Value ?? "15", label: c.aboutStat3Label ?? "Kota Terjangkau", color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400" },
-    { icon: Award, value: c.aboutStat4Value ?? "4.9/5", label: c.aboutStat4Label ?? "Rating Pengguna", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+    { icon: Users, value: c.aboutStat1Value ?? "5.000+", label: c.aboutStat1Label ?? "Pelanggan Bahagia", color: "bg-primary/10 text-primary", bar: "bg-primary" },
+    { icon: Sprout, value: c.aboutStat2Value ?? "120+", label: c.aboutStat2Label ?? "Petani Mitra", color: "bg-orange-500/10 text-orange-500", bar: "bg-orange-500" },
+    { icon: Truck, value: c.aboutStat3Value ?? "15", label: c.aboutStat3Label ?? "Kota Terjangkau", color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400", bar: "bg-cyan-500" },
+    { icon: Award, value: c.aboutStat4Value ?? "4.9/5", label: c.aboutStat4Label ?? "Rating Pengguna", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400", bar: "bg-amber-500" },
   ];
 
   const values = [
@@ -55,24 +56,28 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
       title: c.aboutValue1Title ?? "Segar dari Kebun",
       desc: c.aboutValue1Desc ?? "Dipetik pagi hari, dikirim langsung tanpa middle-man. Kualitas terjaga, nutrisi maksimal.",
       color: "bg-green-500/10 text-green-600 dark:text-green-400",
+      bar: "bg-green-500",
     },
     {
       icon: Handshake,
       title: c.aboutValue2Title ?? "Harga Adil untuk Petani",
       desc: c.aboutValue2Desc ?? "Kami bayar petani dengan harga layak. Tanpa eksploitasi, hubungan jangka panjang yang saling menguntungkan.",
       color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      bar: "bg-amber-500",
     },
     {
       icon: Heart,
       title: c.aboutValue3Title ?? "100% Organik Pilihan",
       desc: c.aboutValue3Desc ?? "Sayuran organik tanpa pestisida. Sehat untuk keluarga, ramah untuk bumi.",
       color: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+      bar: "bg-rose-500",
     },
     {
       icon: Clock,
       title: c.aboutValue4Title ?? "Antar 2 Jam",
       desc: c.aboutValue4Desc ?? "Pesan sekarang, sampai siang. Rantai pasok pendek = kesegaran terjaga maksimal.",
       color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+      bar: "bg-cyan-500",
     },
   ];
 
@@ -249,10 +254,12 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
+              className="group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-6 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
             >
-              {/* Icon in colored circle — replaces emoji */}
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.color}`}>
+              {/* Solid colored top accent — matches icon color, adds depth cue */}
+              <div className={`absolute inset-x-0 top-0 h-1 ${stat.bar}`} />
+              {/* Icon in colored circle with inner ring for dimensionality */}
+              <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.color} ring-1 ring-inset ring-current/10`}>
                 <stat.icon className="h-6 w-6" />
               </div>
               <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl tabular-nums">
@@ -282,8 +289,10 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
+                className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-5 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
               >
+                {/* Solid colored top accent — matches icon color */}
+                <div className={`absolute inset-x-0 top-0 h-1 ${value.bar}`} />
                 {/* Bigger icon circle (h-14 w-14) + ring border for depth */}
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${value.color} ring-1 ring-inset ring-current/10`}>
                   <value.icon className="h-7 w-7" />

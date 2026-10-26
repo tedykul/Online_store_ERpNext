@@ -150,22 +150,25 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="mt-2 grid grid-cols-3 gap-3 text-center"
           >
-            <div className="flex flex-col items-center gap-1.5 rounded-xl border border-border/60 bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30">
+              <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 ring-1 ring-inset ring-primary/10">
                 <Truck className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-bold">Antar Cepat</span>
               <span className="text-[10px] text-muted-foreground">2 jam sampai</span>
             </div>
-            <div className="flex flex-col items-center gap-1.5 rounded-xl border border-border/60 bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-orange-500/30">
+              <div className="absolute inset-x-0 top-0 h-1 bg-orange-500" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-inset ring-orange-500/10">
                 <ShieldCheck className="h-4 w-4 text-orange-500" />
               </div>
               <span className="text-xs font-bold">Kualitas</span>
               <span className="text-[10px] text-muted-foreground">100% segar</span>
             </div>
-            <div className="flex flex-col items-center gap-1.5 rounded-xl border border-border/60 bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-amber-500/30">
+              <div className="absolute inset-x-0 top-0 h-1 bg-amber-500" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10 ring-1 ring-inset ring-amber-500/10">
                 <Sprout className="h-4 w-4 text-amber-600" />
               </div>
               <span className="text-xs font-bold">Petani Lokal</span>

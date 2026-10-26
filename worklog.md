@@ -421,3 +421,26 @@ Stage Summary:
 - Overall product section mobile UX: was 78, expected +3-5 from cookie fix
 - VLM comment on About: "exceptionally strong execution of modern minimalist design that rivals or exceeds Sayurbox/Segari... adopts Apple-esque/Stripe aesthetic applied to grocery vertical"
 - Lint clean, no hydration errors
+
+---
+Task ID: grocery-depth-003
+Agent: main (Z.ai Code)
+Task: Fix "too flat" cards in About section + hero trust badges — add depth with shadow + gradient + colored accent bars
+
+Work Log:
+- Identified root cause of "flat" cards: `border border-border/60 bg-card shadow-sm` — no elevation, pure white on white
+- Redesigned About stats cards (4x): replaced border with ring-1 ring-border/50, added bg-gradient-to-br from-card via-card to-muted/50 (off-white tint), layered shadow [0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)], solid colored top accent bar (h-1 bg-primary/bg-orange-500/bg-cyan-500/bg-amber-500), overflow-hidden for clean rounded corners, enhanced hover shadow
+- Redesigned About values cards (4x): same treatment with per-card accent colors (green/amber/rose/cyan)
+- Added `bar` property to stats/values arrays with solid color class (was using stat.color.split(" ")[0] which gave bg-X/10 = invisible at 60% opacity)
+- Redesigned hero trust badges (3x): same gradient+ring+shadow+accent bar treatment, per-badge accent colors (primary/orange/amber)
+- Fixed bug: accent bar was using icon's /10 opacity bg color → changed to solid `bar` property
+- Verified via Agent Browser DOM: bar class = "bg-primary" (solid), background color = lab(49.58 -42.18 35.87) (solid green)
+- VLM verified all cards: accent bars visible, shadow visible, off-white bg visible, cards clearly elevated
+
+Stage Summary:
+- About stats cards depth score: was "too flat/10" → 85/100 (VLM)
+- About values cards depth score: was "too flat" → 85/100 (VLM)
+- Hero trust badges depth score: 95/100 (VLM: "clean, consistent, effectively highlights value propositions")
+- Design system now consistent across all card types (product cards, about cards, hero badges)
+- Card depth pattern: gradient bg (from-card to-muted/50) + ring-1 ring-border/50 + layered shadow + solid colored top accent bar + hover elevation
+- Lint clean
