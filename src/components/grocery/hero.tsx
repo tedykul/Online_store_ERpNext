@@ -10,7 +10,7 @@ const DEFAULTS = {
   titleA: "Sayur & Buah",
   titleHighlight: "Segar Harian",
   titleB: "dari Petani Lokal",
-  subtitle: "Belanja sayuran organik dan buah-buahan pilihan langsung dari kebun. Tanpa perantara, harga jujur, kualitas terjamin.",
+  subtitle: "Belanja organik langsung dari kebun. Tanpa perantara, harga jujur.",
   ctaPrimary: "Mulai Belanja",
   ctaSecondary: "Lihat Promo",
 };
@@ -72,15 +72,15 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             {badge}
           </motion.div>
 
-          {/* Headline — weight contrast: setup thin, highlight bold */}
+          {/* Headline — weight contrast: setup thin, highlight bold + tracking for premium feel */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-6xl"
+            className="text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-6xl md:tracking-tighter"
           >
             <span className="font-bold text-muted-foreground">{titleA}</span>{" "}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-extrabold">
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-black">
               {titleHighlight}
             </span>{" "}
             <span className="font-bold">{titleB}</span>
@@ -91,7 +91,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-xl text-base text-foreground/70 leading-relaxed md:text-lg"
+            className="max-w-md text-base text-foreground/75 leading-relaxed md:text-lg"
           >
             {subtitle}
           </motion.p>
@@ -143,6 +143,37 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             </Button>
           </motion.div>
 
+          {/* Mobile hero image preview — compact, above trust badges.
+              Desktop has the full image on right; mobile needs emotional hook.
+              Portrait-ish crop (4:3) focuses on farmer + basket. */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative md:hidden mt-1"
+          >
+            <div className="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/40 shadow-primary/20">
+              <img
+                src="/hero-produce-lifestyle.png"
+                alt="Petani lokal memegang sayur dan buah segar dari kebun"
+                className="aspect-[5/4] w-full object-cover object-center"
+                loading="eager"
+              />
+              {/* Subtle gradient overlay for text legibility if needed */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+            </div>
+            {/* "100% Segar" sticker — top right */}
+            <div className="absolute -top-2 -right-2 flex flex-col items-center justify-center rounded-xl bg-orange-500 px-2.5 py-1.5 text-white shadow-lg ring-2 ring-white">
+              <span className="text-xs font-extrabold leading-none">100%</span>
+              <span className="text-[8px] font-semibold leading-tight">SEGAR</span>
+            </div>
+            {/* "Antar 2 Jam" badge — bottom left */}
+            <div className="absolute -bottom-2 -left-2 flex items-center gap-1 rounded-lg bg-white/95 backdrop-blur-md px-2.5 py-1.5 shadow-lg border border-orange-200/60">
+              <Truck className="h-3.5 w-3.5 text-orange-500" />
+              <span className="text-[11px] font-bold text-foreground">Antar 2 Jam</span>
+            </div>
+          </motion.div>
+
           {/* Trust badges — colored icon circles */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -166,13 +197,13 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               <span className="text-xs font-bold">Kualitas</span>
               <span className="text-[10px] text-muted-foreground">100% segar</span>
             </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-amber-500/30">
-              <div className="absolute inset-x-0 top-0 h-1 bg-amber-500" />
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10 ring-1 ring-inset ring-amber-500/10">
-                <Sprout className="h-4 w-4 text-amber-600" />
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-card to-muted p-3 text-center ring-1 ring-primary/30 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/50 ring-2 ring-primary/20">
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-amber-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15 ring-1 ring-inset ring-amber-500/20">
+                <Sprout className="h-5 w-5 text-amber-600" />
               </div>
-              <span className="text-xs font-bold">Petani Lokal</span>
-              <span className="text-[10px] text-muted-foreground">Dari kebun</span>
+              <span className="text-xs font-extrabold">Petani Lokal</span>
+              <span className="text-[10px] font-semibold text-primary">Dari kebun</span>
             </div>
           </motion.div>
         </div>
@@ -198,8 +229,8 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             >
               <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
                 <img
-                  src="/hero-produce-full.png"
-                  alt="Sayur dan buah segar dari petani lokal"
+                  src="/hero-produce-lifestyle.png"
+                  alt="Petani lokal memegang sayur dan buah segar dari kebun"
                   className="w-full h-auto object-cover"
                   loading="eager"
                 />

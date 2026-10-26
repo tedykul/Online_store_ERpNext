@@ -725,3 +725,44 @@ Stage Summary:
 - All 95→100 gaps are VLM assessment limitations (screenshot can't show sticky/scroll/hover), dev-only artifacts, or feature requests beyond MVP scope
 - Design system 100% consistent: ALL cards use unified depth pattern (gradient + ring + shadow + accent bar)
 - Lint clean
+
+---
+Task ID: grocery-hero-90plus-013
+Agent: main (Z.ai Code)
+Task: Hero section — push to 90+ (achieved 91/100)
+
+Work Log:
+- Generated new hero image via z-ai CLI: "Lifestyle photo of an Indonesian farmer holding fresh mixed vegetables and fruits in wicker basket, shallow depth of field, natural morning sunlight, hands visible, green leafy background blurred". Saved to public/hero-produce-lifestyle.png (1024x1024).
+- Replaced hero image src: /hero-produce-full.png (flat lay stock) → /hero-produce-lifestyle.png (lifestyle farmer shot with shallow DoF).
+- Typography polish:
+  - Headline highlight weight: font-extrabold → font-black (stronger emphasis on "Segar Harian")
+  - Desktop letter-spacing: tracking-tight → md:tracking-tighter (premium editorial feel)
+  - Subtitle shortened: "Belanja sayuran organik dan buah-buahan pilihan langsung dari kebun. Tanpa perantara, harga jujur, kualitas terjamin." → "Belanja organik langsung dari kebun. Tanpa perantara, harga jujur." (~8 words for hero scanning)
+  - Subtitle width: max-w-xl → max-w-md (tighter, more readable line length)
+  - Subtitle opacity: text-foreground/70 → text-foreground/75 (slightly darker, better contrast)
+- Added mobile hero preview (md:hidden) between CTA buttons and trust badges:
+  - aspect-[5/4] crop (better than 4:3 — avoids awkward face cropping)
+  - object-cover object-center (focus on farmer + basket)
+  - Same lifestyle image as desktop
+  - "100% Segar" sticker (top-right) + "Antar 2 Jam" badge (bottom-left) — scaled for mobile
+  - Subtle gradient overlay from-black/10 for depth
+- Elevated "Petani Lokal" trust badge as USP:
+  - bg: from-card → from-primary/10 via-card (green tint)
+  - ring: ring-border → ring-1 ring-primary/30 + ring-2 ring-primary/20 (double ring for emphasis)
+  - icon: h-9 w-9 → h-10 w-10 (larger)
+  - icon bg: bg-amber-500/10 → bg-amber-500/15 (stronger)
+  - title: font-bold → font-extrabold
+  - subtext: text-muted-foreground → font-semibold text-primary (bolder, brand color)
+  - accent bar: h-1 → h-1.5
+
+Stage Summary:
+- Hero section score: 82 → 91 (VLM: "ACHIEVED 90+", senior director review)
+- Visual hierarchy: 78 → 92
+- Typography impact: 72 → 94
+- Image presentation: 68 → 90 (biggest win — lifestyle photo transforms brand)
+- Mobile UX: 80 → 88 (emotional hook added above fold)
+- Modern aesthetic vs Sayurbox/Segari/Instacart: 78 → 93 ("Beats Sayurbox + Segari, rivals Instacart with warmer localized soul")
+- Brand identity: 76 → 91 ("Strong farm-to-table DNA, feels like a brand that cares about farmers")
+- VLM verdict: "Ship it. Visually superior to 90% of Indonesian grocery D2C sites."
+- Suggested final polish for 95+: subtle grain/noise texture overlay on background (optional, not critical)
+- Lint clean
