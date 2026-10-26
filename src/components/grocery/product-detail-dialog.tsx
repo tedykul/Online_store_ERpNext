@@ -38,6 +38,8 @@ interface ProductDetailDialogProps {
   product: Product | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Called when user clicks "Beli Sekarang" (Buy Now). Optional. */
+  onBuyNow?: () => void;
 }
 
 /**
@@ -49,6 +51,7 @@ export function ProductDetailDialog({
   product,
   open,
   onOpenChange,
+  onBuyNow,
 }: ProductDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,6 +64,7 @@ export function ProductDetailDialog({
             key={product.id}
             product={product}
             onOpenChange={onOpenChange}
+            onBuyNow={onBuyNow}
           />
         ) : null}
       </DialogContent>
@@ -71,9 +75,11 @@ export function ProductDetailDialog({
 function ProductDetailContent({
   product,
   onOpenChange,
+  onBuyNow,
 }: {
   product: Product;
   onOpenChange: (open: boolean) => void;
+  onBuyNow?: () => void;
 }) {
   const [qty, setQty] = useState(1);
 
@@ -101,6 +107,17 @@ function ProductDetailContent({
       toast.success(`${qty} × ${product.name} ditambahkan ke keranjang`);
     }
     onOpenChange(false);
+  };
+
+  const handleBuyNow = () => {
+    if (inCart) {
+      const newQty = Math.min(inCart.quantity + qty, product.stock);
+      updateQty(product.id, newQty);
+    } else {
+      addItem(product, qty);
+    }
+    onOpenChange(false);
+    onBuyNow?.();
   };
 
   return (
@@ -321,11 +338,31 @@ function ProductDetailContent({
               <Button
                 onClick={handleAddToCart}
                 size="lg"
-                className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
+                variant="outline"
+                className="h-12 rounded-xl text-base shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5"
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                Tambah — {formatIDR(product.price * qty)}
+                Tambah
               </Button>
+              {onBuyNow && (
+                <Button
+                  onClick={handleBuyNow}
+                  size="lg"
+                  className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
+                >
+                  Beli Sekarang — {formatIDR(product.price * qty)}
+                </Button>
+              )}
+              {!onBuyNow && (
+                <Button
+                  onClick={handleAddToCart}
+                  size="lg"
+                  className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
+                >
+                  <ShoppingCart className="h-5 w-5 mr-2" />
+                  Tambah — {formatIDR(product.price * qty)}
+                </Button>
+              )}
             </div>
           </div>
         ) : (

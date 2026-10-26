@@ -237,6 +237,7 @@ export function HomeClient({ content }: HomeClientProps) {
         product={detailProduct}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+        onBuyNow={() => setCheckoutOpen(true)}
       />
       <WishlistSheet onProductClick={handleOpenDetail} />
       <OrderTrackingDialog
