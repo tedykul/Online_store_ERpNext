@@ -38,7 +38,7 @@ export function HomeClient({ content }: HomeClientProps) {
   const [categories, setCategories] = useState<Category[]>(content.categories);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [source, setSource] = useState<"erpnext" | "mock" | null>(null);
+  const [source, setSource] = useState<"erpnext" | "db" | "mock" | null>(null);
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");

@@ -126,7 +126,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
         )}
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-1">
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-col">
             {product.oldPrice && (
               <span className="text-[11px] text-muted-foreground line-through">
                 {formatIDR(product.oldPrice)}
@@ -138,7 +138,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
             </div>
           </div>
 
-          <div onClick={(e) => e.stopPropagation()}>
+          <div onClick={(e) => e.stopPropagation()} className="shrink-0">
             {outOfStock ? (
               <Button disabled size="sm" variant="secondary" className="h-8 rounded-lg text-xs">
                 Habis
@@ -154,7 +154,8 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
               <Button
                 size="sm"
                 onClick={() => addItem(product, 1)}
-                className="h-9 rounded-lg px-3.5 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95"
+                className="h-9 rounded-lg px-3 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95 whitespace-nowrap"
+                aria-label={`Tambah ${product.name} ke keranjang`}
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span className="ml-1 text-xs font-semibold">Tambah</span>
