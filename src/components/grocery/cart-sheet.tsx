@@ -48,19 +48,19 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
 
         {/* Free shipping progress */}
         {items.length > 0 && (
-          <div className="border-b border-border/60 bg-primary/5 px-5 py-3">
+          <div className="border-b border-border/60 bg-orange-500/5 px-5 py-3">
             {freeShipping ? (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-orange-600 dark:text-orange-400">
                 <Truck className="h-3.5 w-3.5" /> Yeay! Kamu dapat gratis ongkir 🎉
               </p>
             ) : (
               <>
                 <p className="text-xs text-muted-foreground">
-                  Tambah <span className="font-semibold text-primary">{formatIDR(remaining)}</span> lagi untuk gratis ongkir!
+                  Tambah <span className="font-semibold text-orange-600 dark:text-orange-400">{formatIDR(remaining)}</span> lagi untuk gratis ongkir!
                 </p>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-primary/15">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-orange-500/15">
                   <motion.div
-                    className="h-full rounded-full bg-primary"
+                    className="h-full rounded-full bg-gradient-to-r from-orange-400 to-orange-500"
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100)}%` }}
                     transition={{ duration: 0.4 }}
