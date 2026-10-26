@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Truck, ShieldCheck, Sprout, ArrowRight, Star, Clock, Users } from "lucide-react";
+import { Truck, Sprout, ArrowRight, Star, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Hardcoded defaults (used when content prop is null/missing)
@@ -157,39 +157,6 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
                 className="aspect-[5/4] w-full object-cover object-center"
                 loading="eager"
               />
-            </div>
-          </motion.div>
-
-          {/* Trust badges — colored icon circles */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-2 grid grid-cols-3 gap-3 text-center"
-          >
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30">
-              <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 ring-1 ring-inset ring-primary/10">
-                <Truck className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-bold">Antar Cepat</span>
-              <span className="text-[10px] text-muted-foreground">2 jam sampai</span>
-            </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-orange-500/30">
-              <div className="absolute inset-x-0 top-0 h-1 bg-orange-500" />
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-inset ring-orange-500/10">
-                <ShieldCheck className="h-4 w-4 text-orange-500" />
-              </div>
-              <span className="text-xs font-bold">Kualitas</span>
-              <span className="text-[10px] text-muted-foreground">100% segar</span>
-            </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 via-card to-muted p-3 text-center ring-1 ring-primary/30 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/50 ring-2 ring-primary/20">
-              <div className="absolute inset-x-0 top-0 h-1.5 bg-amber-500" />
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/15 ring-1 ring-inset ring-amber-500/20">
-                <Sprout className="h-5 w-5 text-amber-600" />
-              </div>
-              <span className="text-xs font-extrabold">Petani Lokal</span>
-              <span className="text-[10px] font-semibold text-primary">Dari kebun</span>
             </div>
           </motion.div>
         </div>
