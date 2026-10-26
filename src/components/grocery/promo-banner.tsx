@@ -81,11 +81,11 @@ export function PromoBanner({
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
-          className="overflow-hidden border-b border-border/40 bg-gradient-to-r from-primary/10 via-emerald-500/10 to-amber-400/10 scroll-mt-24"
+          className="overflow-hidden border-b border-orange-200/40 bg-gradient-to-r from-orange-500/10 via-amber-400/10 to-orange-500/10 scroll-mt-24"
         >
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 px-4 py-2.5 text-center text-sm pr-10 relative">
-            {icon ?? <Sparkles className="h-4 w-4 text-primary shrink-0" />}
-            <span className="font-medium">{title}</span>
+            {icon ?? <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />}
+            <span className="font-bold text-orange-700 dark:text-orange-400">{title}</span>
             <span className="text-muted-foreground">{description}</span>
             <button
               onClick={handleDismiss}

@@ -99,14 +99,14 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             transition={{ duration: 0.5, delay: 0.15 }}
             className="flex flex-wrap gap-3"
           >
-            <Button size="lg" className="rounded-full px-7 h-12 text-base shadow-md" onClick={onShopNow}>
+            <Button size="lg" className="rounded-full px-7 h-12 text-base shadow-lg bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0" onClick={onShopNow}>
               {ctaPrimary}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full px-7 h-12 text-base"
+              className="rounded-full px-7 h-12 text-base border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400 dark:hover:bg-orange-950/30"
               onClick={handleViewPromo}
             >
               {ctaSecondary}
@@ -209,7 +209,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             ].map((dot, i) => (
               <motion.div
                 key={`dot-${i}`}
-                className="absolute h-2 w-2 rounded-full bg-primary/40"
+                className="absolute h-2 w-2 rounded-full bg-orange-400/60"
                 style={{ left: dot.x, top: dot.y }}
                 animate={{ scale: [0, 1, 0], opacity: [0, 0.6, 0] }}
                 transition={{

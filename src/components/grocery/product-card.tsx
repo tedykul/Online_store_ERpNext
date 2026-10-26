@@ -59,7 +59,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
         {/* Badges — bigger + bolder */}
         <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1.5">
           {product.onSale && discount > 0 && (
-            <Badge variant="destructive" className="rounded-lg px-2.5 py-1 text-xs font-bold shadow-md">
+            <Badge className="rounded-lg px-2.5 py-1 text-xs font-bold shadow-md bg-orange-500 text-white hover:bg-orange-500">
               -{discount}%
             </Badge>
           )}
@@ -94,7 +94,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
         )}
         {product.stock > 0 && product.stock <= 10 && (
           <div className="absolute bottom-2.5 right-2.5 z-10">
-            <Badge variant="secondary" className="rounded-lg bg-amber-500/90 text-white text-[10px] font-bold shadow-md px-2 py-0.5">
+            <Badge variant="secondary" className="rounded-lg bg-orange-500/90 text-white text-[10px] font-bold shadow-md px-2 py-0.5">
               Sisa {product.stock}
             </Badge>
           </div>
