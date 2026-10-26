@@ -138,49 +138,66 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           </motion.div>
         </div>
 
-        {/* Right visual — clean masonry grid of product photos */}
+        {/* Right visual — fresh produce wreath with subtle animation */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
           className="relative order-1 md:order-2"
         >
           <div className="relative mx-auto w-full max-w-xs sm:max-w-sm md:max-w-md">
-            {/* Grid 3×2 — staggered fade-in, no floating */}
-            <div className="grid grid-cols-3 gap-2.5">
-              {[
-                { src: "/products/tomat.png",   alt: "Tomat Merah Segar",  badge: "-18%", badgeColor: "bg-orange-500" },
-                { src: "/products/apel.png",    alt: "Apel Fuji",           badge: "-18%", badgeColor: "bg-orange-500" },
-                { src: "/products/brokoli.png", alt: "Brokoli Segar",       badge: "-17%", badgeColor: "bg-orange-500" },
-                { src: "/products/anggur.png",  alt: "Anggur Merah",        badge: "-13%", badgeColor: "bg-orange-500" },
-                { src: "/products/wortel.png",  alt: "Wortel Lokal",        badge: null,   badgeColor: "" },
-                { src: "/products/bayam.png",   alt: "Bayam Hijau Organik", badge: "Organik", badgeColor: "bg-primary" },
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.2 + i * 0.08, duration: 0.5, ease: "easeOut" }}
-                  className="relative aspect-square overflow-hidden rounded-2xl border-2 border-white shadow-lg bg-white group"
-                >
-                  <img
-                    src={item.src}
-                    alt={item.alt}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    loading="eager"
-                  />
-                  {/* Badge */}
-                  {item.badge && (
-                    <div className={`absolute top-1.5 left-1.5 rounded-lg ${item.badgeColor} px-1.5 py-0.5 text-[9px] font-bold text-white shadow-md`}>
-                      {item.badge}
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
+            {/* Main produce image with subtle infinite breathing animation */}
+            <motion.div
+              animate={{ scale: [1, 1.03, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
+            >
+              <div className="overflow-hidden rounded-3xl shadow-2xl border-4 border-white">
+                <img
+                  src="/hero-produce.png"
+                  alt="Sayur dan buah segar dari petani lokal"
+                  className="w-full h-auto object-cover"
+                  loading="eager"
+                />
+              </div>
+            </motion.div>
 
-            {/* Subtle gradient glow behind grid */}
-            <div className="pointer-events-none absolute inset-0 -z-10 rounded-3xl bg-gradient-to-br from-primary/10 via-orange-300/10 to-amber-200/10 blur-xl" />
+            {/* Floating badge — "100% Segar" */}
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 200 }}
+              className="absolute -top-3 -right-3 z-10"
+            >
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="flex flex-col items-center justify-center rounded-full bg-orange-500 px-4 py-3 text-white shadow-xl"
+              >
+                <span className="text-lg font-extrabold leading-none">100%</span>
+                <span className="text-[10px] font-semibold leading-tight mt-0.5">Segar</span>
+              </motion.div>
+            </motion.div>
+
+            {/* Floating badge — "Antar 2 Jam" */}
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.8, duration: 0.5, type: "spring", stiffness: 200 }}
+              className="absolute -bottom-3 -left-3 z-10"
+            >
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="flex items-center gap-1.5 rounded-2xl bg-white px-3 py-2 shadow-xl border border-border/40"
+              >
+                <Truck className="h-4 w-4 text-orange-500" />
+                <span className="text-xs font-bold text-foreground">Antar 2 Jam</span>
+              </motion.div>
+            </motion.div>
+
+            {/* Subtle gradient glow behind image */}
+            <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/15 via-orange-300/10 to-amber-200/10 blur-2xl scale-110" />
           </div>
         </motion.div>
       </div>
