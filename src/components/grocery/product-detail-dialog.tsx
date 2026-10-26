@@ -316,50 +316,56 @@ function ProductDetailContent({
                 </button>
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 p-1">
-                <button
-                  onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors"
-                  aria-label="Kurangi jumlah"
-                  disabled={qty <= 1}
+            <div className="space-y-2">
+              {/* Row 1: qty stepper + Tambah */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 p-1">
+                  <button
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors"
+                    aria-label="Kurangi jumlah"
+                    disabled={qty <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="min-w-10 text-center text-base font-bold tabular-nums">{qty}</span>
+                  <button
+                    onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors"
+                    aria-label="Tambah jumlah"
+                    disabled={qty >= product.stock}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+                <Button
+                  onClick={handleAddToCart}
+                  size="lg"
+                  variant="outline"
+                  className="h-12 flex-1 rounded-xl text-sm font-medium shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5"
                 >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="min-w-10 text-center text-base font-bold tabular-nums">{qty}</span>
-                <button
-                  onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors"
-                  aria-label="Tambah jumlah"
-                  disabled={qty >= product.stock}
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
+                  <ShoppingCart className="h-4 w-4 mr-1.5" />
+                  Tambah
+                </Button>
               </div>
-              <Button
-                onClick={handleAddToCart}
-                size="lg"
-                variant="outline"
-                className="h-12 rounded-xl text-sm font-medium shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5"
-              >
-                <ShoppingCart className="h-4 w-4 mr-1.5" />
-                Tambah
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => onOpenChange(false)}
-                className="h-12 rounded-xl text-sm font-medium"
-              >
-                Lanjut Belanja
-              </Button>
-              <Button
-                onClick={handleBuyNow}
-                size="lg"
-                className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
-              >
-                Bayar — {formatIDR(product.price * qty)}
-              </Button>
+              {/* Row 2: Lanjut Belanja + Bayar */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => onOpenChange(false)}
+                  className="h-12 flex-1 rounded-xl text-sm font-medium"
+                >
+                  Lanjut Belanja
+                </Button>
+                <Button
+                  onClick={handleBuyNow}
+                  size="lg"
+                  className="h-12 flex-[2] rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
+                >
+                  Bayar — {formatIDR(product.price * qty)}
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
