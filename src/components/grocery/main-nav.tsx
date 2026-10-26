@@ -112,15 +112,20 @@ export function MobileNav({ onNavigate }: MainNavProps) {
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-sm p-0 flex flex-col">
-          <SheetHeader className="border-b border-border/60 px-5 py-4">
-            <SheetTitle className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Leaf className="h-4 w-4" />
+        <SheetContent side="right" className="w-full sm:max-w-sm p-0 flex flex-col border-l-2 border-primary/20">
+          {/* Sheet header — gradient bg matching brand */}
+          <SheetHeader className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-card px-5 py-5">
+            <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+            <SheetTitle className="flex items-center gap-2.5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20">
+                <Leaf className="h-5 w-5" />
               </div>
-              <span className="text-base font-bold">SayurLogi</span>
+              <div className="flex flex-col leading-none">
+                <span className="text-base font-bold">SayurLogi</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Sayur & Buah Segar</span>
+              </div>
               <SheetClose
-                className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors ring-1 ring-border/50"
                 aria-label="Tutup menu"
               >
                 <X className="h-5 w-5" />
@@ -129,32 +134,35 @@ export function MobileNav({ onNavigate }: MainNavProps) {
           </SheetHeader>
 
           <nav aria-label="Navigasi mobile" className="flex-1 overflow-y-auto p-3">
+            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Menu</p>
             <ul className="space-y-1">
               {NAV_ITEMS.map((item) => (
                 <li key={item.id}>
                   <button
                     onClick={() => handleNavClick(item.id)}
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-foreground transition-all hover:bg-accent hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="text-xl" aria-hidden="true">{item.emoji}</span>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-lg ring-1 ring-border/50 transition-colors group-hover:bg-primary/10 group-hover:ring-primary/20" aria-hidden="true">{item.emoji}</span>
                     {item.label}
                   </button>
                 </li>
               ))}
             </ul>
 
-            <div className="my-3 h-px bg-border" />
+            <div className="my-3 h-px bg-border/60" />
 
-            {/* Quick actions */}
+            <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Aksi Cepat</p>
             <div className="space-y-1">
               <button
                 onClick={handleCartClick}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-foreground transition-all hover:bg-accent hover:translate-x-1"
               >
-                <ShoppingCart className="h-5 w-5 text-primary" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/10 transition-colors group-hover:bg-primary/15">
+                  <ShoppingCart className="h-5 w-5" />
+                </span>
                 Keranjang
                 {totalItems > 0 && (
-                  <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
+                  <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground ring-2 ring-background">
                     {totalItems}
                   </span>
                 )}
@@ -162,27 +170,36 @@ export function MobileNav({ onNavigate }: MainNavProps) {
 
               <button
                 onClick={handleWishlistClick}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                className="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-foreground transition-all hover:bg-accent hover:translate-x-1"
               >
-                <Heart className={`h-5 w-5 ${wishlistCount > 0 ? "fill-rose-500 text-rose-500" : "text-rose-500"}`} />
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-500/10 text-rose-500 ring-1 ring-rose-500/10 transition-colors group-hover:bg-rose-500/15">
+                  <Heart className={`h-5 w-5 ${wishlistCount > 0 ? "fill-rose-500" : ""}`} />
+                </span>
                 Wishlist
                 {wishlistCount > 0 && (
-                  <span className="ml-auto rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">
+                  <span className="ml-auto rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white ring-2 ring-background">
                     {wishlistCount}
                   </span>
                 )}
               </button>
 
-              <div className="flex items-center gap-3 rounded-xl px-4 py-3">
-                <ThemeToggle />
+              <div className="group flex items-center gap-3 rounded-xl px-3 py-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-foreground ring-1 ring-border/50">
+                  <ThemeToggle />
+                </span>
                 <span className="text-sm font-medium text-foreground">Ganti Tema</span>
               </div>
             </div>
           </nav>
 
-          <div className="border-t border-border/60 px-5 py-4 text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">SayurLogi</p>
-            <p className="mt-0.5">Sayur & buah segar dari petani lokal 🌱</p>
+          {/* Sheet footer — trust strip */}
+          <div className="border-t border-border/60 bg-secondary/30 px-5 py-4">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Leaf className="h-3.5 w-3.5 text-primary" />
+              <span className="font-medium text-foreground">SayurLogi</span>
+              <span className="text-muted-foreground/60">·</span>
+              <span>Petani lokal 🌱</span>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

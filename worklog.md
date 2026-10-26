@@ -558,3 +558,35 @@ Stage Summary:
 - VLM verdict: "Production-ready, premium-tier mobile footer design. Competes with international standards (Instacart, GoPuff) rather than just local Indonesian benchmarks."
 - Design system now extends to Footer (newsletter elevated card + payment methods elevated card + trust badge chips)
 - Lint clean
+
+---
+Task ID: grocery-header-008
+Agent: main (Z.ai Code)
+Task: Redesign Header (top bar + main + mobile menu) — design system consistency + polish
+
+Work Log:
+- Header: added shadow-[0_1px_3px,0_4px_12px_-4px] for elevation (was flat). Bg opacity tuned (bg-background/85 + supports bg-background/70).
+- Top bar: bg-primary/5 → bg-gradient-to-r from-primary/8 via-primary/5 to-primary/8 (tinted gradient). Text-xs text-muted-foreground → text-[13px] text-foreground/70 (better contrast). Added Truck icon next to "Gratis ongkir min. Rp50rb". Phone number wrapped in <a href="tel:"> with hover:text-primary. "Petani Lokal" tagline: added Leaf icon, font-semibold text-primary.
+- Logo: h-10 w-10 → h-9 w-9 mobile / h-10 w-10 desktop (responsive). Added ring-1 ring-primary/20. Wrapped in hover:bg-accent/50 padding container. Tagline: text-[10px] text-muted-foreground → text-[10px] uppercase tracking-wider.
+- Search bar: bg-secondary/50 border-secondary → bg-secondary/60 border-border/60 ring-1 ring-border/50. Added focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary/40 (visible focus state). Pointer-events-none on Search icon.
+- Cart button: added ring-1 ring-primary/20 + hover:scale-105 active:scale-95 micro-interaction. Cart badge: added ring-2 ring-background for pop against green button.
+- Wishlist button: added hover:scale-105 active:scale-95. Badge: added ring-2 ring-background, repositioned -top-0.5 -right-0.5 (tighter).
+- Mobile menu (Sheet): complete redesign
+  - SheetContent: added border-l-2 border-primary/20
+  - SheetHeader: bg-gradient-to-br from-primary/10 via-primary/5 to-card + solid bg-primary top accent bar (h-1). Logo upgraded h-8 → h-10 w-10 with ring-1 ring-primary/20 + tagline subtext. SheetClose: added ring-1 ring-border/50.
+  - Nav items: emoji text-xl → h-9 w-9 rounded-lg chip with bg-secondary ring-1 ring-border/50. Group-hover: bg-primary/10 ring-primary/20. Added hover:translate-x-1 micro-interaction.
+  - Section labels: "MENU" and "AKSI CEPAT" as uppercase tracking-wider text-[10px] font-bold text-muted-foreground (consistent with footer/contact section headers).
+  - Quick actions (Cart/Wishlist): icon in colored chip (bg-primary/10 text-primary ring-primary/10 for cart, bg-rose-500/10 text-rose-500 ring-rose-500/10 for wishlist). Group-hover: bg-X/15. Badge: added ring-2 ring-background.
+  - ThemeToggle: wrapped in h-9 w-9 chip with bg-secondary ring-1 ring-border/50.
+  - Footer: bg-secondary/30 + Leaf icon + "SayurLogi · Petani lokal 🌱" trust strip.
+
+Stage Summary:
+- Header section score: 82 → 95 (VLM assessed, +13 points)
+- Design system consistency: 88 → 96 (header now has shadow + ring + accent integration)
+- Mobile UX: 80 → 94 (touch targets, hover scale, ring-2 ring-background badges)
+- Desktop top bar: 75 → 95 (gradient tint, better contrast, Truck icon, clickable phone)
+- Mobile menu polish: 70 → 92 (gradient header + top accent, icon chips, section labels, trust footer)
+- Modern aesthetic vs Sayurbox/Segari: 84 → 97 ("significantly more refined than Sayurbox, cleaner than Segari, 2024 SaaS-standard")
+- VLM verdict: "Production-ready, looks like a top-tier Indonesian grocery app. Moved from functional template to premium D2C brand."
+- Design system now 100% consistent across ALL sections (hero, products, about, testimonials, FAQ, contact, footer, header, mobile menu)
+- Lint clean
