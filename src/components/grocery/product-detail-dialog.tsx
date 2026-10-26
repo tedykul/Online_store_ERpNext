@@ -117,6 +117,7 @@ function ProductDetailContent({
       addItem(product, qty);
     }
     onOpenChange(false);
+    // Call onBuyNow if provided (opens checkout), otherwise just add to cart
     onBuyNow?.();
   };
 
@@ -315,7 +316,7 @@ function ProductDetailContent({
                 </button>
               </div>
             )}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 p-1">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -339,30 +340,26 @@ function ProductDetailContent({
                 onClick={handleAddToCart}
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-xl text-base shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5"
+                className="h-12 rounded-xl text-sm font-medium shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5"
               >
-                <ShoppingCart className="h-5 w-5 mr-2" />
+                <ShoppingCart className="h-4 w-4 mr-1.5" />
                 Tambah
               </Button>
-              {onBuyNow && (
-                <Button
-                  onClick={handleBuyNow}
-                  size="lg"
-                  className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
-                >
-                  Beli Sekarang — {formatIDR(product.price * qty)}
-                </Button>
-              )}
-              {!onBuyNow && (
-                <Button
-                  onClick={handleAddToCart}
-                  size="lg"
-                  className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
-                >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Tambah — {formatIDR(product.price * qty)}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => onOpenChange(false)}
+                className="h-12 rounded-xl text-sm font-medium"
+              >
+                Lanjut Belanja
+              </Button>
+              <Button
+                onClick={handleBuyNow}
+                size="lg"
+                className="flex-1 h-12 rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
+              >
+                Bayar — {formatIDR(product.price * qty)}
+              </Button>
             </div>
           </div>
         ) : (
