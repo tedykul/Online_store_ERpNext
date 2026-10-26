@@ -256,8 +256,8 @@ function ProductDetailContent({
               )}
             </div>
 
-            {/* Delivery context — "Pengiriman besok" */}
-            <div className="flex items-center gap-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-700 dark:text-cyan-400">
+            {/* Delivery context — "Pengiriman besok" (green tint for brand harmony) */}
+            <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
               <Truck className="h-4 w-4 shrink-0" />
               <span>Pengiriman besok — pilih slot saat checkout</span>
             </div>
@@ -273,10 +273,10 @@ function ProductDetailContent({
               </div>
             )}
 
-            {/* Long description */}
+            {/* Long description — relaxed line-height for readability */}
             <section>
-              <h3 className="mb-1.5 text-sm font-semibold">Deskripsi</h3>
-              <p className="text-sm text-foreground/70 leading-relaxed">
+              <h3 className="mb-2 text-sm font-semibold">Deskripsi</h3>
+              <p className="text-sm text-foreground/70 leading-loose">
                 {product.longDescription || product.description}
               </p>
             </section>
@@ -351,7 +351,7 @@ function ProductDetailContent({
               </div>
             )}
             <div className="space-y-2">
-              {/* Row 1: qty stepper + Tambah/Perbarui (clarified cart state) */}
+              {/* Row 1: qty stepper + Tambah ke Keranjang (PRIMARY — grocery flow) */}
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5 rounded-xl border border-border bg-secondary/30 p-1">
                   <button
@@ -375,14 +375,13 @@ function ProductDetailContent({
                 <Button
                   onClick={handleAddToCart}
                   size="lg"
-                  variant="outline"
-                  className="h-11 flex-1 rounded-xl text-sm font-medium shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5 md:h-12"
+                  className="h-11 flex-1 rounded-xl text-sm font-bold shadow-md transition-transform hover:scale-[1.01] md:h-12"
                 >
                   <ShoppingCart className="h-4 w-4 mr-1.5" />
-                  {inCart ? "Perbarui" : "Tambah"}
+                  {inCart ? "Perbarui Keranjang" : "Tambah ke Keranjang"}
                 </Button>
               </div>
-              {/* Row 2: Lanjut Belanja (secondary) + Bayar (primary) */}
+              {/* Row 2: Lanjut Belanja (ghost) + Beli Langsung (outline secondary) */}
               <div className="flex gap-2">
                 <Button
                   variant="ghost"
@@ -390,14 +389,15 @@ function ProductDetailContent({
                   onClick={() => onOpenChange(false)}
                   className="h-11 flex-1 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground md:h-12"
                 >
-                  Lanjut
+                  Lanjut Belanja
                 </Button>
                 <Button
                   onClick={handleBuyNow}
                   size="lg"
-                  className="h-11 flex-[2] rounded-xl text-sm shadow-md transition-transform hover:scale-[1.01] md:h-12 md:text-base"
+                  variant="outline"
+                  className="h-11 flex-1 rounded-xl text-sm font-medium border-primary/40 text-primary hover:bg-primary/5 transition-transform hover:scale-[1.01] md:h-12"
                 >
-                  Bayar — {formatIDR(product.price * qty)}
+                  Beli Langsung
                 </Button>
               </div>
             </div>
