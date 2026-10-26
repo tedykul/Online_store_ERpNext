@@ -444,3 +444,29 @@ Stage Summary:
 - Design system now consistent across all card types (product cards, about cards, hero badges)
 - Card depth pattern: gradient bg (from-card to-muted/50) + ring-1 ring-border/50 + layered shadow + solid colored top accent bar + hover elevation
 - Lint clean
+
+---
+Task ID: grocery-testimonials-004
+Agent: main (Z.ai Code)
+Task: Fix testimonials section — card depth consistency + emoji avatar replacement
+
+Work Log:
+- Created initial-avatar helper: getInitials(name) → "DL" for "Dewi Lestari", getAvatarColor(name) → deterministic color from 6-color palette (primary/orange/amber/rose/cyan/violet) via name hash. Stable per user, no random per render.
+- Applied card depth pattern to platform stat cards (4x): gradient bg + ring-1 + layered shadow + solid bg-primary top accent bar. Replaced flat border+shadow-sm style.
+- Applied card depth pattern to testimonial cards (6x): same gradient+ring+shadow+accent bar treatment. Accent color is rating-aware: bg-primary for 5★, bg-amber-500 for <5★ (e.g. Budi Santoso 4.5★).
+- Replaced emoji avatars (👩/👨‍🍳/👩‍💼/👨/👩‍🎨/🏃) with initial avatars — colored circle (15% opacity bg) + bold initials + ring-1 ring-inset. 6-color palette cycled deterministically by name hash.
+- Testimonial text: added line-clamp-4 to prevent wall-of-text on mobile. Was unbounded.
+- Verified badge: changed from generic secondary to bg-primary/10 text-primary (green-tinted) for consistency with brand.
+- Quote icon + rating row restructured: Quote icon left, rating stars right (was Quote alone, then rating below). Tighter layout.
+- Rating stars: h-4 → h-3.5 (smaller, more refined), rating number font-medium → font-semibold text-foreground (was muted).
+- Body text: text-foreground → text-foreground/80 (consistent with About section after previous fix).
+
+Stage Summary:
+- Testimonials section score: 76 → 92 (VLM assessed)
+- Card design consistency: 10/10 (perfectly unified with About section)
+- Avatar professionalism: 10/10 (initials vs emoji — "massive improvement, removes cheap template feel")
+- Mobile UX: 9/10 (4-line clamp excellent for scanning)
+- Modern aesthetic vs Sayurbox/Segari: 9/10 ("on par or slightly ahead of market leaders, soft UI feels 2024/2025")
+- VLM verdict: "This section now looks like it belongs in a funded, scalable startup application."
+- Design system now fully consistent across ALL card types on the page (hero trust badges, About stats, About values, testimonial stats, testimonial cards)
+- Lint clean

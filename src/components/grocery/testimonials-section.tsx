@@ -13,10 +13,38 @@ import { cn } from "@/lib/utils";
 interface Testimonial {
   name: string;
   role: string;
-  avatar: string; // emoji avatar
+  avatar: string; // emoji avatar (kept for backward compat, but initials preferred)
   rating: number;
   text: string;
   location: string;
+}
+
+// Color palette for initial avatars — cycles deterministically by name
+const AVATAR_COLORS = [
+  "bg-primary/15 text-primary ring-primary/20",
+  "bg-orange-500/15 text-orange-600 ring-orange-500/20",
+  "bg-amber-500/15 text-amber-600 ring-amber-500/20",
+  "bg-rose-500/15 text-rose-600 ring-rose-500/20",
+  "bg-cyan-500/15 text-cyan-600 ring-cyan-500/20",
+  "bg-violet-500/15 text-violet-600 ring-violet-500/20",
+];
+
+/** Get up to 2 initials from a full name (e.g. "Dewi Lestari" → "DL") */
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+/** Deterministic color index from name (stable per user, not random per render) */
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash << 5) - hash + name.charCodeAt(i);
+    hash |= 0; // force 32-bit
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
 const TESTIMONIALS: Testimonial[] = [
@@ -141,9 +169,11 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-6 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              {/* Solid colored top accent — matches icon color */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-inset ring-primary/10">
                 <stat.icon className="h-5 w-5" />
               </div>
               <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl tabular-nums">
@@ -203,43 +233,59 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
 }
 
 function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; index: number }) {
-  const { name, role, avatar, rating, text, location } = testimonial;
+  const { name, role, rating, text, location } = testimonial;
+  // Accent color based on rating — green for 5★, amber for <5★
+  const isTopRated = rating >= 5;
+  const accentBar = isTopRated ? "bg-primary" : "bg-amber-500";
+  const initials = getInitials(name);
+  const avatarColor = getAvatarColor(name);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.08, 0.4) }}
-      className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
+      className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-5 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
     >
-      {/* Quote icon */}
-      <Quote className="h-6 w-6 text-primary/30" />
+      {/* Solid colored top accent — green for 5★, amber for <5★ */}
+      <div className={`absolute inset-x-0 top-0 h-1 ${accentBar}`} />
 
-      {/* Rating */}
-      <div className="flex items-center gap-0.5" aria-label={`Rating ${rating} dari 5`}>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star
-            key={i}
-            className={cn(
-              "h-4 w-4",
-              i < Math.floor(rating)
-                ? "fill-amber-400 text-amber-400"
-                : i < rating
-                ? "fill-amber-400/50 text-amber-400"
-                : "fill-muted text-muted"
-            )}
-          />
-        ))}
-        <span className="ml-1 text-xs font-medium text-muted-foreground">{rating.toFixed(1)}</span>
+      {/* Quote icon + rating row */}
+      <div className="flex items-center justify-between">
+        <Quote className="h-6 w-6 text-primary/30" />
+        <div className="flex items-center gap-0.5" aria-label={`Rating ${rating} dari 5`}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={cn(
+                "h-3.5 w-3.5",
+                i < Math.floor(rating)
+                  ? "fill-amber-400 text-amber-400"
+                  : i < rating
+                  ? "fill-amber-400/50 text-amber-400"
+                  : "fill-muted text-muted"
+              )}
+            />
+          ))}
+          <span className="ml-1 text-xs font-semibold text-foreground tabular-nums">{rating.toFixed(1)}</span>
+        </div>
       </div>
 
-      {/* Testimonial text */}
-      <p className="text-sm text-foreground leading-relaxed flex-1">"{text}"</p>
+      {/* Testimonial text — line-clamp-4 to prevent wall-of-text on mobile */}
+      <p className="text-sm text-foreground/80 leading-relaxed flex-1 line-clamp-4">"{text}"</p>
 
       {/* Author */}
       <div className="mt-2 flex items-center gap-3 border-t border-border/40 pt-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-xl">
-          {avatar}
+        {/* Initial avatar — colored circle with initials, ring for definition */}
+        <div
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-1 ring-inset",
+            avatarColor
+          )}
+          aria-label={`Avatar ${name}`}
+        >
+          {initials}
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-tight truncate">{name}</p>
@@ -247,7 +293,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
             {role} · {location}
           </p>
         </div>
-        <Badge variant="secondary" className="shrink-0 text-[10px] font-medium">
+        <Badge variant="secondary" className="shrink-0 text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/15">
           ✓ Verified
         </Badge>
       </div>
