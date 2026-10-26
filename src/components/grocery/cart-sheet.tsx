@@ -73,14 +73,18 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
 
         {/* Items list */}
         {items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-            <span className="text-6xl">🛒</span>
-            <h3 className="text-base font-semibold">Keranjang masih kosong</h3>
-            <p className="text-sm text-muted-foreground">
-              Yuk pilih sayur dan buah segar favoritmu!
-            </p>
-            <Button variant="outline" onClick={closeCart} className="mt-2 rounded-full">
-              Lanjut Belanja
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+              <ShoppingBag className="h-10 w-10 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">Keranjang kamu masih kosong</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Yuk isi dengan sayur & buah segar pilihan!
+              </p>
+            </div>
+            <Button onClick={closeCart} className="mt-2 rounded-full px-6">
+              Mulai Belanja
             </Button>
           </div>
         ) : (

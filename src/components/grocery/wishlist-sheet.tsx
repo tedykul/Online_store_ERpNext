@@ -64,15 +64,19 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
 
         {/* Items list */}
         {items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-            <span className="text-6xl">💚</span>
-            <h3 className="text-base font-semibold">Wishlist masih kosong</h3>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Simpan produk favoritmu dengan klik ikon hati ♡ di kartu produk.
-              Nanti bisa balik beli kapan saja!
-            </p>
-            <Button variant="outline" onClick={closeWishlist} className="mt-2 rounded-full">
-              Lanjut Belanja
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-rose-500/10">
+              <Heart className="h-10 w-10 text-rose-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold">Wishlist masih kosong</h3>
+              <p className="mt-1 text-sm text-muted-foreground max-w-xs">
+                Simpan produk favoritmu dengan klik ikon hati ♡ di kartu produk.
+                Nanti bisa balik beli kapan saja!
+              </p>
+            </div>
+            <Button onClick={closeWishlist} className="mt-2 rounded-full px-6">
+              Mulai Belanja
             </Button>
           </div>
         ) : (

@@ -60,7 +60,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
 
       <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-20">
         {/* Left content */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 order-2 md:order-1">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -143,9 +143,9 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="relative hidden md:block"
+          className="relative order-1 md:order-2"
         >
-          <div className="relative mx-auto aspect-square w-full max-w-md">
+          <div className="relative mx-auto aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md">
             {/* Soft gradient background circles */}
             <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/15 via-lime-200/30 to-amber-200/20 blur-sm" />
             <div className="absolute inset-12 rounded-full bg-gradient-to-tr from-emerald-300/25 to-primary/10" />
