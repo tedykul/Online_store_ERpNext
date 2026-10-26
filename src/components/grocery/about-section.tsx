@@ -257,10 +257,10 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-6 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
+              className="group relative flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted p-6 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30"
             >
               {/* Solid colored top accent — matches icon color, adds depth cue */}
-              <div className={`absolute inset-x-0 top-0 h-1 ${stat.bar}`} />
+              <div className={`absolute inset-x-0 top-0 h-1.5 ${stat.bar}`} />
               {/* Icon in colored circle with inner ring for dimensionality */}
               <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.color} ring-1 ring-inset ring-current/10`}>
                 <stat.icon className="h-6 w-6" />
@@ -292,10 +292,10 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-5 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
+                className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted p-5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30"
               >
                 {/* Solid colored top accent — matches icon color */}
-                <div className={`absolute inset-x-0 top-0 h-1 ${value.bar}`} />
+                <div className={`absolute inset-x-0 top-0 h-1.5 ${value.bar}`} />
                 {/* Bigger icon circle (h-14 w-14) + ring border for depth */}
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${value.color} ring-1 ring-inset ring-current/10`}>
                   <value.icon className="h-7 w-7" />

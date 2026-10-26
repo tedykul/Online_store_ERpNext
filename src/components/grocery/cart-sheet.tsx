@@ -73,9 +73,9 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
                   Tambah <span className="font-bold text-orange-600 dark:text-orange-400">{formatIDR(remaining)}</span> lagi untuk gratis ongkir!
                 </p>
                 <div className="relative mt-2">
-                  {/* Glow halo behind bar — always visible */}
+                  {/* Glow halo behind bar — always visible, wider blur */}
                   <div
-                    className="absolute inset-0 rounded-full bg-orange-400/30 blur-md"
+                    className="absolute -inset-y-1 left-0 rounded-full bg-orange-400/40 blur-lg"
                     style={{ width: `${progressPct}%` }}
                     aria-hidden="true"
                   />
@@ -129,7 +129,7 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, x: 30, height: 0, marginBottom: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="group relative flex gap-3 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30"
+                      className="group relative flex gap-3 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30"
                     >
                       {/* Accent bar — orange if discounted, primary otherwise */}
                       <div className={`absolute inset-y-0 left-0 w-1 ${hasDiscount ? "bg-orange-500" : "bg-primary"}`} />

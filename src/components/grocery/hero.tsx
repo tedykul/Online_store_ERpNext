@@ -150,7 +150,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="mt-2 grid grid-cols-3 gap-3 text-center"
           >
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30">
               <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 ring-1 ring-inset ring-primary/10">
                 <Truck className="h-4 w-4 text-primary" />
@@ -158,7 +158,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               <span className="text-xs font-bold">Antar Cepat</span>
               <span className="text-[10px] text-muted-foreground">2 jam sampai</span>
             </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-orange-500/30">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-orange-500/30">
               <div className="absolute inset-x-0 top-0 h-1 bg-orange-500" />
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/10 ring-1 ring-inset ring-orange-500/10">
                 <ShieldCheck className="h-4 w-4 text-orange-500" />
@@ -166,7 +166,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               <span className="text-xs font-bold">Kualitas</span>
               <span className="text-[10px] text-muted-foreground">100% segar</span>
             </div>
-            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-amber-500/30">
+            <div className="group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 text-center ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-amber-500/30">
               <div className="absolute inset-x-0 top-0 h-1 bg-amber-500" />
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10 ring-1 ring-inset ring-amber-500/10">
                 <Sprout className="h-4 w-4 text-amber-600" />
@@ -184,7 +184,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className="relative order-1 mb-2 hidden md:block md:order-2"
         >
-          <div className="relative mx-auto w-full max-w-md">
+          <div className="relative mx-auto w-full max-w-sm">
             {/* Gradient glow behind */}
             <div className="pointer-events-none absolute inset-0 -z-10 scale-110">
               <div className="absolute top-1/2 left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-3xl" />
@@ -196,7 +196,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
-              <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40">
+              <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
                 <img
                   src="/hero-produce-full.png"
                   alt="Sayur dan buah segar dari petani lokal"

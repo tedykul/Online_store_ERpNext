@@ -77,11 +77,12 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
   return (
     <footer className="mt-auto border-t border-border/60 bg-secondary/30">
-      {/* ============ Newsletter strip — elevated card ============ */}
+      {/* ============ Newsletter strip — elevated card, labeled section ============ */}
       <div className="mx-auto max-w-7xl px-4 pt-8">
+        <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Newsletter</p>
         <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 ring-1 ring-primary/20 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] md:p-6">
           {/* Solid top accent — primary green */}
-          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+          <div className="absolute inset-x-0 top-0 h-1.5 bg-primary" />
           <div className="grid items-center gap-4 md:grid-cols-2">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
@@ -100,7 +101,9 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
       </div>
 
       {/* ============ Main footer grid ============ */}
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
+      <div className="mx-auto max-w-7xl px-4 py-12">
+        <p className="mb-6 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tautan Cepat</p>
+        <div className="grid gap-8 md:grid-cols-4">
         {/* Brand */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -212,6 +215,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             </li>
           </ul>
         </div>
+        </div>
       </div>
 
       {/* ============ Payment methods row — trust signal ============ */}
@@ -225,7 +229,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             {PAYMENT_METHODS.map((method) => (
               <span
                 key={method}
-                className="rounded-md bg-background px-2 py-1 text-[10px] font-bold text-muted-foreground ring-1 ring-border/60"
+                className="rounded-md bg-background px-2.5 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border shadow-sm"
               >
                 {method}
               </span>

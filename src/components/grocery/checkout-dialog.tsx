@@ -145,7 +145,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDia
               {/* Scrollable form content */}
               <div className="flex-1 overflow-y-auto scrollbar-grocery px-5 pb-4 space-y-4">
                 {/* ============ Section: Customer info — elevated card ============ */}
-                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
                   <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px]">1</span>
@@ -214,7 +214,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDia
                 </section>
 
                 {/* ============ Section: Delivery method — elevated card ============ */}
-                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-cyan-500" />
                   <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-white text-[10px]">2</span>
@@ -246,7 +246,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDia
                 </section>
 
                 {/* ============ Section: Payment method — elevated card ============ */}
-                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-amber-500" />
                   <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white text-[10px]">3</span>

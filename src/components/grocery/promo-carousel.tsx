@@ -19,7 +19,19 @@ interface PromoCarouselProps {
  */
 export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
   const addItem = useCartStore((s) => s.addItem);
-  const promos = products.filter((p) => p.onSale && p.stock > 0);
+  // Sort by discount % descending, take top 4 — acts as "highlight" not full list.
+  // This avoids visual duplication with the main grid which shows all products.
+  const allPromos = products
+    .filter((p) => p.onSale && p.stock > 0)
+    .map((p) => ({
+      product: p,
+      discount: p.oldPrice && p.oldPrice > p.price
+        ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100)
+        : 0,
+    }))
+    .sort((a, b) => b.discount - a.discount)
+    .slice(0, 4);
+  const promos = allPromos.map((x) => x.product);
 
   if (promos.length < 2) return null;
 
@@ -53,7 +65,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
               viewport={{ once: true, margin: "-30px" }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
               onClick={() => handleClick(product)}
-              className="group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 text-left ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30 md:w-44"
+              className="group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted text-left ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30 md:w-44"
               aria-label={`Lihat detail ${product.name}`}
             >
               {/* Image */}

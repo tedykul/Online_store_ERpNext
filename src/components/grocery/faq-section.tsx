@@ -110,7 +110,7 @@ export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
   return (
     <section
       id="faq"
-      className="scroll-mt-24 border-b border-border/40 bg-secondary/20"
+      className="scroll-mt-28 border-b border-border/40 bg-secondary/20"
     >
       <div className="mx-auto max-w-4xl px-4 py-16 md:py-24">
         {/* Heading */}
@@ -171,23 +171,23 @@ export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
                 <AccordionItem
                   key={i}
                   value={`item-${i}`}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 px-5 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 data-[state=open]:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] data-[state=open]:ring-primary/30"
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted px-5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 data-[state=open]:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] data-[state=open]:ring-primary/30"
                 >
                   {/* Solid colored left accent — category color, full height */}
                   <div className={cn("absolute inset-y-0 left-0 w-1", cat.accent)} />
 
                   <AccordionTrigger className="py-4 pl-3 text-left text-[15px] font-semibold hover:no-underline items-center gap-3">
-                    {/* Category icon — colored, matches accent bar */}
+                    {/* Category icon — colored, matches accent bar, bigger for visibility */}
                     <span
                       className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
-                        item.category === "pemesanan" && "bg-primary/10 text-primary ring-primary/10",
-                        item.category === "pengiriman" && "bg-cyan-500/10 text-cyan-600 ring-cyan-500/10",
-                        item.category === "pembayaran" && "bg-amber-500/10 text-amber-600 ring-amber-500/10",
-                        item.category === "produk" && "bg-orange-500/10 text-orange-600 ring-orange-500/10"
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset shadow-sm",
+                        item.category === "pemesanan" && "bg-primary/15 text-primary ring-primary/20",
+                        item.category === "pengiriman" && "bg-cyan-500/15 text-cyan-600 ring-cyan-500/20",
+                        item.category === "pembayaran" && "bg-amber-500/15 text-amber-600 ring-amber-500/20",
+                        item.category === "produk" && "bg-orange-500/15 text-orange-600 ring-orange-500/20"
                       )}
                     >
-                      <CatIcon className="h-4 w-4" />
+                      <CatIcon className="h-5 w-5" />
                     </span>
                     <span className="flex-1 pr-2 leading-snug">{item.q}</span>
                   </AccordionTrigger>

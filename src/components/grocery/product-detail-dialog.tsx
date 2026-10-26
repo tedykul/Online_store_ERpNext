@@ -283,7 +283,7 @@ function ProductDetailContent({
 
             {/* Benefits — elevated card matching design system */}
             {product.benefits && product.benefits.length > 0 && (
-              <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+              <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
                 <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
                 <h3 className="mb-2.5 text-sm font-semibold flex items-center gap-1.5">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -321,7 +321,7 @@ function ProductDetailContent({
             </section>
 
             {/* Trust badges — elevated card matching design system */}
-            <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+            <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-3 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
               <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
               <div className="grid grid-cols-3 gap-2">
                 <TrustBadge icon={<Truck className="h-4 w-4" />} label="Antar 2 jam" />
@@ -428,7 +428,7 @@ function InfoRow({
 }) {
   return (
     <div className={cn(
-      "relative flex items-start gap-2.5 overflow-hidden rounded-lg bg-gradient-to-br from-card via-card to-muted/50 p-2.5 ring-1 ring-border/50",
+      "relative flex items-start gap-2.5 overflow-hidden rounded-lg bg-gradient-to-br from-card via-card to-muted p-2.5 ring-1 ring-border/50",
       full && "sm:col-span-2"
     )}>
       <span className="text-primary mt-0.5">{icon}</span>
