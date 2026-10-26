@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Truck, ShieldCheck, Sprout, ArrowRight, Star, Clock, Users } from "lucide-react";
+import { Truck, ShieldCheck, Sprout, ArrowRight, Star, Clock, Users, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Hardcoded defaults (used when content prop is null/missing)
@@ -145,7 +145,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
 
           {/* Mobile hero image preview — compact, above trust badges.
               Desktop has the full image on right; mobile needs emotional hook.
-              Portrait-ish crop (4:3) focuses on farmer + basket. */}
+              Portrait-ish crop (4:3) focuses on basket + vegetables. */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -154,21 +154,26 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
           >
             <div className="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/40 shadow-primary/20">
               <img
-                src="/hero-produce-lifestyle.png"
-                alt="Petani lokal memegang sayur dan buah segar dari kebun"
+                src="/hero-produce-basket.png"
+                alt="Keranjang penuh sayur dan buah segar dari petani lokal"
                 className="aspect-[5/4] w-full object-cover object-center"
                 loading="eager"
               />
               {/* Subtle gradient overlay for text legibility if needed */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+              {/* SayurLogi branding overlay — bottom left, like FreshCart reference */}
+              <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-lg bg-white/90 backdrop-blur-md px-2.5 py-1.5 shadow-md">
+                <Leaf className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-extrabold text-foreground">SayurLogi</span>
+              </div>
             </div>
             {/* "100% Segar" sticker — top right */}
             <div className="absolute -top-2 -right-2 flex flex-col items-center justify-center rounded-xl bg-orange-500 px-2.5 py-1.5 text-white shadow-lg ring-2 ring-white">
               <span className="text-xs font-extrabold leading-none">100%</span>
               <span className="text-[8px] font-semibold leading-tight">SEGAR</span>
             </div>
-            {/* "Antar 2 Jam" badge — bottom left */}
-            <div className="absolute -bottom-2 -left-2 flex items-center gap-1 rounded-lg bg-white/95 backdrop-blur-md px-2.5 py-1.5 shadow-lg border border-orange-200/60">
+            {/* "Antar 2 Jam" badge — bottom right */}
+            <div className="absolute -bottom-2 -right-2 flex items-center gap-1 rounded-lg bg-white/95 backdrop-blur-md px-2.5 py-1.5 shadow-lg border border-orange-200/60">
               <Truck className="h-3.5 w-3.5 text-orange-500" />
               <span className="text-[11px] font-bold text-foreground">Antar 2 Jam</span>
             </div>
@@ -227,13 +232,23 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
-              <div className="overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
                 <img
-                  src="/hero-produce-lifestyle.png"
-                  alt="Petani lokal memegang sayur dan buah segar dari kebun"
+                  src="/hero-produce-basket.png"
+                  alt="Keranjang penuh sayur dan buah segar dari petani lokal"
                   className="w-full h-auto object-cover"
                   loading="eager"
                 />
+                {/* SayurLogi branding overlay — bottom left, like FreshCart reference */}
+                <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-xl bg-white/90 backdrop-blur-md px-3 py-2 shadow-lg">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                    <Leaf className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="flex flex-col leading-none">
+                    <span className="text-sm font-extrabold text-foreground">SayurLogi</span>
+                    <span className="text-[8px] text-muted-foreground uppercase tracking-wider">Sayur & Buah Segar</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
 
