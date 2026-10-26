@@ -209,7 +209,7 @@ function ProductDetailContent({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 scrollbar-grocery px-6">
+        <ScrollArea className="flex-1 scrollbar-grocery max-h-[55vh] px-6">
           <div className="space-y-5 pb-4">
             {/* Price */}
             <div className="flex items-end gap-3">
