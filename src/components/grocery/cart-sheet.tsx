@@ -42,7 +42,7 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
             )}
           </SheetTitle>
           <SheetDescription className="sr-only">
-            Keranjang belanja SayurBox — kelola item dan checkout
+            Keranjang belanja SayurLogi — kelola item dan checkout
           </SheetDescription>
         </SheetHeader>
 

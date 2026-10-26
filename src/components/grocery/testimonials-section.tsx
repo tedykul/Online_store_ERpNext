@@ -33,7 +33,7 @@ const TESTIMONIALS: Testimonial[] = [
     role: "Chef Restoran",
     avatar: "👨‍🍳",
     rating: 5,
-    text: "Sebagai chef, kualitas bahan adalah segalanya. SayurBox jadi supplier utama restoran saya. Tomatnya ranum, herbs-nya harum, dan harganya bersaing dengan pasar tradisional.",
+    text: "Sebagai chef, kualitas bahan adalah segalanya. SayurLogi jadi supplier utama restoran saya. Tomatnya ranum, herbs-nya harum, dan harganya bersaing dengan pasar tradisional.",
     location: "Bandung",
   },
   {
@@ -49,7 +49,7 @@ const TESTIMONIALS: Testimonial[] = [
     role: "Ayah 2 Anak",
     avatar: "👨",
     rating: 4.5,
-    text: "Anak-anak saya jadi doyan sayur karena SayurBox. Buahnya manis-manis, sayurnya segar. Customer service-nya juga responsif. Recommended!",
+    text: "Anak-anak saya jadi doyan sayur karena SayurLogi. Buahnya manis-manis, sayurnya segar. Customer service-nya juga responsif. Recommended!",
     location: "Depok",
   },
   {
@@ -57,7 +57,7 @@ const TESTIMONIALS: Testimonial[] = [
     role: "Food Blogger",
     avatar: "👩‍🎨",
     rating: 5,
-    text: "Saya review banyak grocery store, SayurBox salah satu yang terbaik. Transparan soal asal produk, organik certification jelas. Worth every rupiah!",
+    text: "Saya review banyak grocery store, SayurLogi salah satu yang terbaik. Transparan soal asal produk, organik certification jelas. Worth every rupiah!",
     location: "Bekasi",
   },
   {
@@ -122,7 +122,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           </h2>
           <p className="mt-4 text-base text-muted-foreground md:text-lg text-balance">
             Bukan sekedar jualan sayur — kami bangun kepercayaan dengan setiap pesanan.
-            Ini cerita nyata dari pelanggan setia SayurBox.
+            Ini cerita nyata dari pelanggan setia SayurLogi.
           </p>
         </motion.div>
 
@@ -184,7 +184,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           <div className="hidden h-8 w-px bg-border md:block" />
           <p className="text-sm text-muted-foreground max-w-md">
             Bergabung dengan <strong className="text-foreground">5.000+ pelanggan</strong> yang sudah merasakan
-            kesegaran SayurBox. Belanja sekarang, rasakan bedanya!
+            kesegaran SayurLogi. Belanja sekarang, rasakan bedanya!
           </p>
           <a
             href="#belanja"

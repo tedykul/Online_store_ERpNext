@@ -118,7 +118,7 @@ export function MobileNav({ onNavigate }: MainNavProps) {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Leaf className="h-4 w-4" />
               </div>
-              <span className="text-base font-bold">SayurBox</span>
+              <span className="text-base font-bold">SayurLogi</span>
               <SheetClose
                 className="ml-auto rounded-full p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                 aria-label="Tutup menu"
@@ -181,7 +181,7 @@ export function MobileNav({ onNavigate }: MainNavProps) {
           </nav>
 
           <div className="border-t border-border/60 px-5 py-4 text-xs text-muted-foreground">
-            <p className="font-medium text-foreground">SayurBox</p>
+            <p className="font-medium text-foreground">SayurLogi</p>
             <p className="mt-0.5">Sayur & buah segar dari petani lokal 🌱</p>
           </div>
         </SheetContent>

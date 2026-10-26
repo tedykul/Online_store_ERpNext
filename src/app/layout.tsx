@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 // Dynamic metadata from DB (brand name + meta description editable via admin)
 export async function generateMetadata(): Promise<Metadata> {
-  let brandName = "SayurBox";
+  let brandName = "SayurLogi";
   let metaDescription = "Belanja sayuran dan buah segar langsung dari petani lokal. Antar cepat, kualitas terjamin.";
 
   try {

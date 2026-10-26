@@ -144,7 +144,7 @@ export function HomeClient({ content }: HomeClientProps) {
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        brandName={content.brandName ?? "SayurBox"}
+        brandName={content.brandName ?? "SayurLogi"}
       />
 
       <main className="flex-1">

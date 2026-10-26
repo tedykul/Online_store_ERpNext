@@ -88,7 +88,7 @@ export function OrderTrackingDialog({ open, onOpenChange, initialTrackingId }: O
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto scrollbar-grocery sm:max-w-lg">
         <DialogDescription className="sr-only">
-          Lacak pesanan SayurBox berdasarkan tracking ID
+          Lacak pesanan SayurLogi berdasarkan tracking ID
         </DialogDescription>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

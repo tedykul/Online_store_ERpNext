@@ -426,10 +426,10 @@ const ENRICHED_PRODUCTS: Product[] = MOCK_PRODUCTS.map((p) => {
     reviewCount: p.reviewCount ?? deriveReviewCount(p.itemCode),
     longDescription:
       p.longDescription ??
-      `${p.description} Dipanen dan dikurasi langsung oleh tim SayurBox untuk memastikan kualitas terbaik sampai di meja makan keluarga Anda.`,
+      `${p.description} Dipanen dan dikurasi langsung oleh tim SayurLogi untuk memastikan kualitas terbaik sampai di meja makan keluarga Anda.`,
     benefits: p.benefits ?? BENEFITS_BY_CATEGORY[p.category] ?? [],
     storageTip: p.storageTip ?? STORAGE_TIP_BY_CATEGORY[p.category] ?? "Simpan di tempat sejuk dan kering.",
-    origin: p.origin ?? (originTag ? ORIGIN_BY_TAG[originTag] : "Petani mitra SayurBox"),
+    origin: p.origin ?? (originTag ? ORIGIN_BY_TAG[originTag] : "Petani mitra SayurLogi"),
     image: p.image ?? PRODUCT_IMAGES[p.id] ?? undefined,
   };
 });

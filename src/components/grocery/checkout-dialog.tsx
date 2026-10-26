@@ -104,7 +104,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDia
         {/* Always-present description for a11y (suppresses Radix warning
             when step switches to loading/success without DialogDescription) */}
         <DialogDescription className="sr-only">
-          Dialog checkout SayurBox
+          Dialog checkout SayurLogi
         </DialogDescription>
 
         {/* Step indicator (3-step progress: form -> loading -> success) */}

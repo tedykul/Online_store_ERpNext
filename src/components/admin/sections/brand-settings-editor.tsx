@@ -17,7 +17,7 @@ import {
 // ============================================================
 
 const FIELDS = [
-  { key: "brandName", label: "Nama Brand", placeholder: "SayurBox", hint: "Tampil di header, footer, judul tab browser, manifest" },
+  { key: "brandName", label: "Nama Brand", placeholder: "SayurLogi", hint: "Tampil di header, footer, judul tab browser, manifest" },
   { key: "metaDescription", label: "Meta Description (SEO)", placeholder: "Belanja sayuran dan buah segar...", multiline: true, hint: "Tampil di hasil pencarian Google (maks 160 karakter)" },
 ] as const;
 

@@ -57,7 +57,7 @@ export function ProductDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-hidden p-0 sm:max-w-3xl">
         <DialogDescription className="sr-only">
-          Detail produk SayurBox
+          Detail produk SayurLogi
         </DialogDescription>
         {product ? (
           <ProductDetailContent
@@ -275,7 +275,7 @@ function ProductDetailContent({
               <InfoRow
                 icon={<MapPin className="h-4 w-4" />}
                 label="Asal"
-                value={product.origin || "Petani mitra SayurBox"}
+                value={product.origin || "Petani mitra SayurLogi"}
               />
               <InfoRow
                 icon={<Package className="h-4 w-4" />}

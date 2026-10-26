@@ -88,7 +88,7 @@ export function OrderHistoryDialog({ open, onOpenChange, onTrackOrder }: OrderHi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto scrollbar-grocery sm:max-w-lg">
         <DialogDescription className="sr-only">
-          Riwayat pesanan SayurBox
+          Riwayat pesanan SayurLogi
         </DialogDescription>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

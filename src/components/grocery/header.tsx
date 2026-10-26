@@ -12,11 +12,11 @@ import { MainNav, MobileNav } from "./main-nav";
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  /** Brand name from DB (defaults to "SayurBox") */
+  /** Brand name from DB (defaults to "SayurLogi") */
   brandName?: string;
 }
 
-export function Header({ searchQuery, onSearchChange, brandName = "SayurBox" }: HeaderProps) {
+export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi" }: HeaderProps) {
   const totalItems = useCartStore((s) => s.getTotalItems());
   const openCart = useCartStore((s) => s.openCart);
   const wishlistCount = useWishlistStore((s) => s.getCount());

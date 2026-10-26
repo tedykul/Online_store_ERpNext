@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
  */
 const FAQ_ITEMS: { q: string; a: string }[] = [
   {
-    q: "Bagaimana cara memesan di SayurBox?",
+    q: "Bagaimana cara memesan di SayurLogi?",
     a: "Pilih produk yang kamu inginkan, klik 'Tambah' untuk masuk keranjang. Setelah selesai, klik ikon keranjang lalu 'Checkout Sekarang'. Isi data pengiriman, pilih metode pembayaran, lalu 'Buat Pesanan'. Pesanan akan diproses dan dikirim sesuai jadwal pengiriman yang dipilih.",
   },
   {

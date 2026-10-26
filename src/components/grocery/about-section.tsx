@@ -35,7 +35,7 @@ interface AboutSectionProps {
 }
 
 /**
- * Section "Tentang SayurBox" — brand story, mission, statistics, values.
+ * Section "Tentang SayurLogi" — brand story, mission, statistics, values.
  * Anchor target: #tentang (with scroll-mt-24 for sticky header offset).
  */
 export function AboutSection({ content }: AboutSectionProps = {}) {
@@ -100,7 +100,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             {c.aboutTitleB ?? "Keluargamu"}
           </h2>
           <p className="mt-4 text-base text-muted-foreground md:text-lg text-balance">
-            {c.aboutSubtitle ?? "SayurBox lahir dari kepedulian pada petani Indonesia. Kami menghubungkan petani lokal langsung dengan konsumen — tanpa perantara, tanpa bahan kimia, dengan harga yang adil untuk semua pihak."}
+            {c.aboutSubtitle ?? "SayurLogi lahir dari kepedulian pada petani Indonesia. Kami menghubungkan petani lokal langsung dengan konsumen — tanpa perantara, tanpa bahan kimia, dengan harga yang adil untuk semua pihak."}
           </p>
         </motion.div>
 
@@ -119,7 +119,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               {c.aboutStoryP1 ?? "Indonesia adalah negara agraris yang kaya, tapi banyak petani masih kesulitan menjual hasil panen dengan harga layak. Sementara itu, konsumen kota sulit mendapatkan sayur & buah benar-benar segar."}
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              {c.aboutStoryP2 ?? "SayurBox menjembatani kedua pihak: petani mendapat harga adil, konsumen mendapat produk segar dengan harga jujur. Win-win untuk semua."}
+              {c.aboutStoryP2 ?? "SayurLogi menjembatani kedua pihak: petani mendapat harga adil, konsumen mendapat produk segar dengan harga jujur. Win-win untuk semua."}
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
               {["#DukungPetaniLokal", "#SayurOrganik", "#TanpaPestisida", "#RantaiPendek"].map(
