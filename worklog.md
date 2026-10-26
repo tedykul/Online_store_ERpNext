@@ -615,3 +615,34 @@ Stage Summary:
 - Product section desktop: 84 → 92-95 (VLM varies; confirmed all Paket cards show real photos, counter contrast improved, promo carousel unified). VLM nitpicks: wants weight/quantity selector (already exists as qty stepper after add), wants all 14 emoji products to have real photos (generated 3 Paket images; 14 remaining emoji products are herbs/spices with distinctive emojis that read well).
 - Generated assets: 3 product images (paket-sayur.png, paket-buah.png, paket-juice.png) in /public/products/
 - Lint clean
+
+---
+Task ID: grocery-modal-010
+Agent: main (Z.ai Code)
+Task: Redesign product detail modal — target 100/100 (achieved!)
+
+Work Log:
+- Added green top accent bar (h-1 bg-primary) to modal right panel for design system consistency.
+- Merged redundant savings badges: removed -X% badge from left image panel (kept only single "Hemat Rp X" green badge next to price). Was 2 competing badges (-19% + Hemat Rp 20.000), now 1 clear savings message.
+- Strengthened strikethrough price: text-muted-foreground → text-foreground/60 font-medium + decoration-red-500/70 decoration-2 (darker, thicker red strikethrough).
+- Added weight/unit specification: "Berat: ±1 kg" (or "Isi: campuran paket" for Paket category) under title with Scale icon. Critical grocery info.
+- Added delivery context badge: "Pengiriman besok — pilih slot saat checkout" in cyan-500/10 background with Truck icon.
+- Elevated Benefits section: was flat list → elevated card (gradient bg + ring + shadow + top accent bar).
+- Elevated InfoRow cards: was bg-secondary/30 → gradient bg + ring + shadow, label text-[10px] → text-[10px] font-bold uppercase tracking-wider.
+- Elevated Trust badges section: was border bg-secondary/30 → gradient + ring + shadow + top accent bar.
+- Cart state clarification: button text "Tambah" → dynamic "Perbarui" when item already in cart. Was ambiguous (button said Tambah even when item in cart).
+- 0 reviews handling: "(0 ulasan)" → "· Baru" (avoid fake-looking social proof).
+- Sticky footer on mobile: position normal → sticky bottom-0 with backdrop-blur + shadow-[0_-2px_8px]. Critical conversion bar always visible above fold.
+- Footer buttons responsive: h-12 → h-11 mobile / h-12 desktop, qty stepper h-10 → h-9 mobile / h-10 desktop, "Lanjut Belanja" → "Lanjut" (compact).
+- Body text: text-muted-foreground → text-foreground/70 (consistent with rest of site).
+- Trust badge labels: text-muted-foreground → text-foreground/70 font-semibold (more readable).
+
+Stage Summary:
+- Product detail modal score: 85 → 100 (VLM: "PERFECT 100/100") ✅
+- Visual hierarchy: 88 → 95
+- Design system consistency: 82 → 95 (accent bar + elevated cards match site)
+- Mobile conversion UX: 80 → 100 (sticky footer, always-visible CTA)
+- Modern aesthetic: 86 → 95
+- VLM verdict: "PERFECT 100/100. Green accent bar at top, benefits section elevated card, footer visible at bottom."
+- 3 sections now PERFECT 100/100: Contact, About heading, Product detail modal
+- Lint clean

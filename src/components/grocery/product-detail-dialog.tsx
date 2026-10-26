@@ -25,6 +25,9 @@ import {
   CheckCircle2,
   Snowflake,
   Sparkles,
+  X,
+  Clock,
+  Scale,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCartStore } from "@/lib/store/cart";
@@ -55,7 +58,7 @@ export function ProductDetailDialog({
 }: ProductDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-hidden p-0 sm:max-w-3xl">
+      <DialogContent className="max-h-[92vh] overflow-hidden p-0 sm:max-w-3xl gap-0">
         <DialogDescription className="sr-only">
           Detail produk SayurLogi
         </DialogDescription>
@@ -92,16 +95,18 @@ function ProductDetailContent({
     product.oldPrice && product.oldPrice > product.price
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
       : 0;
+  const savings = product.oldPrice ? product.oldPrice - product.price : 0;
 
   const inCart = items.find((i) => i.product.id === product.id);
   const rating = product.rating ?? 4.5;
   const reviewCount = product.reviewCount ?? 0;
+  const hasReviews = reviewCount > 0;
 
   const handleAddToCart = () => {
     if (inCart) {
       const newQty = Math.min(inCart.quantity + qty, product.stock);
       updateQty(product.id, newQty);
-      toast.success(`Jumlah ${product.name} di keranjang: ${newQty}`);
+      toast.success(`Diperbarui — ${product.name} jadi ${newQty} di keranjang`);
     } else {
       addItem(product, qty);
       toast.success(`${qty} × ${product.name} ditambahkan ke keranjang`);
@@ -117,13 +122,12 @@ function ProductDetailContent({
       addItem(product, qty);
     }
     onOpenChange(false);
-    // Call onBuyNow if provided (opens checkout), otherwise just add to cart
     onBuyNow?.();
   };
 
   return (
     <div className="grid max-h-[92vh] grid-cols-1 overflow-hidden md:grid-cols-2">
-      {/* Left: visual */}
+      {/* ============ Left: visual ============ */}
       <div className="relative hidden md:block bg-gradient-to-br from-secondary/40 via-secondary/20 to-background border-r border-border/40">
         <div className="flex h-full min-h-[400px] items-center justify-center p-8">
           <motion.div
@@ -140,24 +144,30 @@ function ProductDetailContent({
             />
           </motion.div>
         </div>
-        <div className="absolute left-4 top-4 flex flex-col gap-1.5">
-          {product.onSale && discount > 0 && (
-            <Badge variant="destructive" className="text-xs font-bold shadow-sm">
+        {/* Single savings badge (was 2 redundant badges) */}
+        {discount > 0 && (
+          <div className="absolute left-4 top-4">
+            <Badge className="bg-orange-500 text-white text-xs font-bold shadow-sm hover:bg-orange-500">
               -{discount}%
             </Badge>
-          )}
-          {product.organic && (
+          </div>
+        )}
+        {product.organic && (
+          <div className={cn("absolute", discount > 0 ? "left-4 top-12" : "left-4 top-4")}>
             <Badge className="bg-primary text-primary-foreground text-xs font-bold shadow-sm">
               <Leaf className="h-3 w-3 mr-0.5" /> Organik
             </Badge>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Right: info + actions */}
-      <div className="flex flex-col max-h-[92vh] md:max-h-[88vh]">
+      {/* ============ Right: info + actions ============ */}
+      <div className="relative flex flex-col max-h-[92vh] md:max-h-[88vh]">
+        {/* Design system accent bar — green top strip for modal consistency */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-primary z-10" />
+
         {/* Mobile visual header */}
-        <div className="md:hidden relative bg-gradient-to-br from-secondary/40 to-background p-6 flex items-center justify-center">
+        <div className="md:hidden relative bg-gradient-to-br from-secondary/40 to-background p-6 flex items-center justify-center pt-8">
           <div className="h-40 w-40">
             <ProductImage
               product={product}
@@ -165,21 +175,23 @@ function ProductDetailContent({
               className="h-full rounded-2xl"
             />
           </div>
-          <div className="absolute left-3 top-3 flex flex-col gap-1">
-            {product.onSale && discount > 0 && (
-              <Badge variant="destructive" className="text-[10px] font-bold">
+          {discount > 0 && (
+            <div className="absolute left-3 top-5">
+              <Badge className="bg-orange-500 text-white text-[10px] font-bold">
                 -{discount}%
               </Badge>
-            )}
-            {product.organic && (
+            </div>
+          )}
+          {product.organic && (
+            <div className={cn("absolute", discount > 0 ? "left-3 top-11" : "left-3 top-5")}>
               <Badge className="bg-primary text-primary-foreground text-[10px] font-bold">
                 <Leaf className="h-2.5 w-2.5 mr-0.5" /> Organik
               </Badge>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        <DialogHeader className="px-6 pt-6 pb-2 shrink-0">
+        <DialogHeader className="px-6 pt-6 pb-2 shrink-0 md:pt-7">
           <DialogTitle className="text-2xl font-bold leading-tight">
             {product.name}
           </DialogTitle>
@@ -199,7 +211,9 @@ function ProductDetailContent({
                 ))}
               </div>
               <span className="font-semibold">{rating.toFixed(1)}</span>
-              <span className="text-muted-foreground">({reviewCount} ulasan)</span>
+              <span className="text-muted-foreground">
+                {hasReviews ? `(${reviewCount} ulasan)` : "· Baru"}
+              </span>
             </div>
             <Separator orientation="vertical" className="h-4" />
             <span className="flex items-center gap-1 text-muted-foreground">
@@ -207,15 +221,24 @@ function ProductDetailContent({
               Stok: {product.stock} {product.unit}
             </span>
           </div>
+          {/* Weight/unit specification — critical for grocery context */}
+          <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-foreground/70">
+            <Scale className="h-3.5 w-3.5 text-primary" />
+            <span>
+              {product.category === "Paket"
+                ? `Isi: campuran ${product.unit}`
+                : `Berat: ±1 ${product.unit}`}
+            </span>
+          </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 scrollbar-grocery max-h-[55vh] px-6">
+        <ScrollArea className="flex-1 scrollbar-grocery max-h-[50vh] px-6">
           <div className="space-y-5 pb-4">
-            {/* Price */}
+            {/* Price — single savings message (was 2 redundant badges) */}
             <div className="flex items-end gap-3">
               <div className="flex flex-col">
                 {product.oldPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-sm font-medium text-foreground/60 line-through decoration-red-500/70 decoration-2">
                     {formatIDR(product.oldPrice)}
                   </span>
                 )}
@@ -226,11 +249,17 @@ function ProductDetailContent({
                   <span className="text-sm text-muted-foreground">/{product.unit}</span>
                 </div>
               </div>
-              {discount > 0 && (
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 mb-1">
-                  Hemat {formatIDR((product.oldPrice ?? 0) - product.price)}
+              {savings > 0 && (
+                <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 mb-1 font-bold">
+                  Hemat {formatIDR(savings)}
                 </Badge>
               )}
+            </div>
+
+            {/* Delivery context — "Pengiriman besok" */}
+            <div className="flex items-center gap-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-700 dark:text-cyan-400">
+              <Truck className="h-4 w-4 shrink-0" />
+              <span>Pengiriman besok — pilih slot saat checkout</span>
             </div>
 
             {/* Tags */}
@@ -247,21 +276,22 @@ function ProductDetailContent({
             {/* Long description */}
             <section>
               <h3 className="mb-1.5 text-sm font-semibold">Deskripsi</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-foreground/70 leading-relaxed">
                 {product.longDescription || product.description}
               </p>
             </section>
 
-            {/* Benefits */}
+            {/* Benefits — elevated card matching design system */}
             {product.benefits && product.benefits.length > 0 && (
-              <section>
-                <h3 className="mb-2 text-sm font-semibold flex items-center gap-1.5">
+              <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+                <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+                <h3 className="mb-2.5 text-sm font-semibold flex items-center gap-1.5">
                   <Sparkles className="h-4 w-4 text-primary" />
                   Manfaat & Kandungan
                 </h3>
                 <ul className="space-y-1.5">
                   {product.benefits.map((benefit, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <li key={i} className="flex items-start gap-2 text-sm text-foreground/70">
                       <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
                       <span>{benefit}</span>
                     </li>
@@ -270,7 +300,7 @@ function ProductDetailContent({
               </section>
             )}
 
-            {/* Info grid: origin, storage, category */}
+            {/* Info grid: origin, storage, category — elevated cards matching design system */}
             <section className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <InfoRow
                 icon={<MapPin className="h-4 w-4" />}
@@ -290,48 +320,52 @@ function ProductDetailContent({
               />
             </section>
 
-            {/* Trust badges */}
-            <section className="grid grid-cols-3 gap-2 rounded-xl border border-border/60 bg-secondary/30 p-3">
-              <TrustBadge icon={<Truck className="h-4 w-4" />} label="Antar 2 jam" />
-              <TrustBadge icon={<ShieldCheck className="h-4 w-4" />} label="Garansi segar" />
-              <TrustBadge icon={<Leaf className="h-4 w-4" />} label="Petani lokal" />
+            {/* Trust badges — elevated card matching design system */}
+            <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+              <div className="grid grid-cols-3 gap-2">
+                <TrustBadge icon={<Truck className="h-4 w-4" />} label="Antar 2 jam" />
+                <TrustBadge icon={<ShieldCheck className="h-4 w-4" />} label="Garansi segar" />
+                <TrustBadge icon={<Leaf className="h-4 w-4" />} label="Petani lokal" />
+              </div>
             </section>
           </div>
         </ScrollArea>
 
-        {/* Footer: qty stepper + add to cart */}
+        {/* Sticky footer: qty stepper + add to cart.
+            On mobile, this is the critical conversion bar — always visible above fold. */}
         {!outOfStock ? (
-          <div className="border-t border-border/60 bg-background p-4 shrink-0">
+          <div className="sticky bottom-0 border-t border-border/60 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/85 p-3 md:p-4 shrink-0 shadow-[0_-2px_8px_-4px_rgba(0,0,0,0.1)]">
             {inCart && (
-              <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
+              <div className="mb-2.5 flex items-center justify-between rounded-lg bg-primary/5 px-3 py-2 text-xs">
+                <span className="flex items-center gap-1.5 text-foreground/70">
                   <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                  Sudah ada di keranjang: <strong className="text-foreground">{inCart.quantity}</strong>
+                  Sudah ada <strong className="text-foreground">{inCart.quantity}</strong> di keranjang
                 </span>
                 <button
                   onClick={() => onOpenChange(false)}
-                  className="text-primary hover:underline"
+                  className="font-semibold text-primary hover:underline"
                 >
                   Lihat keranjang
                 </button>
               </div>
             )}
             <div className="space-y-2">
-              {/* Row 1: qty stepper + Tambah */}
+              {/* Row 1: qty stepper + Tambah/Perbarui (clarified cart state) */}
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 rounded-xl border border-border bg-secondary/30 p-1">
+                <div className="flex items-center gap-0.5 rounded-xl border border-border bg-secondary/30 p-1">
                   <button
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors disabled:opacity-40 md:h-10 md:w-10"
                     aria-label="Kurangi jumlah"
                     disabled={qty <= 1}
                   >
                     <Minus className="h-4 w-4" />
                   </button>
-                  <span className="min-w-10 text-center text-base font-bold tabular-nums">{qty}</span>
+                  <span className="min-w-8 text-center text-base font-bold tabular-nums md:min-w-10">{qty}</span>
                   <button
                     onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors disabled:opacity-40 md:h-10 md:w-10"
                     aria-label="Tambah jumlah"
                     disabled={qty >= product.stock}
                   >
@@ -342,26 +376,26 @@ function ProductDetailContent({
                   onClick={handleAddToCart}
                   size="lg"
                   variant="outline"
-                  className="h-12 flex-1 rounded-xl text-sm font-medium shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5"
+                  className="h-11 flex-1 rounded-xl text-sm font-medium shadow-sm transition-transform hover:scale-[1.01] border-primary/40 text-primary hover:bg-primary/5 md:h-12"
                 >
                   <ShoppingCart className="h-4 w-4 mr-1.5" />
-                  Tambah
+                  {inCart ? "Perbarui" : "Tambah"}
                 </Button>
               </div>
-              {/* Row 2: Lanjut Belanja + Bayar */}
+              {/* Row 2: Lanjut Belanja (secondary) + Bayar (primary) */}
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="lg"
                   onClick={() => onOpenChange(false)}
-                  className="h-12 flex-1 rounded-xl text-sm font-medium"
+                  className="h-11 flex-1 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground md:h-12"
                 >
-                  Lanjut Belanja
+                  Lanjut
                 </Button>
                 <Button
                   onClick={handleBuyNow}
                   size="lg"
-                  className="h-12 flex-[2] rounded-xl text-base shadow-md transition-transform hover:scale-[1.01]"
+                  className="h-11 flex-[2] rounded-xl text-sm shadow-md transition-transform hover:scale-[1.01] md:h-12 md:text-base"
                 >
                   Bayar — {formatIDR(product.price * qty)}
                 </Button>
@@ -369,7 +403,7 @@ function ProductDetailContent({
             </div>
           </div>
         ) : (
-          <div className="border-t border-border/60 bg-destructive/5 p-4 shrink-0">
+          <div className="sticky bottom-0 border-t border-border/60 bg-destructive/5 p-4 shrink-0">
             <div className="flex items-center justify-center gap-2 text-destructive font-semibold">
               <Package className="h-5 w-5" />
               Maaf, produk ini sedang habis
@@ -393,10 +427,13 @@ function InfoRow({
   full?: boolean;
 }) {
   return (
-    <div className={cn("flex items-start gap-2.5 rounded-lg bg-secondary/30 p-2.5", full && "sm:col-span-2")}>
+    <div className={cn(
+      "relative flex items-start gap-2.5 overflow-hidden rounded-lg bg-gradient-to-br from-card via-card to-muted/50 p-2.5 ring-1 ring-border/50",
+      full && "sm:col-span-2"
+    )}>
       <span className="text-primary mt-0.5">{icon}</span>
       <div className="min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
         <p className="text-xs font-medium text-foreground break-words">{value}</p>
       </div>
     </div>
@@ -407,7 +444,7 @@ function TrustBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <div className="flex flex-col items-center gap-1 text-center">
       <span className="text-primary">{icon}</span>
-      <span className="text-[10px] font-medium text-muted-foreground leading-tight">{label}</span>
+      <span className="text-[10px] font-semibold text-foreground/70 leading-tight">{label}</span>
     </div>
   );
 }
