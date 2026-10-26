@@ -103,7 +103,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
         }}
         className="flex flex-1 cursor-pointer flex-col gap-1 px-2 py-2.5"
       >
-        <h3 className="line-clamp-1 text-[13px] font-semibold leading-tight tracking-tight text-foreground">{product.name}</h3>
+        <h3 className="line-clamp-2 text-[13px] font-semibold leading-tight tracking-tight text-foreground min-h-[2.4em]">{product.name}</h3>
 
         {/* Rating — ultra compact, single line */}
         {rating > 0 && (

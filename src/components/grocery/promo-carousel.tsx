@@ -72,7 +72,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
 
               {/* Body — compact */}
               <div className="flex flex-col gap-1 p-2.5">
-                <h3 className="line-clamp-1 text-xs font-semibold leading-tight tracking-tight">
+                <h3 className="line-clamp-2 text-xs font-semibold leading-tight tracking-tight min-h-[2.4em]">
                   {product.name}
                 </h3>
                 {rating > 0 && (

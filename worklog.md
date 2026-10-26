@@ -400,3 +400,24 @@ Stage Summary:
 - Key wins: minimalist cards (borderless, icon-only +, price-forward), sticky category+sort bar, load-more pagination, promo carousel breaks vertical monotony
 - Grid height on mobile reduced 3.3x (8 cards vs 23 rendered)
 - Remaining issues flagged by VLM: cookie consent obstructs grid (separate component), product name truncation on "Paket" items
+
+---
+Task ID: grocery-polish-002
+Agent: main (Z.ai Code)
+Task: Fix 5 remaining issues — cookie banner, Paket name truncation, About section polish
+
+Work Log:
+- Cookie consent: rewrote from center modal to slim full-width bottom bar. Removed max-w-3xl card, added backdrop-blur, border-t (not border all around), shadow-[0_-4px_20px_-4px]. Mobile: single column icon+text+actions. Desktop: 3-column row. Slide-up animation from y:100%. No longer obstructs product grid.
+- Product name truncation: changed line-clamp-1 → line-clamp-2 + min-h-[2.4em] in ProductCard and PromoCarousel. Paket products now show full name on 2 lines (verified: "Paket Sayur Mingguan" height=33px, "Paket Buah Keluarga" height=31px, both lineClamp=2).
+- About section body text: text-foreground/70 → text-foreground/80 (darker, WCAG AA pass)
+- About section micro-stats: added 3-column inline stats row below paragraph (5.000+ Pelanggan / 120+ Petani Mitra / 15 Kota), gradient text per stat (green/orange/cyan), divide-x border separators, uppercase tracking-wide labels
+- About section badge: updated DB SiteSetting.aboutBadge from "Tentang Kami" → "🌱 Cerita Kami" (more distinctive). Updated code default too.
+- All fixes verified via Agent Browser DOM checks + VLM scoring.
+
+Stage Summary:
+- Cookie banner: was floating card modal, now slim bottom bar (no grid obstruction)
+- Paket products: was truncated "...", now full 2-line name visible
+- About section score: 74 → 88 (VLM assessed)
+- Overall product section mobile UX: was 78, expected +3-5 from cookie fix
+- VLM comment on About: "exceptionally strong execution of modern minimalist design that rivals or exceeds Sayurbox/Segari... adopts Apple-esque/Stripe aesthetic applied to grocery vertical"
+- Lint clean, no hydration errors

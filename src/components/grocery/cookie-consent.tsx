@@ -2,16 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cookie } from "lucide-react";
+import { Cookie, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // ============================================================
-// CookieConsent — GDPR-style cookie consent banner.
+// CookieConsent — slim bottom-sheet banner (GDPR-style).
 // ============================================================
-// Shows on first visit. User can Accept or Decline. Choice persists
-// in localStorage (key: cookie-consent-v1). Once decided, banner
-// stays hidden until key changes (e.g., policy update).
+// Shows on first visit only. User can Accept or Decline. Choice
+// persists in localStorage (key: cookie-consent-v1). Once decided,
+// banner stays hidden until key changes (e.g., policy update).
 //
+// Design: full-width slim bar anchored to bottom, slides up from
+// below viewport. Does NOT obstruct product grid like a modal would.
 // Mount once in root layout. No props required.
 // ============================================================
 
@@ -38,8 +40,6 @@ export function CookieConsent() {
   const [mounted, setMounted] = useState(false);
 
   // Sync with localStorage after mount — legitimate external system sync.
-  // This is the standard SSR pattern for reading client-only storage
-  // without causing hydration mismatch.
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const stored = readConsent();
@@ -48,86 +48,79 @@ export function CookieConsent() {
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  const handleAccept = () => {
-    setChoice("accepted");
+  const persist = (value: ConsentChoice) => {
+    setChoice(value);
     try {
-      localStorage.setItem(STORAGE_KEY, "accepted");
-    } catch {
-      // ignore storage errors
-    }
-  };
-
-  const handleDecline = () => {
-    setChoice("declined");
-    try {
-      localStorage.setItem(STORAGE_KEY, "declined");
+      localStorage.setItem(STORAGE_KEY, value);
     } catch {
       // ignore storage errors
     }
   };
 
   // Show banner only after mount & if no choice made yet (null = first visit).
-  // Before mount, render nothing to avoid hydration flash.
   const showBanner = mounted && choice === null;
 
   return (
     <AnimatePresence>
       {showBanner && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-0 left-0 right-0 z-50"
           role="dialog"
           aria-label="Pemberitahuan cookie"
           aria-live="polite"
         >
-          <div className="mx-auto max-w-3xl rounded-2xl border border-border/60 bg-card p-4 shadow-2xl md:p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-              {/* Icon */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Cookie className="h-5 w-5" />
-              </div>
+          {/* Full-width slim bar — no max-w constraint, no card shadow ring.
+              Mobile: single column. Desktop: 3-column row (icon | text | actions). */}
+          <div className="border-t border-border/60 bg-card/95 backdrop-blur-lg supports-[backdrop-filter]:bg-card/85 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
+            <div className="mx-auto max-w-7xl px-4 py-3 md:py-3.5">
+              <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:gap-4">
+                {/* Icon + text — inline on mobile, row on desktop */}
+                <div className="flex items-start gap-2.5 md:flex-1 md:min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary md:h-9 md:w-9">
+                    <Cookie className="h-4 w-4 md:h-4.5 md:w-4.5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[13px] font-semibold leading-tight">
+                      Kami menggunakan cookie untuk pengalaman terbaik
+                    </h3>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground leading-snug md:text-xs">
+                      Simpan keranjang, wishlist & preferensi.{" "}
+                      <a
+                        href="#faq"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        Pelajari lebih lanjut
+                      </a>
+                    </p>
+                  </div>
+                </div>
 
-              {/* Text */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold">Kami menggunakan cookie 🍪</h3>
-                <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
-                  Cookie membantu kami memberikan pengalaman terbaik — menyimpan keranjang,
-                  wishlist, dan preferensi. Dengan lanjut menggunakan situs ini, kamu setuju
-                  dengan{" "}
-                  <a
-                    href="#faq"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className="font-medium text-primary hover:underline"
+                {/* Actions — row on mobile, shrink on desktop */}
+                <div className="flex shrink-0 items-center gap-2 md:gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => persist("declined")}
+                    className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:text-foreground"
                   >
-                    kebijakan privasi
-                  </a>{" "}
-                  kami.
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDecline}
-                  className="h-9 rounded-full text-xs"
-                >
-                  Tolak
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleAccept}
-                  className="h-9 rounded-full text-xs shadow-sm"
-                >
-                  Setuju
-                </Button>
+                    Tolak
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => persist("accepted")}
+                    className="h-8 rounded-full px-4 text-xs shadow-sm"
+                  >
+                    Setuju
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
