@@ -79,29 +79,32 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
   return (
     <section
       id="tentang"
-      className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-secondary/30 via-background to-background"
+      className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-secondary/30 via-background to-background relative overflow-hidden"
     >
-      <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
+      {/* Subtle noise texture overlay */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-20 md:py-28">
         {/* Heading */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto max-w-3xl text-center"
         >
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <Sprout className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-semibold text-primary backdrop-blur-sm shadow-sm">
+            <Sprout className="h-4 w-4" />
             {c.aboutBadge ?? "Tentang Kami"}
           </span>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance md:text-5xl">
-            {c.aboutTitleA ?? "Dari Kebun Petani,"}{" "}
-            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
+          <h2 className="mt-6 text-3xl font-extrabold leading-[1.15] tracking-tight text-balance md:text-5xl">
+            <span className="font-bold text-muted-foreground">{c.aboutTitleA ?? "Dari Kebun Petani,"}</span>{" "}
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-extrabold">
               {c.aboutTitleHighlight ?? "Langsung ke Meja Makan"}
             </span>{" "}
-            {c.aboutTitleB ?? "Keluargamu"}
+            <span className="font-bold">{c.aboutTitleB ?? "Keluargamu"}</span>
           </h2>
-          <p className="mt-4 text-base text-muted-foreground md:text-lg text-balance">
+          <p className="mt-5 text-base text-foreground/70 md:text-lg leading-relaxed text-balance max-w-2xl mx-auto">
             {c.aboutSubtitle ?? "SayurLogi lahir dari kepedulian pada petani Indonesia. Kami menghubungkan petani lokal langsung dengan konsumen — tanpa perantara, tanpa bahan kimia, dengan harga yang adil untuk semua pihak."}
           </p>
         </motion.div>
@@ -211,7 +214,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="flex flex-col items-center gap-3 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
             >
               {/* Icon in colored circle — replaces emoji */}
               <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.color}`}>
@@ -244,7 +247,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
+                className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
               >
                 {/* Bigger icon circle (h-14 w-14) + ring border for depth */}
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${value.color} ring-1 ring-inset ring-current/10`}>
