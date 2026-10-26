@@ -6,6 +6,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
 import { ProductImage } from "./product-image";
+import { WishlistButton } from "./wishlist-button";
 
 interface PromoCarouselProps {
   products: Product[];
@@ -75,6 +76,8 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
                     -{discount}%
                   </span>
                 )}
+                {/* Wishlist button — consistent with main grid cards */}
+                <WishlistButton product={product} size="sm" variant="overlay" />
                 <ProductImage
                   product={product}
                   emojiClassName="text-5xl transition-transform duration-500 group-hover:scale-110"

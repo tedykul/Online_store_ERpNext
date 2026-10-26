@@ -4,13 +4,20 @@ import { useEffect, useState, useCallback } from "react";
 import { Download, X, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/lib/store/cart";
 
 // ============================================================
 // PWAInstallPrompt — shows install banner when eligible.
 // ============================================================
+// Trigger strategy: only show AFTER user has added 3+ items to
+// cart (engagement signal). Showing immediately on page load
+// interrupts shopping flow and hurts conversion. Waiting for
+// cart engagement ensures the user has shown real intent before
+// we ask them to install the app.
 
 const DISMISS_KEY = "pwa-install-dismissed";
 const DISMISS_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+const MIN_CART_ITEMS_FOR_PROMPT = 3;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -22,6 +29,16 @@ export function PWAInstallPrompt() {
   const [showBanner, setShowBanner] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [hasEngaged, setHasEngaged] = useState(false);
+
+  // Track cart item count — only show install prompt after user adds 3+ items
+  const totalItems = useCartStore((s) => s.getTotalItems());
+
+  useEffect(() => {
+    if (totalItems >= MIN_CART_ITEMS_FOR_PROMPT) {
+      setHasEngaged(true);
+    }
+  }, [totalItems]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -43,25 +60,16 @@ export function PWAInstallPrompt() {
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-
-      const dismissed = localStorage.getItem(DISMISS_KEY);
-      if (dismissed) {
-        const dismissedTime = parseInt(dismissed, 10);
-        if (!isNaN(dismissedTime) && Date.now() - dismissedTime < DISMISS_EXPIRY_MS) {
-          return;
-        }
-      }
-
-      setTimeout(() => setShowBanner(true), 2000);
+      // Don't show immediately — wait for cart engagement (hasEngaged flag)
     };
 
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, [isStandalone]);
 
+  // Show banner only when: user has engaged (3+ cart items) + not dismissed + not standalone
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!isIOS || isStandalone) return;
+    if (!hasEngaged || isStandalone) return;
 
     const dismissed = localStorage.getItem(DISMISS_KEY);
     if (dismissed) {
@@ -71,12 +79,17 @@ export function PWAInstallPrompt() {
       }
     }
 
-    const timer = setTimeout(() => setShowBanner(true), 3000);
+    // Small delay after engagement threshold reached (feels less aggressive)
+    const timer = setTimeout(() => setShowBanner(true), 1500);
     return () => clearTimeout(timer);
-  }, [isIOS, isStandalone]);
+  }, [hasEngaged, isStandalone]);
 
   const handleInstall = useCallback(async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // iOS or unsupported — just dismiss
+      handleDismiss();
+      return;
+    }
 
     try {
       await deferredPrompt.prompt();
@@ -172,3 +185,4 @@ export function PWAInstallPrompt() {
     </AnimatePresence>
   );
 }
+
