@@ -180,7 +180,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm"
+              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <span className="text-3xl" aria-hidden="true">{stat.emoji}</span>
               <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
@@ -198,7 +198,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="mb-8 text-center text-2xl font-bold md:text-3xl"
+            className="mb-8 text-center text-2xl font-bold tracking-tight md:text-3xl"
           >
             Nilai yang Kami Pegang
           </motion.h3>
@@ -210,7 +210,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
+                className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
               >
                 <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${value.color}`}>
                   <value.icon className="h-6 w-6" />

@@ -141,7 +141,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: 0.15 + i * 0.05 }}
-              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm"
+              className="flex flex-col items-center gap-2 rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <stat.icon className="h-5 w-5" />
@@ -210,7 +210,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.08, 0.4) }}
-      className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/40"
+      className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/30"
     >
       {/* Quote icon */}
       <Quote className="h-6 w-6 text-primary/30" />
