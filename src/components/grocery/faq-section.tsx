@@ -7,45 +7,85 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle, MessageCircleQuestion } from "lucide-react";
+import {
+  HelpCircle,
+  MessageCircleQuestion,
+  ShoppingBag,
+  Truck,
+  CreditCard,
+  Leaf,
+  RefreshCw,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * Section "FAQ" — accordion of frequently asked questions.
  * Anchor target: #faq (with scroll-mt-24 for sticky header offset).
+ *
+ * FAQs are categorized into 4 groups with distinct icon + accent color,
+ * applied as a left accent bar on each accordion item for scanability.
  */
-const FAQ_ITEMS: { q: string; a: string }[] = [
+
+type FaqCategory = "pemesanan" | "pengiriman" | "pembayaran" | "produk";
+
+interface FaqItem {
+  q: string;
+  a: string;
+  category: FaqCategory;
+}
+
+const CATEGORY_META: Record<
+  FaqCategory,
+  { icon: LucideIcon; accent: string; label: string }
+> = {
+  pemesanan: { icon: ShoppingBag, accent: "bg-primary", label: "Pemesanan" },
+  pengiriman: { icon: Truck, accent: "bg-cyan-500", label: "Pengiriman" },
+  pembayaran: { icon: CreditCard, accent: "bg-amber-500", label: "Pembayaran" },
+  produk: { icon: Leaf, accent: "bg-orange-500", label: "Produk" },
+};
+
+const FAQ_ITEMS: FaqItem[] = [
   {
     q: "Bagaimana cara memesan di SayurLogi?",
     a: "Pilih produk yang kamu inginkan, klik 'Tambah' untuk masuk keranjang. Setelah selesai, klik ikon keranjang lalu 'Checkout Sekarang'. Isi data pengiriman, pilih metode pembayaran, lalu 'Buat Pesanan'. Pesanan akan diproses dan dikirim sesuai jadwal pengiriman yang dipilih.",
-  },
-  {
-    q: "Berapa lama waktu pengiriman?",
-    a: "Kami mengantarkan pesanan dalam waktu 2-4 jam untuk wilayah kota metropolitan. Untuk pengiriman di luar kota, estimasi 1-2 hari kerja. Kamu akan menerima notifikasi via WhatsApp/email ketika pesanan sedang dalam perjalanan.",
+    category: "pemesanan",
   },
   {
     q: "Apakah ada minimum order?",
     a: "Tidak ada minimum order! Tapi untuk mendapatkan gratis ongkir, belanja minimal Rp50.000. Di bawah nominal tersebut, ongkir flat Rp9.000 berlaku untuk wilayah kota.",
+    category: "pemesanan",
   },
   {
-    q: "Metode pembayaran apa saja yang tersedia?",
-    a: "Kami menerima 3 metode pembayaran: (1) COD — bayar tunai di tempat saat pesanan tiba, (2) Transfer bank (BCA, Mandiri, BNI, BRI), dan (3) E-Wallet (GoPay, OVO, DANA, ShopeePay). Semua transaksi aman dan terenkripsi.",
-  },
-  {
-    q: "Apakah sayuran & buah benar-benar segar?",
-    a: "Ya! Semua produk dipetik langsung dari kebun petani mitra pada pagi hari, lalu dikirim ke gudang kami untuk quality check, dan diteruskan ke konsumen di hari yang sama. Rantai pasok pendek = kesegaran maksimal. Jika kamu menerima produk yang tidak segar, hubungi kami dalam 24 jam untuk penggantian gratis.",
-  },
-  {
-    q: "Apakah semua produk organik?",
-    a: "Tidak semua, tapi kami menandai produk organik dengan badge 'Organik' hijau di kartu produk. Produk organik ditanam tanpa pestisida sintetis dan disertasi dari lembaga organik terpercaya. Produk non-organik masih aman dikonsumsi karena ditanam dengan praktik pertanian yang baik (GAP).",
-  },
-  {
-    q: "Bagaimana kebijakan refund dan retur?",
-    a: "Jika produk yang kamu terima rusak, busuk, atau tidak sesuai pesanan, hubungi customer service dalam 24 jam dengan foto bukti. Kami akan menggantinya gratis atau refund 100%. Untuk perubahan pikiran, refund berlaku untuk produk kemasan yang belum dibuka dalam 3 hari.",
+    q: "Berapa lama waktu pengiriman?",
+    a: "Kami mengantarkan pesanan dalam waktu 2-4 jam untuk wilayah kota metropolitan. Untuk pengiriman di luar kota, estimasi 1-2 hari kerja. Kamu akan menerima notifikasi via WhatsApp/email ketika pesanan sedang dalam perjalanan.",
+    category: "pengiriman",
   },
   {
     q: "Bisakah saya jadwalkan pengiriman untuk hari tertentu?",
     a: "Ya! Saat checkout, pilih tanggal & slot waktu pengiriman yang kamu inginkan (pagi 09-12, siang 12-15, sore 15-18, atau malam 18-21). Cocok untuk yang ingin pesan sayur untuk masak akhir pekan atau kebutuhan kantin harian.",
+    category: "pengiriman",
+  },
+  {
+    q: "Metode pembayaran apa saja yang tersedia?",
+    a: "Kami menerima 3 metode pembayaran: (1) COD — bayar tunai di tempat saat pesanan tiba, (2) Transfer bank (BCA, Mandiri, BNI, BRI), dan (3) E-Wallet (GoPay, OVO, DANA, ShopeePay). Semua transaksi aman dan terenkripsi.",
+    category: "pembayaran",
+  },
+  {
+    q: "Apakah sayuran & buah benar-benar segar?",
+    a: "Ya! Semua produk dipetik langsung dari kebun petani mitra pada pagi hari, lalu dikirim ke gudang kami untuk quality check, dan diteruskan ke konsumen di hari yang sama. Rantai pasok pendek = kesegaran maksimal. Jika kamu menerima produk yang tidak segar, hubungi kami dalam 24 jam untuk penggantian gratis.",
+    category: "produk",
+  },
+  {
+    q: "Apakah semua produk organik?",
+    a: "Tidak semua, tapi kami menandai produk organik dengan badge 'Organik' hijau di kartu produk. Produk organik ditanam tanpa pestisida sintetis dan disertasi dari lembaga organik terpercaya. Produk non-organik masih aman dikonsumsi karena ditanam dengan praktik pertanian yang baik (GAP).",
+    category: "produk",
+  },
+  {
+    q: "Bagaimana kebijakan refund dan retur?",
+    a: "Jika produk yang kamu terima rusak, busuk, atau tidak sesuai pesanan, hubungi customer service dalam 24 jam dengan foto bukti. Kami akan menggantinya gratis atau refund 100%. Untuk perubahan pikiran, refund berlaku untuk produk kemasan yang belum dibuka dalam 3 hari.",
+    category: "produk",
   },
 ];
 
@@ -55,8 +95,12 @@ interface FaqSectionProps {
 }
 
 export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
-  // Use DB FAQs if provided and non-empty, else hardcoded defaults
-  const items = dbFaqs && dbFaqs.length > 0 ? dbFaqs : FAQ_ITEMS;
+  // Use DB FAQs if provided and non-empty, else hardcoded defaults.
+  // DB FAQs don't have category → default to "pemesanan" so they still render.
+  const items: FaqItem[] =
+    dbFaqs && dbFaqs.length > 0
+      ? dbFaqs.map((f) => ({ q: f.q, a: f.a, category: "pemesanan" as FaqCategory }))
+      : FAQ_ITEMS;
 
   const handleContactClick = () => {
     const el = document.getElementById("kontak");
@@ -87,9 +131,28 @@ export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
               Sering Ditanyakan
             </span>
           </h2>
-          <p className="mt-4 text-base text-muted-foreground md:text-lg text-balance">
+          <p className="mt-4 text-base text-foreground/80 md:text-lg text-balance">
             Belum nemu jawabannya? Tim kami siap bantu di section Kontak di bawah.
           </p>
+
+          {/* Category legend — quick visual key for the 4 categories */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            className="mt-6 flex flex-wrap items-center justify-center gap-2"
+          >
+            {Object.values(CATEGORY_META).map((cat) => (
+              <span
+                key={cat.label}
+                className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground ring-1 ring-border/50"
+              >
+                <span className={cn("h-1.5 w-1.5 rounded-full", cat.accent)} />
+                {cat.label}
+              </span>
+            ))}
+          </motion.div>
         </motion.div>
 
         {/* Accordion */}
@@ -100,40 +163,68 @@ export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mt-10"
         >
-          <Accordion type="single" collapsible className="space-y-3">
-            {items.map((item, i) => (
-              <AccordionItem
-                key={item.id || i}
-                value={`item-${i}`}
-                className="overflow-hidden rounded-xl border border-border/60 bg-card px-5 shadow-sm transition-shadow data-[state=open]:shadow-md"
-              >
-                <AccordionTrigger className="py-5 text-left text-base font-semibold hover:no-underline">
-                  <span className="pr-2">{item.q}</span>
-                </AccordionTrigger>
-                <AccordionContent className="pb-5 pt-0 text-sm text-muted-foreground leading-relaxed">
-                  {item.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+          <Accordion type="single" collapsible className="space-y-2.5">
+            {items.map((item, i) => {
+              const cat = CATEGORY_META[item.category];
+              const CatIcon = cat.icon;
+              return (
+                <AccordionItem
+                  key={i}
+                  value={`item-${i}`}
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 px-5 ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all duration-300 data-[state=open]:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] data-[state=open]:ring-primary/30"
+                >
+                  {/* Solid colored left accent — category color, full height */}
+                  <div className={cn("absolute inset-y-0 left-0 w-1", cat.accent)} />
+
+                  <AccordionTrigger className="py-4 pl-3 text-left text-[15px] font-semibold hover:no-underline items-center gap-3">
+                    {/* Category icon — colored, matches accent bar */}
+                    <span
+                      className={cn(
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
+                        item.category === "pemesanan" && "bg-primary/10 text-primary ring-primary/10",
+                        item.category === "pengiriman" && "bg-cyan-500/10 text-cyan-600 ring-cyan-500/10",
+                        item.category === "pembayaran" && "bg-amber-500/10 text-amber-600 ring-amber-500/10",
+                        item.category === "produk" && "bg-orange-500/10 text-orange-600 ring-orange-500/10"
+                      )}
+                    >
+                      <CatIcon className="h-4 w-4" />
+                    </span>
+                    <span className="flex-1 pr-2 leading-snug">{item.q}</span>
+                  </AccordionTrigger>
+
+                  <AccordionContent className="pb-5 pl-12 pr-0 pt-0 text-sm text-foreground/80 leading-relaxed">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </motion.div>
 
-        {/* CTA to contact */}
+        {/* CTA card — solid elevated, matches design system (no dashed border) */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-6 text-center"
+          className="group relative mt-10 flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-6 text-center ring-1 ring-primary/20 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]"
         >
-          <MessageCircleQuestion className="h-8 w-8 text-primary" />
+          {/* Solid accent bar at top — primary green for emphasis */}
+          <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
+            <MessageCircleQuestion className="h-6 w-6" />
+          </div>
           <div>
             <h3 className="text-lg font-semibold">Masih ada pertanyaan?</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tim customer service kami siap membantu 7 hari seminggu (08.00-21.00 WIB)
+            <p className="mt-1 text-sm text-foreground/70 max-w-sm">
+              Tim customer service kami siap membantu 7 hari seminggu (08.00–21.00 WIB)
             </p>
           </div>
-          <Button onClick={handleContactClick} className="mt-2 rounded-full px-6">
+          <Button
+            onClick={handleContactClick}
+            className="mt-2 rounded-full px-6 shadow-md transition-transform hover:scale-105"
+          >
             Hubungi Kami
           </Button>
         </motion.div>

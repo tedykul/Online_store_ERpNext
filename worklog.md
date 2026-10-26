@@ -470,3 +470,34 @@ Stage Summary:
 - VLM verdict: "This section now looks like it belongs in a funded, scalable startup application."
 - Design system now fully consistent across ALL card types on the page (hero trust badges, About stats, About values, testimonial stats, testimonial cards)
 - Lint clean
+
+---
+Task ID: grocery-faq-005
+Agent: main (Z.ai Code)
+Task: Redesign FAQ section — card depth consistency + categorization + CTA fix
+
+Work Log:
+- Created FaqCategory type with 4 categories: pemesanan, pengiriman, pembayaran, produk
+- Created CATEGORY_META mapping: each category has icon (ShoppingBag/Truck/CreditCard/Leaf), accent color (primary/cyan-500/amber-500/orange-500), label
+- Reorganized 8 FAQ items into categories (2 pemesanan, 2 pengiriman, 1 pembayaran, 3 produk) — sorted by category for visual grouping
+- Applied card depth pattern to accordion items: gradient bg (from-card via-card to-muted/50), ring-1 ring-border/50, layered shadow, overflow-hidden rounded-2xl. Left accent bar (w-1 inset-y-0) colored by category instead of top bar (accordion items are wide, left bar more visible).
+- Added category icon in colored circle (8x8 h-8 w-8 rounded-lg with category bg/10 + ring) at left of AccordionTrigger. Icons: ShoppingBag/Truck/CreditCard/Leaf.
+- Added category legend below heading — 4 pill chips with colored dot + label, so users learn the color-coding before scanning items
+- Body text: text-muted-foreground → text-foreground/80 (consistent with About section)
+- Body text padding adjusted: pl-12 (aligns with icon + gap), pr-0 (was px-5)
+- CTA card completely redesigned: removed dashed border + pale mint bg, replaced with solid elevated card matching design system (gradient from-primary/10 via-primary/5 to-card, ring-1 ring-primary/20, layered shadow, solid bg-primary top accent bar). Added ring-1 ring-inset ring-primary/20 around MessageCircleQuestion icon.
+- Accordion trigger padding: py-5 → py-4 pl-3 (tighter, room for icon)
+- Accordion trigger text: text-base → text-[15px] (slightly smaller for mobile)
+- Accordion item spacing: space-y-3 → space-y-2.5 (slightly tighter)
+- data-[state=open] enhanced shadow + ring-primary/30 (open item gets more elevation)
+- DB fallback: DB FAQs default to "pemesanan" category (no DB schema change needed)
+
+Stage Summary:
+- FAQ section score: 70 → 92 (VLM assessed, +22 points)
+- Card design consistency: 58 → 95 (perfectly unified with design system)
+- Information architecture: 55 → 90 (categorized with legend + color-coded icons)
+- Mobile UX: 80 → 93 (large tap targets, clear hierarchy)
+- Modern aesthetic vs Sayurbox/Segari: 72 → 90 ("competitive with modern Indonesian grocery apps, soft UI feels current and premium")
+- VLM verdict: "Massive improvement. Shifts perception from basic template to polished, professional product. Information architecture is now a structured, navigable system."
+- Design system now extends to FAQ accordion (left accent bar variant for wide items vs top accent bar for square cards)
+- Lint clean
