@@ -2,7 +2,7 @@
 // SayurLogi Service Worker — PWA offline support + caching.
 // ============================================================
 
-const CACHE_VERSION = "v23";
+const CACHE_VERSION = "v24";
 const STATIC_CACHE = `sayurlogi-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `sayurlogi-page-${CACHE_VERSION}`;
 const API_CACHE = `sayurlogi-api-${CACHE_VERSION}`;
@@ -57,7 +57,7 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/products/")
   ) {
-    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
     return;
   }
 
