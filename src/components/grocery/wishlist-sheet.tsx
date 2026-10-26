@@ -76,7 +76,7 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
             </Button>
           </div>
         ) : (
-          <ScrollArea className="flex-1 scrollbar-grocery">
+          <ScrollArea className="flex-1 scrollbar-grocery max-h-[50vh]">
             <div className="flex flex-col gap-3 p-4">
               <AnimatePresence initial={false}>
                 {items.map((product) => {
@@ -163,7 +163,7 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
 
         {/* Footer */}
         {items.length > 0 && (
-          <SheetFooter className="border-t border-border/60 p-4">
+          <SheetFooter className="border-t border-border/60 p-4 shrink-0">
             <p className="mb-2 text-center text-xs text-muted-foreground">
               {items.length} produk tersimpan. Klik <Plus className="inline h-3 w-3" /> untuk pindahkan ke keranjang.
             </p>
