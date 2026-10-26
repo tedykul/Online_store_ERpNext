@@ -69,10 +69,10 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-          Menampilkan <span className="font-semibold text-foreground">{visibleProducts.length}</span> dari{" "}
-          <span className="font-semibold text-foreground">{products.length}</span> produk
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-foreground/80">
+          Menampilkan <span className="font-bold text-foreground">{visibleProducts.length}</span> dari{" "}
+          <span className="font-bold text-foreground">{products.length}</span> produk
         </span>
         {source && (
           <span

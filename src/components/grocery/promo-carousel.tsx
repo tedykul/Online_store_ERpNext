@@ -53,7 +53,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
               viewport={{ once: true, margin: "-30px" }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
               onClick={() => handleClick(product)}
-              className="group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl bg-card text-left transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5 hover:ring-1 hover:ring-primary/20 md:w-44"
+              className="group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 text-left ring-1 ring-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-all hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-12px_rgba(0,0,0,0.22)] hover:ring-primary/30 md:w-44"
               aria-label={`Lihat detail ${product.name}`}
             >
               {/* Image */}
@@ -98,7 +98,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
                       e.stopPropagation();
                       addItem(product, 1);
                     }}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm transition-all hover:scale-110 active:scale-95"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-all hover:scale-110 active:scale-95"
                     aria-label={`Tambah ${product.name} ke keranjang`}
                   >
                     <Plus className="h-3.5 w-3.5" />

@@ -100,7 +100,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-semibold text-primary backdrop-blur-sm shadow-sm">
             <Sprout className="h-4 w-4" />
-            {c.aboutBadge ?? "🌱 Cerita Kami"}
+            {c.aboutBadge ?? "Cerita Kami"}
           </span>
           <h2 className="mt-6 text-3xl font-extrabold leading-[1.15] tracking-tight text-balance md:text-5xl">
             <span className="font-bold text-muted-foreground">{c.aboutTitleA ?? "Dari Kebun Petani,"}</span>{" "}
@@ -109,40 +109,40 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             </span>{" "}
             <span className="font-bold">{c.aboutTitleB ?? "Keluargamu"}</span>
           </h2>
-          <p className="mt-5 text-base text-foreground/80 md:text-lg leading-relaxed text-balance max-w-2xl mx-auto">
+          <p className="mt-5 text-base text-foreground/80 md:text-lg leading-relaxed text-balance max-w-xl mx-auto">
             {c.aboutSubtitle ?? "SayurLogi lahir dari kepedulian pada petani Indonesia. Kami menghubungkan petani lokal langsung dengan konsumen — tanpa perantara, tanpa bahan kimia, dengan harga yang adil untuk semua pihak."}
           </p>
 
-          {/* Inline micro-stats — social proof right under the story pitch.
-              Compact 3-column grid that proves the claim with numbers. */}
+          {/* Inline micro-stats — unified green gradient (no rainbow chaos).
+              Larger labels with tighter tracking for readability. */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mx-auto mt-8 flex max-w-md items-center justify-center divide-x divide-border/60"
+            className="mx-auto mt-10 flex max-w-lg items-center justify-center divide-x divide-border/60"
           >
-            <div className="flex flex-1 flex-col items-center px-3">
+            <div className="flex flex-1 flex-col items-center px-4">
               <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl tabular-nums">
                 {c.aboutStat1Value ?? "5.000+"}
               </span>
-              <span className="mt-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="mt-1 text-xs font-semibold text-foreground/70 uppercase tracking-normal">
                 {c.aboutStat1Label ?? "Pelanggan"}
               </span>
             </div>
-            <div className="flex flex-1 flex-col items-center px-3">
-              <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl tabular-nums">
+            <div className="flex flex-1 flex-col items-center px-4">
+              <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl tabular-nums">
                 {c.aboutStat2Value ?? "120+"}
               </span>
-              <span className="mt-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="mt-1 text-xs font-semibold text-foreground/70 uppercase tracking-normal">
                 {c.aboutStat2Label ?? "Petani Mitra"}
               </span>
             </div>
-            <div className="flex flex-1 flex-col items-center px-3">
-              <span className="bg-gradient-to-r from-cyan-500 to-sky-500 bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl tabular-nums">
+            <div className="flex flex-1 flex-col items-center px-4">
+              <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl tabular-nums">
                 {c.aboutStat3Value ?? "15"}
               </span>
-              <span className="mt-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="mt-1 text-xs font-semibold text-foreground/70 uppercase tracking-normal">
                 {c.aboutStat3Label ?? "Kota"}
               </span>
             </div>
@@ -159,7 +159,10 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-bold tracking-tight">{c.aboutStoryH3 ?? "Misi Kami 🌱"}</h3>
+            <h3 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+              <Sprout className="h-6 w-6 text-primary" />
+              {c.aboutStoryH3 ?? "Misi Kami"}
+            </h3>
             <p className="text-muted-foreground leading-relaxed">
               {c.aboutStoryP1 ?? "Indonesia adalah negara agraris yang kaya, tapi banyak petani masih kesulitan menjual hasil panen dengan harga layak. Sementara itu, konsumen kota sulit mendapatkan sayur & buah benar-benar segar."}
             </p>
