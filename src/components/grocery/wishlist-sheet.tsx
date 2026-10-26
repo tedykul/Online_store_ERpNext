@@ -48,7 +48,7 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         {/* Header */}
         <SheetHeader className="border-b border-border/60 px-5 py-4">
-          <SheetTitle className="flex items-center gap-2">
+          <SheetTitle className="flex items-center gap-2 pr-8">
             <Heart className="h-5 w-5 text-rose-500" />
             Wishlist Favorit
             {items.length > 0 && (

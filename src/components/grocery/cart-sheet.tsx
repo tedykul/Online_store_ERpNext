@@ -187,12 +187,21 @@ export function CartSheet({ onCheckout }: CartSheetProps) {
                 <span className="text-primary">{formatIDR(grandTotal)}</span>
               </div>
             </div>
-            <Button
-              onClick={onCheckout}
-              className="h-12 w-full rounded-xl text-base shadow-md transition-transform hover:scale-[1.02]"
-            >
-              Checkout Sekarang
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={closeCart}
+                className="h-12 flex-1 rounded-xl text-sm font-medium"
+              >
+                Lanjut Belanja
+              </Button>
+              <Button
+                onClick={onCheckout}
+                className="h-12 flex-[2] rounded-xl text-base shadow-md transition-transform hover:scale-[1.02]"
+              >
+                Bayar — {formatIDR(grandTotal)}
+              </Button>
+            </div>
             {/* Mini trust indicators under checkout button */}
             <div className="flex items-center justify-center gap-3 pt-1 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1">
