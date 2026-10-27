@@ -84,10 +84,13 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
   return (
     <section
       id="tentang"
-      className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-secondary/30 via-background to-background relative overflow-hidden"
+      className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-primary/5 via-background to-background relative overflow-hidden"
     >
-      {/* Subtle noise texture overlay */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+      {/* Subtle organic leaf pattern texture */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='0.5'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
+      {/* Decorative gradient blobs */}
+      <div className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-primary/8 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-1/4 -left-20 h-72 w-72 rounded-full bg-orange-300/6 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-10 md:py-28">
         {/* Heading */}
@@ -192,52 +195,56 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             </div>
           </motion.div>
 
-          {/* Visual — gradient pattern with tagline (replaces emoji collage) */}
+          {/* Visual — real farmer photo + harvest photo (replaces generic icon cluster) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative aspect-square w-full max-w-md mx-auto"
+            className="relative w-full max-w-md mx-auto"
           >
             {/* Gradient glow background */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-2xl" />
+            <div className="pointer-events-none absolute inset-0 -z-10 scale-105 rounded-3xl bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-2xl" />
 
-            {/* Premium gradient card with tagline */}
-            <div className="relative flex h-full flex-col items-center justify-center gap-6 rounded-3xl border border-border/40 bg-gradient-to-br from-primary/5 via-orange-500/5 to-amber-500/5 p-8 text-center">
-              {/* Top icon cluster */}
-              <div className="flex items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-md">
-                  <Sprout className="h-7 w-7" />
-                </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500 shadow-md">
-                  <Truck className="h-7 w-7" />
-                </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 shadow-md">
-                  <Heart className="h-7 w-7" />
-                </div>
-              </div>
-
-              {/* Tagline */}
-              <div className="space-y-2">
-                <p className="text-2xl font-extrabold tracking-tight text-foreground">
+            {/* Main farmer photo — full bleed, rounded, shadow */}
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
+              <img
+                src="/about-farmer.png"
+                alt="Petani lokal di kebun sayur saat pagi hari"
+                className="w-full aspect-[4/5] object-cover"
+                loading="lazy"
+              />
+              {/* Gradient overlay bottom for text legibility */}
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
+              {/* Tagline overlay — bottom of photo */}
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <p className="font-display text-xl font-extrabold leading-tight drop-shadow-lg">
                   Dari Kebun
-                  <span className="text-orange-500"> → </span>
+                  <span className="text-orange-300"> → </span>
                   ke Meja Makan
                 </p>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-                  Rantai pasok terpendek untuk kesegaran maksimal. Tanpa perantara, tanpa bahan kimia.
+                <p className="mt-1 text-[11px] text-white/85 leading-snug">
+                  Rantai pasok terpendek untuk kesegaran maksimal
                 </p>
               </div>
+            </div>
 
-              {/* Flow diagram */}
-              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                <span className="rounded-lg bg-primary/10 px-3 py-1.5 text-primary">🌱 Petani</span>
-                <span className="text-orange-500">→</span>
-                <span className="rounded-lg bg-orange-500/10 px-3 py-1.5 text-orange-500">🚚 SayurLogi</span>
-                <span className="text-orange-500">→</span>
-                <span className="rounded-lg bg-amber-500/10 px-3 py-1.5 text-amber-600">🏠 Kamu</span>
+            {/* Floating harvest photo — bottom right overlap */}
+            <div className="absolute -bottom-4 -right-4 z-10 hidden sm:block">
+              <div className="overflow-hidden rounded-2xl shadow-xl ring-2 ring-white w-28 h-28">
+                <img
+                  src="/about-harvest.png"
+                  alt="Hasil panen sayur segar di meja kayu"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
               </div>
+            </div>
+
+            {/* Floating badge — top left */}
+            <div className="absolute -top-3 -left-3 z-10 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-white shadow-lg ring-2 ring-white">
+              <Sprout className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold">Petani Mitra</span>
             </div>
           </motion.div>
         </div>
