@@ -58,7 +58,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
         <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-lime-300/15 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-20">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-8 md:grid-cols-2 md:py-20">
         {/* Left content */}
         <div className="flex flex-col gap-5">
           {/* Badge — premium pill with border + shadow */}
@@ -143,22 +143,10 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             </Button>
           </motion.div>
 
-          {/* Mobile hero image preview — compact, above trust badges */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="relative md:hidden mt-1"
-          >
-            <div className="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/40 shadow-primary/20">
-              <img
-                src="/hero-green-bag-sayurlogi.png"
-                alt="Tas belanja SayurLogi penuh sayur dan buah segar"
-                className="aspect-[5/4] w-full object-cover object-center"
-                loading="eager"
-              />
-            </div>
-          </motion.div>
+          {/* Mobile: NO hero image — compact hero for faster-to-product UX.
+              Image is hidden on mobile (md:hidden) per UI/UX principle:
+              grocery mobile users need products, not brand showcase.
+              Desktop keeps full image (below). */}
         </div>
 
         {/* Right visual — green bag with SayurLogi branding, no floating badges */}
