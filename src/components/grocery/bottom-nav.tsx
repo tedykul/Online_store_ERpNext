@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Home, ShoppingCart, Heart, HelpCircle } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useWishlistStore } from "@/lib/store/wishlist";
@@ -168,17 +167,14 @@ export function BottomNav({ onOpenCart, onOpenWishlist }: BottomNavProps) {
   };
 
   return (
-    <AnimatePresence>
-      {showNav && (
-        <motion.nav
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
-          aria-label="Navigasi bawah"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
+    <nav
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-40 md:hidden transition-transform duration-300 ease-out",
+        showNav ? "translate-y-0" : "translate-y-full"
+      )}
+      aria-label="Navigasi bawah"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
           <div className="relative border-t border-border/60 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/85 shadow-[0_-2px_8px_-4px_rgba(0,0,0,0.1)]">
             <div className="flex items-stretch h-16">
               {navItems.map((item, index) => {
@@ -264,8 +260,6 @@ export function BottomNav({ onOpenCart, onOpenWishlist }: BottomNavProps) {
               })}
             </div>
           </div>
-        </motion.nav>
-      )}
-    </AnimatePresence>
+    </nav>
   );
 }
