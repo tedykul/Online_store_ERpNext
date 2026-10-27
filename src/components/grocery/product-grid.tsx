@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Loader2, ChevronDown } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { ProductCard } from "./product-card";
 import type { Product } from "@/types/grocery";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 
 interface ProductGridProps {
   products: Product[];
@@ -21,6 +20,9 @@ const LOAD_MORE_COUNT = 8;
 
 export function ProductGrid({ products, loading, source, onOpenDetail }: ProductGridProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
   // Track the previous product list key so we can reset pagination
   // when category/search/filter changes — using the documented
   // "adjusting state during render" pattern (no setState in effect).
@@ -29,11 +31,40 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
   if (currentKey !== prevKey) {
     setPrevKey(currentKey);
     setVisibleCount(INITIAL_COUNT);
+    setIsLoadingMore(false);
   }
 
   const visibleProducts = products.slice(0, visibleCount);
   const hasMore = visibleCount < products.length;
-  const remaining = products.length - visibleCount;
+
+  // IntersectionObserver for infinite scroll
+  // Loads LOAD_MORE_COUNT more products when sentinel becomes visible.
+  // Cleanup on unmount. Reset observer when products list changes.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true);
+          // Small delay for smooth UX + loading indicator visibility
+          setTimeout(() => {
+            setVisibleCount((c) => Math.min(c + LOAD_MORE_COUNT, products.length));
+            setIsLoadingMore(false);
+          }, 300);
+        }
+      },
+      {
+        rootMargin: "200px", // trigger 200px before sentinel is visible = pre-load
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, products.length]);
 
   if (loading) {
     return (
@@ -82,20 +113,34 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
         ))}
       </div>
 
-      {/* Load more — minimal, centered */}
+      {/* Infinite scroll sentinel — invisible trigger element.
+          When this enters viewport (200px margin), IntersectionObserver
+          fires and loads LOAD_MORE_COUNT more products.
+          Shows loading spinner while fetching.
+          Hidden when all products are loaded (hasMore = false). */}
       {hasMore && (
-        <div className="flex flex-col items-center gap-2 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setVisibleCount((c) => c + LOAD_MORE_COUNT)}
-            className="h-9 rounded-full px-5 text-xs font-medium border-border hover:bg-accent"
-          >
-            <ChevronDown className="h-3.5 w-3.5 mr-1" />
-            Muat {Math.min(LOAD_MORE_COUNT, remaining)} produk lagi
-          </Button>
+        <div
+          ref={sentinelRef}
+          className="flex items-center justify-center py-6"
+          aria-label="Memuat produk lainnya"
+          role="status"
+        >
+          {isLoadingMore ? (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span>Memuat produk lainnya...</span>
+            </div>
+          ) : (
+            <div className="h-4 w-4" aria-hidden="true" />
+          )}
+        </div>
+      )}
+
+      {/* End-of-list indicator — shows when all products are loaded */}
+      {!hasMore && products.length > INITIAL_COUNT && (
+        <div className="flex items-center justify-center py-4">
           <span className="text-[10px] text-muted-foreground">
-            {remaining} produk tersisa
+            ✓ Semua {products.length} produk telah ditampilkan
           </span>
         </div>
       )}
