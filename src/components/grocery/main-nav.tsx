@@ -103,7 +103,7 @@ export function MobileNav({ onNavigate }: MainNavProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden h-10 w-10 rounded-full"
+        className="hidden h-10 w-10 rounded-full"
         onClick={() => setOpen(true)}
         aria-label="Buka menu navigasi"
         aria-expanded={open}
