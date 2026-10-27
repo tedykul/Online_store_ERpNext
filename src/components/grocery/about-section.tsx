@@ -207,12 +207,15 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             <div className="pointer-events-none absolute inset-0 -z-10 scale-105 rounded-3xl bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-2xl" />
 
             {/* Main farmer photo — full bleed, rounded, shadow */}
-            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20">
+            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20 bg-gradient-to-br from-primary/10 to-secondary/30">
               <img
                 src="/about-farmer.png"
                 alt="Petani lokal di kebun sayur saat pagi hari"
                 className="w-full aspect-[4/5] object-cover"
-                loading="lazy"
+                loading="eager"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
               />
               {/* Gradient overlay bottom for text legibility */}
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
