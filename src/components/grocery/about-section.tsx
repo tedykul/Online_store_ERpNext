@@ -89,7 +89,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
       {/* Subtle noise texture overlay */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-20 md:py-28">
+      <div className="relative mx-auto max-w-7xl px-4 py-10 md:py-28">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -120,7 +120,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mx-auto mt-10 flex max-w-lg items-center justify-center divide-x divide-border/60"
+            className="mx-auto mt-6 flex max-w-lg items-center justify-center divide-x divide-border/60 md:mt-10"
           >
             <div className="flex flex-1 flex-col items-center px-4">
               <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-2xl font-extrabold text-transparent md:text-3xl tabular-nums">
@@ -150,7 +150,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
         </motion.div>
 
         {/* Story + Visual — gap-12 for more breathing room */}
-        <div className="mt-12 grid items-center gap-8 md:grid-cols-2 md:gap-12">
+        <div className="mt-8 grid items-center gap-6 md:grid-cols-2 md:gap-12 md:mt-12">
           {/* Story text — with pull quote highlight */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -248,7 +248,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6"
+          className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:mt-16 md:gap-6"
         >
           {stats.map((stat, i) => (
             <motion.div
@@ -274,7 +274,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
         </motion.div>
 
         {/* Values — bigger icon circles + ring border */}
-        <div className="mt-10 md:mt-16">
+        <div className="mt-8 md:mt-16">
           <motion.h3
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
