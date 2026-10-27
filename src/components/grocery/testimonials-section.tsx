@@ -139,6 +139,10 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
     setActiveIndex(index);
   }, []);
 
+  const prevSlide = useCallback(() => {
+    setActiveIndex((prev) => (prev === 0 ? items.length - 1 : prev - 1));
+  }, [items.length]);
+
   // Auto-play effect
   useEffect(() => {
     autoPlayRef.current = setTimeout(() => {
@@ -149,10 +153,10 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
     };
   }, [activeIndex, nextSlide]);
 
-  // Scroll to active slide on mobile
+  // Scroll to active slide on mobile (auto-play + dots click)
   useEffect(() => {
-    if (scrollRef.current && window.innerWidth < 768) {
-      const scrollContainer = scrollRef.current;
+    const scrollContainer = document.getElementById('testimonial-carousel');
+    if (scrollContainer && window.innerWidth < 768) {
       const slideWidth = scrollContainer.offsetWidth;
       scrollContainer.scrollTo({
         left: activeIndex * slideWidth,
@@ -160,6 +164,32 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
       });
     }
   }, [activeIndex]);
+
+  // Update active index when user swipes manually
+  useEffect(() => {
+    const scrollContainer = document.getElementById('testimonial-carousel');
+    if (!scrollContainer) return;
+
+    let scrollTimeout: ReturnType<typeof setTimeout>;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        if (window.innerWidth >= 768) return;
+        const slideWidth = scrollContainer.offsetWidth;
+        if (slideWidth === 0) return;
+        const newIndex = Math.round(scrollContainer.scrollLeft / slideWidth);
+        if (newIndex !== activeIndex && newIndex >= 0 && newIndex < items.length) {
+          setActiveIndex(newIndex);
+        }
+      }, 150);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [activeIndex, items.length]);
   return (
     <section
       id="testimoni"
@@ -222,10 +252,34 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           ))}
         </motion.div>
 
-        {/* ============ Mobile: Horizontal carousel (1 card visible + dots + auto-play) ============ */}
+        {/* ============ Mobile: Horizontal carousel (1 card visible + arrows + dots + auto-play) ============ */}
         <div className="mt-10 md:hidden">
+          {/* Carousel header with arrows */}
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              {activeIndex + 1} / {items.length}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={prevSlide}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-card ring-1 ring-border shadow-sm active:scale-90 transition-all"
+                aria-label="Testimoni sebelumnya"
+              >
+                <ChevronLeft className="h-4 w-4 text-foreground" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm active:scale-90 transition-all"
+                aria-label="Testimoni berikutnya"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Carousel scroll container */}
           <div
-            ref={scrollRef}
+            id="testimonial-carousel"
             className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory gap-3 pb-2 -mx-4 px-4"
             style={{ scrollBehavior: "smooth" }}
           >
