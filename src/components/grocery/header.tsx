@@ -85,16 +85,17 @@ export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi" }:
           />
         </div>
 
-        {/* Right actions */}
+        {/* Right actions — mobile: theme only (cart + wishlist in bottom nav)
+            Desktop: theme + wishlist + cart + hamburger */}
         <div className="flex items-center gap-1 md:gap-1.5">
           <ThemeToggle />
 
-          {/* Wishlist button */}
+          {/* Wishlist button — desktop only (mobile moved to bottom nav) */}
           <Button
             variant="ghost"
             size="icon"
             onClick={openWishlist}
-            className="relative h-10 w-10 rounded-full hover:bg-accent transition-all hover:scale-105 active:scale-95"
+            className="relative hidden md:flex h-10 w-10 rounded-full hover:bg-accent transition-all hover:scale-105 active:scale-95"
             aria-label={`Wishlist${wishlistCount > 0 ? ` (${wishlistCount} item)` : ""}`}
             title="Wishlist favorit"
           >
@@ -109,10 +110,10 @@ export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi" }:
             )}
           </Button>
 
-          {/* Cart button — elevated, hover scale, ring on badge */}
+          {/* Cart button — desktop only (mobile moved to bottom nav center FAB) */}
           <Button
             onClick={openCart}
-            className="relative h-10 rounded-full px-3.5 shadow-sm ring-1 ring-primary/20 transition-all hover:shadow-md hover:scale-105 active:scale-95 md:px-5"
+            className="relative hidden md:flex h-10 rounded-full px-3.5 shadow-sm ring-1 ring-primary/20 transition-all hover:shadow-md hover:scale-105 active:scale-95 md:px-5"
             size="default"
             aria-label={`Keranjang belanja${totalItems > 0 ? ` (${totalItems} item)` : ""}`}
           >

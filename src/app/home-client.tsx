@@ -22,6 +22,9 @@ import { ServiceWorkerRegistration } from "@/components/grocery/sw-registration"
 import { PWAInstallPrompt } from "@/components/grocery/pwa-install-prompt";
 import { PromoBanner } from "@/components/grocery/promo-banner";
 import { PromoCarousel } from "@/components/grocery/promo-carousel";
+import { BottomNav } from "@/components/grocery/bottom-nav";
+import { useCartStore } from "@/lib/store/cart";
+import { useWishlistStore } from "@/lib/store/wishlist";
 import { AdminOverlay } from "@/components/admin/admin-overlay";
 import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
 import { OrderHistoryDialog } from "@/components/grocery/order-history-dialog";
@@ -271,6 +274,12 @@ export function HomeClient({ content }: HomeClientProps) {
       {/* PWA: service worker registration + install prompt */}
       <ServiceWorkerRegistration />
       <PWAInstallPrompt />
+
+      {/* Mobile bottom navigation — native app feel (4 items + elevated cart FAB) */}
+      <BottomNav
+        onOpenCart={() => useCartStore.getState().openCart()}
+        onOpenWishlist={() => useWishlistStore.getState().openWishlist()}
+      />
 
       {/* Admin overlay (hidden by default, Ctrl+Shift+A or footer button) */}
       <AdminOverlay open={adminOpen} onOpenChange={setAdminOpen} />
