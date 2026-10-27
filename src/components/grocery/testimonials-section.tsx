@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Star, Quote, Heart, TrendingUp } from "lucide-react";
+import { Star, Quote, Heart, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -123,12 +124,48 @@ interface TestimonialsSectionProps {
 export function TestimonialsSection({ testimonials: dbTestimonials }: TestimonialsSectionProps = {}) {
   // Use DB testimonials if provided and non-empty, else hardcoded
   const items = dbTestimonials && dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
+
+  // Mobile carousel state
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const autoPlayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Auto-play carousel (4s interval)
+  const nextSlide = useCallback(() => {
+    setActiveIndex((prev) => (prev + 1) % items.length);
+  }, [items.length]);
+
+  const goToSlide = useCallback((index: number) => {
+    setActiveIndex(index);
+  }, []);
+
+  // Auto-play effect
+  useEffect(() => {
+    autoPlayRef.current = setTimeout(() => {
+      nextSlide();
+    }, 4000);
+    return () => {
+      if (autoPlayRef.current) clearTimeout(autoPlayRef.current);
+    };
+  }, [activeIndex, nextSlide]);
+
+  // Scroll to active slide on mobile
+  useEffect(() => {
+    if (scrollRef.current && window.innerWidth < 768) {
+      const scrollContainer = scrollRef.current;
+      const slideWidth = scrollContainer.offsetWidth;
+      scrollContainer.scrollTo({
+        left: activeIndex * slideWidth,
+        behavior: "smooth",
+      });
+    }
+  }, [activeIndex]);
   return (
     <section
       id="testimoni"
       className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-background via-secondary/20 to-background"
     >
-      <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 py-10 md:py-24">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -185,8 +222,41 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           ))}
         </motion.div>
 
-        {/* Testimonials grid */}
-        <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {/* ============ Mobile: Horizontal carousel (1 card visible + dots + auto-play) ============ */}
+        <div className="mt-10 md:hidden">
+          <div
+            ref={scrollRef}
+            className="flex overflow-x-auto scrollbar-none snap-x snap-mandatory gap-3 pb-2 -mx-4 px-4"
+            style={{ scrollBehavior: "smooth" }}
+          >
+            {items.map((t, i) => (
+              <div key={t.name} className="w-full shrink-0 snap-center">
+                <TestimonialCard testimonial={t} index={0} />
+              </div>
+            ))}
+          </div>
+          {/* Dots indicator */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToSlide(i)}
+                className={cn(
+                  "h-2 rounded-full transition-all duration-300",
+                  activeIndex === i ? "w-6 bg-primary" : "w-2 bg-border hover:bg-muted-foreground/40"
+                )}
+                aria-label={`Testimoni ${i + 1}`}
+              />
+            ))}
+          </div>
+          {/* Swipe hint */}
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+            Geser untuk lihat lebih
+          </p>
+        </div>
+
+        {/* ============ Desktop: 3-col grid (unchanged) ============ */}
+        <div className="mt-10 hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {items.map((t, i) => (
             <TestimonialCard key={t.name} testimonial={t} index={i} />
           ))}
@@ -198,7 +268,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="mt-16 flex flex-col items-center justify-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center md:flex-row md:gap-8"
+          className="mt-10 flex flex-col items-center justify-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center md:mt-16 md:flex-row md:gap-8 md:p-6"
         >
           <div className="flex items-center gap-2">
             <div className="flex" aria-label="Rating rata-rata 4.9 dari 5">
