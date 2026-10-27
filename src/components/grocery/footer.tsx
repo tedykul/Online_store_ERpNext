@@ -104,31 +104,33 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
         </div>
       </div>
 
-      {/* ============ Brand section (mobile: compact, desktop: full) ============ */}
-      <div className="mx-auto max-w-7xl px-4 pt-10 pb-6">
-        <div className="flex flex-col gap-4 md:hidden">
-          {/* Mobile brand — compact, 1-line description */}
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <Leaf className="h-5 w-5" />
+      {/* ============ Brand section — elevated card (mobile) ============ */}
+      <div className="mx-auto max-w-7xl px-4 pt-6 pb-3 md:pt-10 md:pb-6">
+        {/* Mobile: single elevated brand card */}
+        <div className="md:hidden">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+            <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                <Leaf className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-lg font-bold block leading-tight">{brandName}</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-lg font-bold block leading-tight">{brandName}</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+            <p className="text-sm text-foreground/70 mb-3">{brandTextShort}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {TRUST_BADGES.map((badge) => {
+                const Icon = badge.icon;
+                return (
+                  <span key={badge.label} className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold text-foreground ring-1 ring-border/40">
+                    <Icon className="h-3 w-3 text-primary" />
+                    {badge.label}
+                  </span>
+                );
+              })}
             </div>
-          </div>
-          <p className="text-sm text-foreground/70 leading-relaxed">{brandTextShort}</p>
-          {/* Trust badges */}
-          <div className="flex flex-wrap gap-2">
-            {TRUST_BADGES.map((badge) => {
-              const Icon = badge.icon;
-              return (
-                <span key={badge.label} className="inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-[10px] font-semibold text-foreground ring-1 ring-border/50">
-                  <Icon className="h-3 w-3 text-primary" />
-                  {badge.label}
-                </span>
-              );
-            })}
           </div>
         </div>
 
@@ -168,7 +170,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
       </div>
 
       {/* ============ Mobile: Elevated card sections (native app feel) ============ */}
-      <div className="mx-auto max-w-7xl px-4 md:hidden space-y-3">
+      <div className="mx-auto max-w-7xl px-4 md:hidden space-y-3 pb-4">
         {/* Bantuan — elevated card with left accent + disclosure chevrons */}
         <MobileCard title="Bantuan" icon={<HelpCircle className="h-4 w-4" />} isOpen={openSection === "bantuan"} onToggle={() => toggleSection("bantuan")}>
           <ul className="space-y-0">
@@ -286,19 +288,22 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
       </div>
 
       {/* ============ Payment methods — compact inline (mobile) / card (desktop) ============ */}
-      <div className="mx-auto max-w-7xl px-4 pb-6">
-        {/* Mobile: compact inline */}
+      <div className="mx-auto max-w-7xl px-4 pb-4">
+        {/* Mobile: compact inline inside elevated card */}
         <div className="md:hidden">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <CreditCard className="h-3 w-3 text-primary" />
-            Metode Pembayaran
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {PAYMENT_METHODS.map((method) => (
-              <span key={method} className="rounded-md bg-background px-2 py-1 text-[10px] font-bold text-foreground ring-1 ring-border/60">
-                {method}
-              </span>
-            ))}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+            <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
+            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <CreditCard className="h-3 w-3 text-primary" />
+              Metode Pembayaran
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {PAYMENT_METHODS.map((method) => (
+                <span key={method} className="rounded-md bg-background px-2.5 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border/60 shadow-sm">
+                  {method}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
         {/* Desktop: elevated card */}
@@ -319,22 +324,23 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
       {/* ============ Bottom bar — copyright + legal (no tech credits) ============ */}
       <div className="border-t border-border/60 bg-secondary/50">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-4 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} {brandName}. Semua hak dilindungi.</p>
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-3.5 text-xs text-muted-foreground sm:flex-row md:py-4">
+          <p className="text-center sm:text-left">© {new Date().getFullYear()} {brandName}. Semua hak dilindungi.</p>
+          <div className="flex items-center gap-3">
             <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-              Syarat &amp; Ketentuan
+              Syarat
             </a>
+            <span className="text-border">·</span>
             <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
-              Kebijakan Privasi
+              Privasi
             </a>
             {onOpenAdmin && (
-              <Button variant="ghost" size="icon" onClick={onOpenAdmin} className="h-8 w-8 rounded-full hover:bg-primary hover:text-primary-foreground" aria-label="Buka admin dashboard" title="Admin (Ctrl+Shift+A)">
-                <Settings className="h-4 w-4" />
+              <Button variant="ghost" size="icon" onClick={onOpenAdmin} className="h-7 w-7 rounded-full hover:bg-primary hover:text-primary-foreground" aria-label="Buka admin dashboard" title="Admin (Ctrl+Shift+A)">
+                <Settings className="h-3.5 w-3.5" />
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={scrollToTop} className="h-8 w-8 rounded-full hover:bg-primary hover:text-primary-foreground" aria-label="Kembali ke atas" title="Kembali ke atas">
-              <ArrowUp className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={scrollToTop} className="h-7 w-7 rounded-full hover:bg-primary hover:text-primary-foreground" aria-label="Kembali ke atas" title="Kembali ke atas">
+              <ArrowUp className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
