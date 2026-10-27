@@ -274,17 +274,37 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
         </motion.div>
 
         {/* Values — bigger icon circles + ring border */}
-        <div className="mt-16">
+        <div className="mt-10 md:mt-16">
           <motion.h3
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="mb-8 text-center text-2xl font-bold tracking-tight md:text-3xl"
+            className="mb-4 text-center text-xl font-bold tracking-tight md:mb-8 md:text-2xl"
           >
             Nilai yang Kami Pegang
           </motion.h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Mobile: compact 2x2 grid (icon + title only, no description) */}
+          <div className="grid grid-cols-2 gap-2.5 md:hidden">
+            {values.map((value, i) => (
+              <motion.div
+                key={value.title}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: i * 0.06 }}
+                className="group relative flex flex-col items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3 text-center ring-1 ring-border shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <div className={`absolute inset-x-0 top-0 h-1 ${value.bar}`} />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${value.color} ring-1 ring-inset ring-current/10`}>
+                  <value.icon className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-bold leading-tight">{value.title}</span>
+              </motion.div>
+            ))}
+          </div>
+          {/* Desktop: full 4-col grid with description (unchanged) */}
+          <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
             {values.map((value, i) => (
               <motion.div
                 key={value.title}
@@ -294,9 +314,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted p-5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30"
               >
-                {/* Solid colored top accent — matches icon color */}
                 <div className={`absolute inset-x-0 top-0 h-1.5 ${value.bar}`} />
-                {/* Bigger icon circle (h-14 w-14) + ring border for depth */}
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${value.color} ring-1 ring-inset ring-current/10`}>
                   <value.icon className="h-7 w-7" />
                 </div>
