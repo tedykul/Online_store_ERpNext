@@ -250,7 +250,7 @@ function ProductDetailContent({
                 </div>
               </div>
               {savings > 0 && (
-                <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 mb-1 font-bold">
+                <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 mb-1 font-bold whitespace-nowrap shrink-0">
                   Hemat {formatIDR(savings)}
                 </Badge>
               )}
@@ -381,25 +381,15 @@ function ProductDetailContent({
                   {inCart ? "Perbarui Keranjang" : "Tambah ke Keranjang"}
                 </Button>
               </div>
-              {/* Row 2: Lanjut Belanja (ghost) + Beli Langsung (outline secondary) */}
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => onOpenChange(false)}
-                  className="h-11 flex-1 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground md:h-12"
-                >
-                  Lanjut Belanja
-                </Button>
-                <Button
-                  onClick={handleBuyNow}
-                  size="lg"
-                  variant="outline"
-                  className="h-11 flex-1 rounded-xl text-sm font-medium border-primary/40 text-primary hover:bg-primary/5 transition-transform hover:scale-[1.01] md:h-12"
-                >
-                  Beli Langsung
-                </Button>
-              </div>
+              {/* Row 2: Beli Langsung (single secondary, no "Lanjut Belanja") */}
+              <Button
+                onClick={handleBuyNow}
+                size="lg"
+                variant="outline"
+                className="h-11 w-full rounded-xl text-sm font-medium border-primary/40 text-primary hover:bg-primary/5 transition-transform hover:scale-[1.01] md:h-12"
+              >
+                Beli Langsung
+              </Button>
             </div>
           </div>
         ) : (
