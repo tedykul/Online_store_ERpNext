@@ -22,6 +22,7 @@ import { ServiceWorkerRegistration } from "@/components/grocery/sw-registration"
 import { PWAInstallPrompt } from "@/components/grocery/pwa-install-prompt";
 import { PromoBanner } from "@/components/grocery/promo-banner";
 import { PromoCarousel } from "@/components/grocery/promo-carousel";
+import { BestSellerCarousel } from "@/components/grocery/best-seller-carousel";
 import { BottomNav } from "@/components/grocery/bottom-nav";
 import { useCartStore } from "@/lib/store/cart";
 import { useWishlistStore } from "@/lib/store/wishlist";
@@ -207,6 +208,11 @@ export function HomeClient({ content }: HomeClientProps) {
                 Pilih kategori atau cari produk favoritmu
               </p>
             </div>
+
+            {/* Best Seller carousel — horizontal scroll, surfaces top products (mobile only) */}
+            {!loading && !activeCategory && !searchQuery && (
+              <BestSellerCarousel products={products} onOpenDetail={handleOpenDetail} />
+            )}
 
             {/* Promo carousel — horizontal scroll, breaks vertical monotony */}
             {!loading && !activeCategory && !searchQuery && (
