@@ -146,7 +146,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
       id="kontak"
       className="scroll-mt-24 bg-gradient-to-b from-background to-secondary/20"
     >
-      <div className="mx-auto max-w-7xl px-4 py-12 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:py-24">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -170,7 +170,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-5 lg:gap-12">
+        <div className="mt-8 grid gap-6 lg:grid-cols-5 lg:gap-12 md:mt-12">
           {/* ============ Left: Contact info cards ============ */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
