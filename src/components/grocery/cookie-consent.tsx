@@ -45,6 +45,15 @@ export function CookieConsent() {
     const stored = readConsent();
     setChoice(stored);
     setMounted(true);
+
+    // Auto-dismiss after 6 seconds on mobile (reduces obstruction)
+    if (!stored) {
+      const timer = setTimeout(() => {
+        setChoice("accepted");
+        try { localStorage.setItem(STORAGE_KEY, "accepted"); } catch {}
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -68,7 +77,7 @@ export function CookieConsent() {
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-0 left-0 right-0 z-50"
+          className="fixed bottom-16 left-0 right-0 z-50 md:bottom-0"
           role="dialog"
           aria-label="Pemberitahuan cookie"
           aria-live="polite"
@@ -76,8 +85,27 @@ export function CookieConsent() {
           {/* Full-width slim bar — no max-w constraint, no card shadow ring.
               Mobile: single column. Desktop: 3-column row (icon | text | actions). */}
           <div className="border-t border-border/60 bg-card/95 backdrop-blur-lg supports-[backdrop-filter]:bg-card/85 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
-            <div className="mx-auto max-w-7xl px-4 py-3 md:py-3.5">
-              <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:gap-4">
+            <div className="mx-auto max-w-7xl px-4 py-2.5 md:py-3.5">
+              {/* Mobile: ultra-compact single row */}
+              <div className="flex items-center gap-2 md:hidden">
+                <span className="flex-1 text-[11px] font-medium text-foreground/70 leading-tight">
+                  Cookie untuk pengalaman terbaik
+                </span>
+                <button
+                  onClick={() => persist("declined")}
+                  className="shrink-0 rounded-full px-3 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground"
+                >
+                  Tolak
+                </button>
+                <button
+                  onClick={() => persist("accepted")}
+                  className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-[11px] font-medium text-primary-foreground shadow-sm"
+                >
+                  Setuju
+                </button>
+              </div>
+              {/* Desktop: full 3-column row */}
+              <div className="hidden md:flex md:items-center md:gap-4">
                 {/* Icon + text — inline on mobile, row on desktop */}
                 <div className="flex items-start gap-2.5 md:flex-1 md:min-w-0">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary md:h-9 md:w-9">
