@@ -104,33 +104,33 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
         </div>
       </div>
 
-      {/* ============ Brand section — elevated card (mobile) ============ */}
-      <div className="mx-auto max-w-7xl px-4 pt-6 pb-3 md:pt-10 md:pb-6">
-        {/* Mobile: single elevated brand card */}
+      {/* ============ Brand section — compact elevated card (mobile) ============ */}
+      <div className="mx-auto max-w-7xl px-4 pt-5 pb-3 md:pt-10 md:pb-6">
+        {/* Mobile: single compact brand card — logo + trust badges inline */}
         <div className="md:hidden">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-3.5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
             <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                <Leaf className="h-5 w-5" />
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+                <Leaf className="h-4.5 w-4.5" />
               </div>
-              <div>
-                <span className="text-lg font-bold block leading-tight">{brandName}</span>
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+              <div className="flex-1">
+                <span className="text-base font-bold block leading-tight">{brandName}</span>
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+              </div>
+              {/* Trust badges inline right */}
+              <div className="flex gap-1">
+                {TRUST_BADGES.map((badge) => {
+                  const Icon = badge.icon;
+                  return (
+                    <span key={badge.label} className="flex items-center justify-center rounded-md bg-primary/10 px-1.5 py-1 text-primary ring-1 ring-inset ring-primary/10" title={badge.label}>
+                      <Icon className="h-3 w-3" />
+                    </span>
+                  );
+                })}
               </div>
             </div>
-            <p className="text-sm text-foreground/70 mb-3">{brandTextShort}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {TRUST_BADGES.map((badge) => {
-                const Icon = badge.icon;
-                return (
-                  <span key={badge.label} className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold text-foreground ring-1 ring-border/40">
-                    <Icon className="h-3 w-3 text-primary" />
-                    {badge.label}
-                  </span>
-                );
-              })}
-            </div>
+            <p className="text-xs text-foreground/60">{brandTextShort}</p>
           </div>
         </div>
 
@@ -169,69 +169,89 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
         </div>
       </div>
 
-      {/* ============ Mobile: Elevated card sections (native app feel) ============ */}
+      {/* ============ Mobile: Single unified card for Bantuan + Hubungi Kami ============ */}
       <div className="mx-auto max-w-7xl px-4 md:hidden space-y-3 pb-4">
-        {/* Bantuan — elevated card with left accent + disclosure chevrons */}
-        <MobileCard title="Bantuan" icon={<HelpCircle className="h-4 w-4" />} isOpen={openSection === "bantuan"} onToggle={() => toggleSection("bantuan")}>
-          <ul className="space-y-0">
-            {[
-              { label: "Cara Pemesanan", id: "faq" },
-              { label: "Kebijakan Pengiriman", id: "faq" },
-              { label: "Pembayaran", id: "faq" },
-              { label: "Refund & Retur", id: "faq" },
-              { label: "Customer Service", id: "kontak" },
-            ].map((item) => (
-              <li key={item.label}>
-                <a href={`#${item.id}`} onClick={handleNavClick(item.id)} className="flex items-center justify-between py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
-                  <span>{item.label}</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-                </a>
-              </li>
-            ))}
-            {onTrackOrder && (
-              <li>
-                <button onClick={onTrackOrder} className="flex w-full items-center justify-between py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
-                  <span>📦 Lacak Pesanan</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-                </button>
-              </li>
-            )}
-            {onOrderHistory && (
-              <li>
-                <button onClick={onOrderHistory} className="flex w-full items-center justify-between py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
-                  <span>📋 Riwayat Pesanan</span>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-                </button>
-              </li>
-            )}
-          </ul>
-        </MobileCard>
+        {/* Unified help + contact card */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+          <div className="absolute inset-y-0 left-0 w-1 bg-primary" />
 
-        {/* Hubungi Kami — elevated card with contact info */}
-        <MobileCard title="Hubungi Kami" icon={<Phone className="h-4 w-4" />} isOpen={openSection === "kontak"} onToggle={() => toggleSection("kontak")}>
-          <ul className="space-y-0">
-            <li>
-              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-3 py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
-                <Phone className="h-4 w-4 text-primary shrink-0" />
+          {/* Bantuan section (collapsible) */}
+          <button
+            onClick={() => toggleSection("bantuan")}
+            className="flex w-full items-center gap-2.5 py-3.5 pl-4 pr-4 text-left active:scale-[0.99] transition-transform"
+            aria-expanded={openSection === "bantuan"}
+          >
+            <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors", openSection === "bantuan" ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground")}>
+              <HelpCircle className="h-4 w-4" />
+            </span>
+            <span className={cn("text-sm font-bold transition-colors", openSection === "bantuan" ? "text-foreground" : "text-foreground/80")}>Bantuan</span>
+            <ChevronDown className={cn("ml-auto h-4 w-4 transition-all duration-300", openSection === "bantuan" ? "rotate-180 text-primary" : "text-muted-foreground")} />
+          </button>
+          {openSection === "bantuan" && (
+            <div className="px-4 pb-1">
+              {[
+                { label: "Cara Pemesanan", id: "faq" },
+                { label: "Kebijakan Pengiriman", id: "faq" },
+                { label: "Pembayaran", id: "faq" },
+                { label: "Refund & Retur", id: "faq" },
+                { label: "Layanan Pelanggan", id: "kontak" },
+              ].map((item) => (
+                <a key={item.label} href={`#${item.id}`} onClick={handleNavClick(item.id)} className="flex items-center justify-between py-2.5 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                  <span>{item.label}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+                </a>
+              ))}
+              {onTrackOrder && (
+                <button onClick={onTrackOrder} className="flex w-full items-center justify-between py-2.5 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                  <span>Lacak Pesanan</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+                </button>
+              )}
+              {onOrderHistory && (
+                <button onClick={onOrderHistory} className="flex w-full items-center justify-between py-2.5 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                  <span>Riwayat Pesanan</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Divider between sections */}
+          <div className="mx-4 h-px bg-border/40" />
+
+          {/* Hubungi Kami section (collapsible) */}
+          <button
+            onClick={() => toggleSection("kontak")}
+            className="flex w-full items-center gap-2.5 py-3.5 pl-4 pr-4 text-left active:scale-[0.99] transition-transform"
+            aria-expanded={openSection === "kontak"}
+          >
+            <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors", openSection === "kontak" ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground")}>
+              <Phone className="h-4 w-4" />
+            </span>
+            <span className={cn("text-sm font-bold transition-colors", openSection === "kontak" ? "text-foreground" : "text-foreground/80")}>Hubungi Kami</span>
+            <ChevronDown className={cn("ml-auto h-4 w-4 transition-all duration-300", openSection === "kontak" ? "rotate-180 text-primary" : "text-muted-foreground")} />
+          </button>
+          {openSection === "kontak" && (
+            <div className="px-4 pb-3">
+              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-3 py-2.5 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
                 <span>{phone}</span>
               </a>
-            </li>
-            <li>
-              <a href={`mailto:${email}`} className="flex items-center gap-3 py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
-                <Mail className="h-4 w-4 text-primary shrink-0" />
+              <a href={`mailto:${email}`} className="flex items-center gap-3 py-2.5 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
                 <span>{email}</span>
               </a>
-            </li>
-            <li className="flex items-start gap-3 py-3 text-sm text-foreground/70">
-              <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <span>{address}</span>
-            </li>
-            <li className="flex items-center gap-3 py-3 text-sm text-foreground/70">
-              <Clock className="h-4 w-4 text-primary shrink-0" />
-              <span>{hours}</span>
-            </li>
-          </ul>
-        </MobileCard>
+              <div className="flex items-start gap-3 py-2.5 text-sm text-foreground/70 px-2 -mx-2">
+                <MapPin className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                <span>{address}</span>
+              </div>
+              <div className="flex items-center gap-3 py-2.5 text-sm text-foreground/70 px-2 -mx-2">
+                <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>{hours}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ============ Desktop: 4-column grid ============ */}
@@ -291,15 +311,15 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
       <div className="mx-auto max-w-7xl px-4 pb-4">
         {/* Mobile: compact inline inside elevated card */}
         <div className="md:hidden">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-3.5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
             <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-            <p className="mb-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <CreditCard className="h-3 w-3 text-primary" />
               Metode Pembayaran
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5">
               {PAYMENT_METHODS.map((method) => (
-                <span key={method} className="rounded-md bg-background px-2.5 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border/60 shadow-sm">
+                <span key={method} className="flex items-center justify-center rounded-md bg-background px-1 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border/60 shadow-sm text-center">
                   {method}
                 </span>
               ))}
