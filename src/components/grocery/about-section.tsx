@@ -212,7 +212,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 src="/about-farmer.png"
                 alt="Petani lokal di kebun sayur saat pagi hari"
                 className="w-full aspect-[4/5] object-cover"
-                loading="eager"
+                loading="lazy"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
@@ -229,18 +229,6 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 <p className="mt-1 text-[11px] text-white/85 leading-snug">
                   Rantai pasok terpendek untuk kesegaran maksimal
                 </p>
-              </div>
-            </div>
-
-            {/* Floating harvest photo — bottom right overlap */}
-            <div className="absolute -bottom-4 -right-4 z-10 hidden sm:block">
-              <div className="overflow-hidden rounded-2xl shadow-xl ring-2 ring-white w-28 h-28">
-                <img
-                  src="/about-harvest.png"
-                  alt="Hasil panen sayur segar di meja kayu"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
               </div>
             </div>
 
