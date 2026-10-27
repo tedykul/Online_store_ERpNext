@@ -77,7 +77,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
               {/* Image */}
               <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/30 to-secondary/5">
                 {discount > 0 && (
-                  <span className="absolute left-2 top-2 z-10 rounded-md bg-orange-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                  <span className="absolute left-2 top-2 z-10 rounded-md bg-stone-900/90 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm backdrop-blur-sm">
                     -{discount}%
                   </span>
                 )}
@@ -104,7 +104,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
                 <div className="mt-0.5 flex items-end justify-between gap-1.5">
                   <div className="flex min-w-0 flex-col">
                     {product.oldPrice && (
-                      <span className="text-[10px] text-muted-foreground line-through leading-none">
+                      <span className="text-[10px] text-muted-foreground/50 line-through leading-none">
                         {formatIDR(product.oldPrice)}
                       </span>
                     )}
