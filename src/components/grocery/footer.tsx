@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Settings, Clock, ShieldCheck, Truck, CreditCard, ChevronDown } from "lucide-react";
+import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Settings, Clock, ShieldCheck, Truck, CreditCard, ChevronDown, ChevronRight, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewsletterForm } from "./newsletter-form";
 import { cn } from "@/lib/utils";
@@ -57,7 +57,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
   const hours = content?.contactHours ?? "Setiap hari, 08.00 - 21.00 WIB";
 
   // Accordion state (mobile only)
-  const [openSection, setOpenSection] = useState<string | null>("navigasi");
+  const [openSection, setOpenSection] = useState<string | null>("bantuan");
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section);
@@ -167,52 +167,69 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
         </div>
       </div>
 
-      {/* ============ Mobile: Accordion sections ============ */}
-      <div className="mx-auto max-w-7xl px-4 md:hidden">
-        <MobileAccordion title="Navigasi" isOpen={openSection === "navigasi"} onToggle={() => toggleSection("navigasi")}>
+      {/* ============ Mobile: Elevated card sections (native app feel) ============ */}
+      <div className="mx-auto max-w-7xl px-4 md:hidden space-y-3">
+        {/* Bantuan — elevated card with left accent + disclosure chevrons */}
+        <MobileCard title="Bantuan" icon={<HelpCircle className="h-4 w-4" />} isOpen={openSection === "bantuan"} onToggle={() => toggleSection("bantuan")}>
           <ul className="space-y-0">
-            <li><a href="#beranda" onClick={handleNavClick("beranda")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Beranda</a></li>
-            <li><a href="#belanja" onClick={handleNavClick("belanja")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Belanja Produk</a></li>
-            <li><a href="#tentang" onClick={handleNavClick("tentang")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Tentang Kami</a></li>
-            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">FAQ</a></li>
-            <li><a href="#kontak" onClick={handleNavClick("kontak")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors">Hubungi Kami</a></li>
-          </ul>
-        </MobileAccordion>
-        <MobileAccordion title="Bantuan" isOpen={openSection === "bantuan"} onToggle={() => toggleSection("bantuan")}>
-          <ul className="space-y-0">
-            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Cara Pemesanan</a></li>
-            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Kebijakan Pengiriman</a></li>
-            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Pembayaran</a></li>
-            <li><a href="#faq" onClick={handleNavClick("faq")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Refund & Retur</a></li>
-            <li><a href="#kontak" onClick={handleNavClick("kontak")} className="block py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">Customer Service</a></li>
+            {[
+              { label: "Cara Pemesanan", id: "faq" },
+              { label: "Kebijakan Pengiriman", id: "faq" },
+              { label: "Pembayaran", id: "faq" },
+              { label: "Refund & Retur", id: "faq" },
+              { label: "Customer Service", id: "kontak" },
+            ].map((item) => (
+              <li key={item.label}>
+                <a href={`#${item.id}`} onClick={handleNavClick(item.id)} className="flex items-center justify-between py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                  <span>{item.label}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </a>
+              </li>
+            ))}
             {onTrackOrder && (
-              <li><button onClick={onTrackOrder} className="block w-full text-left py-3 text-sm text-muted-foreground hover:text-primary transition-colors border-b border-border/30">📦 Lacak Pesanan</button></li>
+              <li>
+                <button onClick={onTrackOrder} className="flex w-full items-center justify-between py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                  <span>📦 Lacak Pesanan</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </button>
+              </li>
             )}
             {onOrderHistory && (
-              <li><button onClick={onOrderHistory} className="block w-full text-left py-3 text-sm text-muted-foreground hover:text-primary transition-colors">📋 Riwayat Pesanan</button></li>
+              <li>
+                <button onClick={onOrderHistory} className="flex w-full items-center justify-between py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                  <span>📋 Riwayat Pesanan</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                </button>
+              </li>
             )}
           </ul>
-        </MobileAccordion>
-        <MobileAccordion title="Hubungi Kami" isOpen={openSection === "kontak"} onToggle={() => toggleSection("kontak")}>
+        </MobileCard>
+
+        {/* Hubungi Kami — elevated card with contact info */}
+        <MobileCard title="Hubungi Kami" icon={<Phone className="h-4 w-4" />} isOpen={openSection === "kontak"} onToggle={() => toggleSection("kontak")}>
           <ul className="space-y-0">
-            <li className="flex items-center gap-2 py-3 border-b border-border/30">
-              <Phone className="h-4 w-4 text-primary shrink-0" />
-              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{phone}</a>
+            <li>
+              <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-3 py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                <Phone className="h-4 w-4 text-primary shrink-0" />
+                <span>{phone}</span>
+              </a>
             </li>
-            <li className="flex items-center gap-2 py-3 border-b border-border/30">
-              <Mail className="h-4 w-4 text-primary shrink-0" />
-              <a href={`mailto:${email}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{email}</a>
+            <li>
+              <a href={`mailto:${email}`} className="flex items-center gap-3 py-3 text-sm text-foreground/70 active:bg-accent/50 active:scale-[0.98] transition-all rounded-lg px-2 -mx-2">
+                <Mail className="h-4 w-4 text-primary shrink-0" />
+                <span>{email}</span>
+              </a>
             </li>
-            <li className="flex items-start gap-2 py-3 border-b border-border/30">
+            <li className="flex items-start gap-3 py-3 text-sm text-foreground/70">
               <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <span className="text-sm text-muted-foreground">{address}</span>
+              <span>{address}</span>
             </li>
-            <li className="flex items-center gap-2 py-3">
+            <li className="flex items-center gap-3 py-3 text-sm text-foreground/70">
               <Clock className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-sm text-muted-foreground">{hours}</span>
+              <span>{hours}</span>
             </li>
           </ul>
-        </MobileAccordion>
+        </MobileCard>
       </div>
 
       {/* ============ Desktop: 4-column grid ============ */}
@@ -326,30 +343,58 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
   );
 }
 
-// ============ Mobile accordion component ============
-function MobileAccordion({
+// ============ Mobile elevated card component (native app feel) ============
+function MobileCard({
   title,
+  icon,
   isOpen,
   onToggle,
   children,
 }: {
   title: string;
+  icon: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-border/40">
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 ring-1 transition-all duration-300",
+        isOpen
+          ? "ring-primary/30 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]"
+          : "ring-border shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+      )}
+    >
+      {/* Left accent bar — brand green, visible when open */}
+      <div className={cn(
+        "absolute inset-y-0 left-0 w-1 transition-colors",
+        isOpen ? "bg-primary" : "bg-transparent"
+      )} />
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between py-3.5 text-left"
+        className="flex w-full items-center gap-2.5 py-4 pl-4 pr-4 text-left active:scale-[0.99] transition-transform"
         aria-expanded={isOpen}
       >
-        <span className="text-xs font-bold uppercase tracking-wider text-foreground">{title}</span>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
+        <span className={cn(
+          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
+          isOpen ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"
+        )}>
+          {icon}
+        </span>
+        <span className={cn(
+          "text-sm font-bold transition-colors",
+          isOpen ? "text-foreground" : "text-foreground/80"
+        )}>
+          {title}
+        </span>
+        <ChevronDown className={cn(
+          "ml-auto h-4 w-4 transition-all duration-300",
+          isOpen ? "rotate-180 text-primary" : "text-muted-foreground"
+        )} />
       </button>
       {isOpen && (
-        <div className="pb-2">
+        <div className="px-4 pb-2">
           {children}
         </div>
       )}
