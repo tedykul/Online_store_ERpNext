@@ -77,7 +77,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-6xl md:tracking-tighter"
+            className="font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-6xl md:tracking-tighter"
           >
             <span className="font-bold text-muted-foreground">{titleA}</span>{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-black">

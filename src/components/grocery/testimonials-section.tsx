@@ -141,7 +141,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
             <Heart className="h-3.5 w-3.5" />
             Apa Kata Pelanggan
           </span>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-balance md:text-5xl">
+          <h2 className="font-display mt-4 text-3xl font-extrabold tracking-tight text-balance md:text-5xl">
             Dipercaya{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
               Ribuan Keluarga

@@ -102,7 +102,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             <Sprout className="h-4 w-4" />
             {c.aboutBadge ?? "Cerita Kami"}
           </span>
-          <h2 className="mt-6 text-3xl font-extrabold leading-[1.15] tracking-tight text-balance md:text-5xl">
+          <h2 className="font-display mt-6 text-3xl font-extrabold leading-[1.15] tracking-tight text-balance md:text-5xl">
             <span className="font-bold text-muted-foreground">{c.aboutTitleA ?? "Dari Kebun Petani,"}</span>{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-extrabold">
               {c.aboutTitleHighlight ?? "Langsung ke Meja Makan"}
