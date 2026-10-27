@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Flame, Plus, Star } from "lucide-react";
+import { Flame, Plus, Star, ChevronRight } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import type { Product } from "@/types/grocery";
@@ -40,14 +40,19 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
 
   return (
     <section className="mb-6" aria-label="Sedang Promo">
-      <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-500/10">
-          <Flame className="h-4 w-4 text-orange-500" />
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-500/10">
+            <Flame className="h-4 w-4 text-orange-500" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-base font-bold tracking-tight md:text-lg">Sedang Promo</h2>
+            <span className="text-xs text-muted-foreground">{promos.length} produk</span>
+          </div>
         </div>
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-base font-bold tracking-tight md:text-lg">Sedang Promo</h2>
-          <span className="text-xs text-muted-foreground">{promos.length} produk</span>
-        </div>
+        <span className="flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">
+          Geser <ChevronRight className="h-3 w-3" />
+        </span>
       </div>
 
       {/* Horizontal scroll — no visible scrollbar */}
@@ -66,7 +71,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
               viewport={{ once: true, margin: "-30px" }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.3) }}
               onClick={() => handleClick(product)}
-              className="group relative flex w-40 shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted text-left ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30 md:w-44"
+              className="group relative flex w-36 shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted text-left ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] transition-all hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_-8px_rgba(0,0,0,0.24)] hover:ring-primary/30 md:w-44"
               aria-label={`Lihat detail ${product.name}`}
             >
               {/* Image */}
@@ -104,7 +109,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
                       </span>
                     )}
                     <div className="flex items-baseline gap-0.5">
-                      <span className="text-sm font-bold text-orange-600 leading-none">{formatIDR(product.price)}</span>
+                      <span className="text-sm font-extrabold text-orange-600 leading-none">{formatIDR(product.price)}</span>
                       <span className="text-[9px] text-muted-foreground">/{product.unit}</span>
                     </div>
                   </div>

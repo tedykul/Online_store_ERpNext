@@ -123,8 +123,8 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
               </span>
             )}
             <div className="flex items-baseline gap-0.5">
-              <span className="text-base font-bold text-foreground tracking-tight leading-none">{formatIDR(product.price)}</span>
-              <span className="text-[9px] text-muted-foreground">/{product.unit}</span>
+              <span className="text-base font-extrabold text-foreground tracking-tight leading-none">{formatIDR(product.price)}</span>
+              <span className="text-[10px] font-medium text-muted-foreground">/{product.unit}</span>
             </div>
           </div>
 
