@@ -162,24 +162,37 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-4"
           >
-            <h3 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-              <Sprout className="h-6 w-6 text-primary" />
+            <h3 className="flex items-center gap-2 text-xl font-bold tracking-tight md:text-2xl">
+              <Sprout className="h-5 w-5 text-primary md:h-6 md:w-6" />
               {c.aboutStoryH3 ?? "Misi Kami"}
             </h3>
-            <p className="text-muted-foreground leading-relaxed">
-              {c.aboutStoryP1 ?? "Indonesia adalah negara agraris yang kaya, tapi banyak petani masih kesulitan menjual hasil panen dengan harga layak. Sementara itu, konsumen kota sulit mendapatkan sayur & buah benar-benar segar."}
+
+            {/* Problem paragraph — with bold key phrases for scanability */}
+            <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
+              Indonesia negara agraris yang kaya. Tapi{" "}
+              <strong className="font-semibold text-foreground">banyak petani</strong>{" "}
+              masih kesulitan menjual hasil panen dengan{" "}
+              <strong className="font-semibold text-foreground">harga layak</strong>.
+              Sementara konsumen kota{" "}
+              <strong className="font-semibold text-foreground">sulit mendapat sayur & buah segar</strong>.
             </p>
 
-            {/* Pull quote — visual break between paragraphs */}
-            <div className="my-4 flex items-start gap-3 rounded-2xl border-l-4 border-orange-500 bg-orange-500/5 p-4">
-              <Quote className="h-5 w-5 shrink-0 text-orange-500 mt-0.5" />
-              <p className="text-sm font-semibold text-foreground italic leading-relaxed">
+            {/* Pull quote — visual break, solution statement */}
+            <div className="relative my-3 overflow-hidden rounded-2xl border-l-4 border-orange-500 bg-gradient-to-r from-orange-500/8 to-transparent p-4 md:my-4">
+              <Quote className="h-5 w-5 shrink-0 text-orange-500 absolute top-3 right-3 opacity-30" />
+              <p className="text-sm font-semibold text-foreground italic leading-relaxed pr-8">
                 "Petani mendapat harga adil, konsumen mendapat produk segar. Win-win untuk semua."
               </p>
             </div>
 
-            <p className="text-muted-foreground leading-relaxed">
-              {c.aboutStoryP2 ?? "SayurLogi menjembatani kedua pihak: petani mendapat harga adil, konsumen mendapat produk segar dengan harga jujur. Win-win untuk semua."}
+            {/* Solution paragraph — with bold key phrases */}
+            <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
+              <strong className="font-semibold text-primary">SayurLogi</strong>{" "}
+              menjembatani kedua pihak. Petani mendapat{" "}
+              <strong className="font-semibold text-foreground">harga adil</strong>,{" "}
+              konsumen mendapat{" "}
+              <strong className="font-semibold text-foreground">produk segar</strong>{" "}
+              dengan harga jujur.
             </p>
             <div className="flex flex-wrap gap-2 pt-2">
               {["#DukungPetaniLokal", "#SayurOrganik", "#TanpaPestisida", "#RantaiPendek"].map(
