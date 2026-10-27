@@ -124,14 +124,11 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* Add bottom padding to main content on mobile so footer/content
+  /* Add bottom padding to footer on mobile so copyright bar
      isn't hidden behind fixed bottom nav */
   @media (max-width: 767px) {
-    main {
-      padding-bottom: 4rem; /* 64px = bottom nav height */
-    }
     footer {
-      padding-bottom: 4rem; /* footer also needs clearance */
+      padding-bottom: 4rem; /* 64px = bottom nav height */
     }
   }
 }
