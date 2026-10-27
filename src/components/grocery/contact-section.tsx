@@ -146,7 +146,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
       id="kontak"
       className="scroll-mt-24 bg-gradient-to-b from-background to-secondary/20"
     >
-      <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 py-12 md:py-24">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
