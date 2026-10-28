@@ -114,14 +114,19 @@ export function FaqSection({ faqs: dbFaqs, onOpenContactSheet }: FaqSectionProps
       id="faq"
       className="scroll-mt-28 border-b border-border/40 bg-secondary/20"
     >
-      <div className="mx-auto max-w-4xl px-4 py-16 md:py-24">
-        {/* Heading */}
+      <div className="mx-auto max-w-4xl px-4 py-8 md:py-24">
+        {/* Mobile: compact label (no heading/legend) */}
+        <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground md:hidden">
+          FAQ
+        </p>
+
+        {/* Desktop: full heading + legend (hidden on mobile) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5 }}
-          className="text-center"
+          className="hidden text-center md:block"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <HelpCircle className="h-3.5 w-3.5" />
@@ -163,10 +168,11 @@ export function FaqSection({ faqs: dbFaqs, onOpenContactSheet }: FaqSectionProps
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-10"
+          className="mt-3 md:mt-10"
         >
           <Accordion type="single" collapsible className="space-y-2.5">
-            {items.map((item, i) => {
+            {/* Mobile: top 5 items only. Desktop: all items */}
+            {(typeof window !== 'undefined' && window.innerWidth < 768 ? items.slice(0, 5) : items).map((item, i) => {
               const cat = CATEGORY_META[item.category];
               const CatIcon = cat.icon;
               return (
@@ -203,17 +209,30 @@ export function FaqSection({ faqs: dbFaqs, onOpenContactSheet }: FaqSectionProps
           </Accordion>
         </motion.div>
 
-        {/* CTA card — solid elevated, matches design system (no dashed border) */}
+        {/* Mobile: compact single-line CS button */}
+        <button
+          onClick={() => {
+            if (onOpenContactSheet && window.innerWidth < 768) {
+              onOpenContactSheet();
+            } else {
+              handleContactClick();
+            }
+          }}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-card via-card to-muted/50 px-4 py-3 text-sm font-bold text-primary ring-1 ring-border shadow-sm active:scale-[0.99] transition-all md:hidden"
+        >
+          <MessageCircleQuestion className="h-4 w-4" />
+          Masih ada pertanyaan? Hubungi CS
+        </button>
+
+        {/* Desktop: full CTA card (hidden on mobile) */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="group relative mt-10 flex flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-6 text-center ring-1 ring-primary/20 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]"
+          className="hidden md:block group relative mt-10 flex-col items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-6 text-center ring-1 ring-primary/20 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)] md:flex"
         >
-          {/* Solid accent bar at top — primary green for emphasis */}
           <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
             <MessageCircleQuestion className="h-6 w-6" />
           </div>
