@@ -50,8 +50,8 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
             <span className="text-xs text-muted-foreground">{promos.length} produk</span>
           </div>
         </div>
-        <span className="flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground">
-          Geser <ChevronRight className="h-3 w-3" />
+        <span className="flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[9px] font-bold text-red-600">
+          ⏰ Berakhir cepat
         </span>
       </div>
 

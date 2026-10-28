@@ -82,8 +82,8 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
 
   return (
     <footer className="mt-auto border-t border-border/60 bg-secondary/30">
-      {/* ============ Newsletter strip — elevated card ============ */}
-      <div className="mx-auto max-w-7xl px-4 pt-3 md:pt-8">
+      {/* ============ Newsletter strip — elevated card (desktop only, mobile hidden for lighter footer) ============ */}
+      <div className="hidden md:block mx-auto max-w-7xl px-4 pt-8">
         <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Newsletter</p>
         <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 ring-1 ring-primary/20 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] md:p-6">
           <div className="absolute inset-x-0 top-0 h-1.5 bg-primary" />
@@ -105,7 +105,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
       </div>
 
       {/* ============ Brand section — compact elevated card (mobile) ============ */}
-      <div className="mx-auto max-w-7xl px-4 pt-5 pb-3 md:pt-10 md:pb-6">
+      <div className="mx-auto max-w-7xl px-4 pt-4 pb-3 md:pt-10 md:pb-6">
         {/* Mobile: single compact brand card — logo + trust badges inline */}
         <div className="md:hidden">
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-3.5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">

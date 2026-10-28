@@ -167,8 +167,8 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               {c.aboutStoryH3 ?? "Misi Kami"}
             </h3>
 
-            {/* Problem paragraph — elevated card with left accent for visual structure */}
-            <div className="relative overflow-hidden rounded-xl border-l-4 border-red-400/60 bg-red-500/5 p-3.5 md:p-4">
+            {/* Single compact story card — problem→solution in one block (mobile) */}
+            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted/50 p-3.5 ring-1 ring-border shadow-[0_1px_2px_rgba(0,0,0,0.04)] md:p-4">
               <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
                 Indonesia negara agraris yang kaya. Tapi{" "}
                 <strong className="font-bold text-foreground">banyak petani</strong>{" "}
@@ -177,18 +177,11 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
                 Sementara konsumen kota{" "}
                 <strong className="font-bold text-foreground">sulit mendapat sayur & buah segar</strong>.
               </p>
-            </div>
-
-            {/* Pull quote — solution statement, enhanced */}
-            <div className="relative my-3 overflow-hidden rounded-2xl border-l-4 border-orange-500 bg-gradient-to-r from-orange-500/8 to-transparent p-4 md:my-4">
-              <Quote className="h-5 w-5 shrink-0 text-orange-500 absolute top-3 right-3 opacity-30" />
-              <p className="text-sm font-semibold text-foreground italic leading-relaxed pr-8">
-                "Petani mendapat harga adil, konsumen mendapat produk segar. Win-win untuk semua."
-              </p>
-            </div>
-
-            {/* Solution paragraph — elevated card with left accent */}
-            <div className="relative overflow-hidden rounded-xl border-l-4 border-primary/60 bg-primary/5 p-3.5 md:p-4">
+              <div className="my-3 flex items-start gap-2 border-l-3 border-orange-500 pl-3">
+                <p className="text-sm font-semibold text-foreground italic leading-relaxed">
+                  "Petani mendapat harga adil, konsumen mendapat produk segar. Win-win untuk semua."
+                </p>
+              </div>
               <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
                 <strong className="font-bold text-primary">SayurLogi</strong>{" "}
                 menjembatani kedua pihak. Petani mendapat{" "}
@@ -276,7 +269,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:mt-16 md:gap-6"
+          className="hidden md:mt-16 md:grid md:grid-cols-4 md:gap-6"
         >
           {stats.map((stat, i) => (
             <motion.div
