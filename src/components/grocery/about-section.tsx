@@ -214,7 +214,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative w-full max-w-md mx-auto"
+            className="relative w-full max-w-md mx-auto hidden md:block"
           >
             {/* Gradient glow background */}
             <div className="pointer-events-none absolute inset-0 -z-10 scale-105 rounded-3xl bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-2xl" />
