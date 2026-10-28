@@ -208,7 +208,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             </div>
           </motion.div>
 
-          {/* Visual — real farmer photo + harvest photo (replaces generic icon cluster) */}
+          {/* Visual — icon cluster card (desktop only, mobile hidden for fast-to-action) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -217,38 +217,51 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             className="relative w-full max-w-md mx-auto hidden md:block"
           >
             {/* Gradient glow background */}
-            <div className="pointer-events-none absolute inset-0 -z-10 scale-105 rounded-3xl bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-2xl" />
-
-            {/* Main farmer photo — full bleed, rounded, shadow */}
-            <div className="relative overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/40 shadow-primary/20 bg-gradient-to-br from-primary/10 to-secondary/30">
-              <img
-                src="/about-farmer.png"
-                alt="Petani lokal di kebun sayur saat pagi hari"
-                className="w-full aspect-[4/5] object-cover"
-                loading="lazy"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              {/* Gradient overlay bottom for text legibility */}
-              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
-              {/* Tagline overlay — bottom of photo */}
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <p className="font-display text-xl font-extrabold leading-tight drop-shadow-lg">
-                  Dari Kebun
-                  <span className="text-orange-300"> → </span>
-                  ke Meja Makan
-                </p>
-                <p className="mt-1 text-[11px] text-white/85 leading-snug">
-                  Rantai pasok terpendek untuk kesegaran maksimal
-                </p>
-              </div>
+            <div className="pointer-events-none absolute inset-0 -z-10 scale-110">
+              <div className="absolute top-1/2 left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-orange-300/15 to-amber-200/10 blur-3xl" />
             </div>
 
-            {/* Floating badge — top left */}
-            <div className="absolute -top-3 -left-3 z-10 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-white shadow-lg ring-2 ring-white">
-              <Sprout className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-bold">Petani Mitra</span>
+            {/* Premium gradient card with icon cluster + tagline */}
+            <div className="relative flex aspect-square flex-col items-center justify-center gap-6 rounded-3xl border border-border/40 bg-gradient-to-br from-primary/5 via-orange-500/5 to-amber-500/5 p-8 text-center">
+              {/* Top icon cluster */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-md">
+                  <Sprout className="h-7 w-7" />
+                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500 shadow-md">
+                  <Truck className="h-7 w-7" />
+                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 shadow-md">
+                  <Heart className="h-7 w-7" />
+                </div>
+              </div>
+
+              {/* Tagline */}
+              <div className="space-y-2">
+                <p className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+                  Dari Kebun
+                  <span className="text-orange-500"> → </span>
+                  ke Meja Makan
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                  Rantai pasok terpendek untuk kesegaran maksimal. Tanpa perantara, tanpa bahan kimia.
+                </p>
+              </div>
+
+              {/* Flow diagram */}
+              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <span className="rounded-lg bg-primary/10 px-3 py-1.5 text-primary flex items-center gap-1">
+                  <Sprout className="h-3 w-3" /> Petani
+                </span>
+                <span className="text-orange-500">→</span>
+                <span className="rounded-lg bg-orange-500/10 px-3 py-1.5 text-orange-500 flex items-center gap-1">
+                  <Truck className="h-3 w-3" /> SayurLogi
+                </span>
+                <span className="text-orange-500">→</span>
+                <span className="rounded-lg bg-amber-500/10 px-3 py-1.5 text-amber-600 flex items-center gap-1">
+                  <Heart className="h-3 w-3" /> Kamu
+                </span>
+              </div>
             </div>
           </motion.div>
         </div>
