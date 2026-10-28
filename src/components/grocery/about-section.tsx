@@ -167,17 +167,19 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               {c.aboutStoryH3 ?? "Misi Kami"}
             </h3>
 
-            {/* Problem paragraph — with bold key phrases for scanability */}
-            <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
-              Indonesia negara agraris yang kaya. Tapi{" "}
-              <strong className="font-semibold text-foreground">banyak petani</strong>{" "}
-              masih kesulitan menjual hasil panen dengan{" "}
-              <strong className="font-semibold text-foreground">harga layak</strong>.
-              Sementara konsumen kota{" "}
-              <strong className="font-semibold text-foreground">sulit mendapat sayur & buah segar</strong>.
-            </p>
+            {/* Problem paragraph — elevated card with left accent for visual structure */}
+            <div className="relative overflow-hidden rounded-xl border-l-4 border-red-400/60 bg-red-500/5 p-3.5 md:p-4">
+              <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
+                Indonesia negara agraris yang kaya. Tapi{" "}
+                <strong className="font-bold text-foreground">banyak petani</strong>{" "}
+                masih kesulitan menjual hasil panen dengan{" "}
+                <strong className="font-bold text-foreground">harga layak</strong>.
+                Sementara konsumen kota{" "}
+                <strong className="font-bold text-foreground">sulit mendapat sayur & buah segar</strong>.
+              </p>
+            </div>
 
-            {/* Pull quote — visual break, solution statement */}
+            {/* Pull quote — solution statement, enhanced */}
             <div className="relative my-3 overflow-hidden rounded-2xl border-l-4 border-orange-500 bg-gradient-to-r from-orange-500/8 to-transparent p-4 md:my-4">
               <Quote className="h-5 w-5 shrink-0 text-orange-500 absolute top-3 right-3 opacity-30" />
               <p className="text-sm font-semibold text-foreground italic leading-relaxed pr-8">
@@ -185,15 +187,17 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               </p>
             </div>
 
-            {/* Solution paragraph — with bold key phrases */}
-            <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
-              <strong className="font-semibold text-primary">SayurLogi</strong>{" "}
-              menjembatani kedua pihak. Petani mendapat{" "}
-              <strong className="font-semibold text-foreground">harga adil</strong>,{" "}
-              konsumen mendapat{" "}
-              <strong className="font-semibold text-foreground">produk segar</strong>{" "}
-              dengan harga jujur.
-            </p>
+            {/* Solution paragraph — elevated card with left accent */}
+            <div className="relative overflow-hidden rounded-xl border-l-4 border-primary/60 bg-primary/5 p-3.5 md:p-4">
+              <p className="text-sm text-foreground/70 leading-relaxed md:text-base">
+                <strong className="font-bold text-primary">SayurLogi</strong>{" "}
+                menjembatani kedua pihak. Petani mendapat{" "}
+                <strong className="font-bold text-foreground">harga adil</strong>,{" "}
+                konsumen mendapat{" "}
+                <strong className="font-bold text-foreground">produk segar</strong>{" "}
+                dengan harga jujur.
+              </p>
+            </div>
             <div className="flex flex-wrap gap-2 pt-2">
               {["#DukungPetaniLokal", "#SayurOrganik", "#TanpaPestisida", "#RantaiPendek"].map(
                 (tag) => (
