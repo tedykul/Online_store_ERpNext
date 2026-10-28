@@ -227,7 +227,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6"
+          className="hidden mt-12 md:grid md:grid-cols-4 md:gap-6"
         >
           {PLATFORM_STATS.map((stat, i) => (
             <motion.div

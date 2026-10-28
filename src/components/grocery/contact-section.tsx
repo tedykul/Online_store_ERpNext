@@ -147,13 +147,13 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
       className="scroll-mt-24 bg-gradient-to-b from-background to-secondary/20"
     >
       <div className="mx-auto max-w-7xl px-4 py-6 md:py-24">
-        {/* Heading */}
+        {/* Heading — desktop only (mobile: straight to cards + form) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5 }}
-          className="mx-auto max-w-3xl text-center"
+          className="hidden mx-auto max-w-3xl text-center md:block"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <Mail className="h-3.5 w-3.5" />
@@ -169,6 +169,11 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
             Tim customer service kami siap membantu. Isi form di bawah atau hubungi langsung via kontak kami.
           </p>
         </motion.div>
+
+        {/* Mobile: compact section label (replaces full heading) */}
+        <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground md:hidden">
+          Hubungi Kami
+        </p>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-5 lg:gap-12 md:mt-12">
           {/* ============ Left: Contact info cards ============ */}

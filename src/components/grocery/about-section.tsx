@@ -92,15 +92,43 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
       <div className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-primary/8 blur-3xl" />
       <div className="pointer-events-none absolute bottom-1/4 -left-20 h-72 w-72 rounded-full bg-orange-300/6 blur-3xl" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-10 md:py-28">
-        {/* Heading */}
+      <div className="relative mx-auto max-w-7xl px-4 py-8 md:py-28">
+        {/* Mobile: micro-stats only (trust signal, compact) */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto max-w-3xl text-center"
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto flex max-w-md items-center justify-center divide-x divide-border/60 md:hidden"
         >
+          <div className="flex flex-1 flex-col items-center px-3">
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-xl font-extrabold text-transparent tabular-nums">
+              {c.aboutStat1Value ?? "5.000+"}
+            </span>
+            <span className="mt-0.5 text-[10px] font-semibold text-foreground/70 uppercase">
+              {c.aboutStat1Label ?? "Pelanggan"}
+            </span>
+          </div>
+          <div className="flex flex-1 flex-col items-center px-3">
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-xl font-extrabold text-transparent tabular-nums">
+              {c.aboutStat2Value ?? "120+"}
+            </span>
+            <span className="mt-0.5 text-[10px] font-semibold text-foreground/70 uppercase">
+              {c.aboutStat2Label ?? "Petani"}
+            </span>
+          </div>
+          <div className="flex flex-1 flex-col items-center px-3">
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-xl font-extrabold text-transparent tabular-nums">
+              {c.aboutStat3Value ?? "15"}
+            </span>
+            <span className="mt-0.5 text-[10px] font-semibold text-foreground/70 uppercase">
+              {c.aboutStat3Label ?? "Kota"}
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Desktop: full heading + story + values (hidden on mobile) */}
+        <div className="hidden md:block">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-semibold text-primary backdrop-blur-sm shadow-sm">
             <Sprout className="h-4 w-4" />
             {c.aboutBadge ?? "Cerita Kami"}
@@ -150,9 +178,8 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               </span>
             </div>
           </motion.div>
-        </motion.div>
 
-        {/* Story + Visual — gap-12 for more breathing room */}
+          {/* Story + Visual — gap-12 for more breathing room */}
         <div className="mt-8 grid items-center gap-6 md:grid-cols-2 md:gap-12 md:mt-12">
           {/* Story text — with pull quote highlight */}
           <motion.div
@@ -345,6 +372,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
             ))}
           </div>
         </div>
+        </div>{/* end hidden md:block */}
       </div>
     </section>
   );
