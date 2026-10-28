@@ -17,6 +17,7 @@ import { AboutSection } from "@/components/grocery/about-section";
 import { TestimonialsSection } from "@/components/grocery/testimonials-section";
 import { FaqSection } from "@/components/grocery/faq-section";
 import { ContactSection } from "@/components/grocery/contact-section";
+import { ContactSheet } from "@/components/grocery/contact-sheet";
 import { BackToTop } from "@/components/grocery/back-to-top";
 import { ServiceWorkerRegistration } from "@/components/grocery/sw-registration";
 import { PWAInstallPrompt } from "@/components/grocery/pwa-install-prompt";
@@ -136,6 +137,7 @@ export function HomeClient({ content }: HomeClientProps) {
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [trackingId, setTrackingId] = useState<string | undefined>(undefined);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [contactSheetOpen, setContactSheetOpen] = useState(false);
 
   const handleTrackOrder = (id: string) => {
     setTrackingId(id);
@@ -238,7 +240,7 @@ export function HomeClient({ content }: HomeClientProps) {
         <TestimonialsSection testimonials={content.testimonials} />
 
         {/* FAQ section */}
-        <FaqSection faqs={content.faqs} />
+        <FaqSection faqs={content.faqs} onOpenContactSheet={() => setContactSheetOpen(true)} />
 
         {/* Contact section */}
         <ContactSection content={content} />
@@ -265,6 +267,11 @@ export function HomeClient({ content }: HomeClientProps) {
         onBuyNow={() => setCheckoutOpen(true)}
       />
       <WishlistSheet onProductClick={handleOpenDetail} />
+      <ContactSheet
+        open={contactSheetOpen}
+        onOpenChange={setContactSheetOpen}
+        content={content}
+      />
       <OrderTrackingDialog
         open={trackingOpen}
         onOpenChange={setTrackingOpen}

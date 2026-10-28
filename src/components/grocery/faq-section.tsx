@@ -92,9 +92,11 @@ const FAQ_ITEMS: FaqItem[] = [
 interface FaqSectionProps {
   /** DB-driven FAQs. If empty/missing, falls back to hardcoded defaults. */
   faqs?: { id: string; q: string; a: string }[];
+  /** Open contact sheet (mobile only — desktop scrolls to #kontak) */
+  onOpenContactSheet?: () => void;
 }
 
-export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
+export function FaqSection({ faqs: dbFaqs, onOpenContactSheet }: FaqSectionProps = {}) {
   // Use DB FAQs if provided and non-empty, else hardcoded defaults.
   // DB FAQs don't have category → default to "pemesanan" so they still render.
   const items: FaqItem[] =
@@ -222,7 +224,13 @@ export function FaqSection({ faqs: dbFaqs }: FaqSectionProps = {}) {
             </p>
           </div>
           <Button
-            onClick={handleContactClick}
+            onClick={() => {
+              if (onOpenContactSheet && window.innerWidth < 768) {
+                onOpenContactSheet();
+              } else {
+                handleContactClick();
+              }
+            }}
             className="mt-2 rounded-full px-6 shadow-md transition-transform hover:scale-105"
           >
             Hubungi Kami

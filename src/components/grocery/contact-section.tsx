@@ -144,7 +144,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
   return (
     <section
       id="kontak"
-      className="scroll-mt-24 bg-gradient-to-b from-background to-secondary/20"
+      className="hidden md:block scroll-mt-24 bg-gradient-to-b from-background to-secondary/20"
     >
       <div className="mx-auto max-w-7xl px-4 py-6 md:py-24">
         {/* Heading — desktop only (mobile: straight to cards + form) */}
