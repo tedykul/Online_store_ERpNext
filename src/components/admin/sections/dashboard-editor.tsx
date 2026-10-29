@@ -98,6 +98,16 @@ interface DashboardStats {
   ordersByPaymentMethod: PaymentItem[];
   recentOrders: RecentOrder[];
   lowStockProducts: LowStockProduct[];
+  // Phase 2
+  stockByCategory: { category: string; stock: number; productCount: number; value: number }[];
+  totalStockUnits: number;
+  totalStockValue: number;
+  erpSyncStatus: {
+    totalProducts: number;
+    syncedProducts: number;
+    lastSyncAt: string | null;
+    isConfigured: boolean;
+  };
 }
 
 // Colorful palette for charts (8 distinct colors)
@@ -592,6 +602,186 @@ export function DashboardEditor() {
           </div>
         </AdminCard>
       </div>
+
+      {/* === Phase 2: Product Dashboard Section === */}
+      {/* Stock KPI cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KpiCard
+          title="Total Stok (unit)"
+          value={String(stats.totalStockUnits)}
+          icon={<Package className="h-5 w-5" />}
+          gradient="from-cyan-500 to-blue-600"
+          subtitle="Semua produk published"
+        />
+        <KpiCard
+          title="Nilai Stok"
+          value={formatIDR(stats.totalStockValue)}
+          icon={<DollarSign className="h-5 w-5" />}
+          gradient="from-emerald-500 to-green-600"
+          subtitle="Stock × harga"
+        />
+        <KpiCard
+          title="Produk Published"
+          value={String(stats.erpSyncStatus.totalProducts)}
+          icon={<Package className="h-5 w-5" />}
+          gradient="from-violet-500 to-purple-600"
+          subtitle="Total di DB"
+        />
+        <KpiCard
+          title="Sync ERPNext"
+          value={String(stats.erpSyncStatus.syncedProducts)}
+          icon={<TrendingUp className="h-5 w-5" />}
+          gradient="from-amber-500 to-orange-600"
+          subtitle={
+            stats.erpSyncStatus.lastSyncAt
+              ? `Last: ${timeAgo(stats.erpSyncStatus.lastSyncAt)}`
+              : "Belum pernah sync"
+          }
+        />
+      </div>
+
+      {/* ERPNext Sync Status Card */}
+      <AdminCard>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">
+                🔄 ERPNext Sync Status
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Status sinkronisasi produk dengan ERPNext
+              </p>
+            </div>
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-xs font-medium",
+                stats.erpSyncStatus.isConfigured
+                  ? "bg-emerald-500/20 text-emerald-700"
+                  : "bg-rose-500/20 text-rose-700"
+              )}
+            >
+              {stats.erpSyncStatus.isConfigured ? "● Configured" : "● Not Configured"}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-center">
+              <p className="text-2xl font-bold text-foreground">
+                {stats.erpSyncStatus.totalProducts}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Total Produk</p>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-center">
+              <p className="text-2xl font-bold text-emerald-600">
+                {stats.erpSyncStatus.syncedProducts}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Tersinkron</p>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-secondary/30 p-3 text-center">
+              <p className="text-2xl font-bold text-amber-600">
+                {stats.erpSyncStatus.totalProducts - stats.erpSyncStatus.syncedProducts}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Manual Only</p>
+            </div>
+          </div>
+          {stats.erpSyncStatus.lastSyncAt && (
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              Sync terakhir: {timeAgo(stats.erpSyncStatus.lastSyncAt)}
+            </p>
+          )}
+        </div>
+      </AdminCard>
+
+      {/* Stock per category — Bar chart */}
+      <AdminCard>
+        <div className="p-4">
+          <h3 className="text-sm font-semibold text-foreground mb-1">
+            📦 Stok per Kategori
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            Distribusi stok + jumlah produk per kategori
+          </p>
+          {stats.stockByCategory.length === 0 ? (
+            <div className="py-10 text-center text-sm text-muted-foreground">
+              <Package className="mx-auto mb-2 h-8 w-8 opacity-40" />
+              Belum ada produk
+            </div>
+          ) : (
+            <>
+              <div className="h-[220px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={stats.stockByCategory.map((c, i) => ({
+                      ...c,
+                      fill: CHART_COLORS[i % CHART_COLORS.length],
+                    }))}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                    <XAxis
+                      dataKey="category"
+                      tick={{ fontSize: 11, fill: "#6b7280" }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#6b7280" }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const c = payload[0].payload as {
+                          category: string;
+                          stock: number;
+                          productCount: number;
+                          value: number;
+                        };
+                        return (
+                          <div className="rounded-lg border border-border bg-popover p-2 shadow-md text-xs">
+                            <p className="font-medium text-foreground">{c.category}</p>
+                            <p className="text-blue-600">Stok: {c.stock} unit</p>
+                            <p className="text-violet-600">Produk: {c.productCount}</p>
+                            <p className="text-emerald-600">Nilai: {formatIDR(c.value)}</p>
+                          </div>
+                        );
+                      }}
+                    />
+                    <Bar dataKey="stock" radius={[6, 6, 0, 0]}>
+                      {stats.stockByCategory.map((c, i) => (
+                        <Cell key={c.category} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Detail table */}
+              <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2">
+                {stats.stockByCategory.map((c, i) => (
+                  <div
+                    key={c.category}
+                    className="rounded-lg border border-border/60 bg-secondary/30 p-2"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
+                      />
+                      <span className="text-xs font-medium text-foreground truncate">
+                        {c.category}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-lg font-bold text-foreground">{c.stock}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {c.productCount} produk · {formatIDR(c.value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </AdminCard>
 
       {/* Payment methods (compact) */}
       {stats.ordersByPaymentMethod.length > 0 && (

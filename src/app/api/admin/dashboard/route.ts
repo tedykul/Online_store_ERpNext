@@ -87,6 +87,16 @@ interface DashboardStats {
   // Lists
   recentOrders: RecentOrder[];
   lowStockProducts: LowStockProduct[];
+  // Phase 2: Product dashboard
+  stockByCategory: { category: string; stock: number; productCount: number; value: number }[];
+  totalStockUnits: number;
+  totalStockValue: number;
+  erpSyncStatus: {
+    totalProducts: number;
+    syncedProducts: number;
+    lastSyncAt: string | null;
+    isConfigured: boolean;
+  };
 }
 
 // Status colors + labels (mirror of ORDER_STATUS_COLORS in lib/orders.ts)
@@ -309,6 +319,47 @@ export async function GET() {
       emoji: p.emoji || "🛒",
     }));
 
+    // === Phase 2: Product dashboard stats ===
+    // Stock per category (for stacked bar chart)
+    const allProductsForStock = await db.product.findMany({
+      where: { published: true },
+      select: { category: true, stock: true, price: true },
+    });
+    const stockByCategoryMap: Record<string, { stock: number; productCount: number; value: number }> = {};
+    let totalStockUnits = 0;
+    let totalStockValue = 0;
+    allProductsForStock.forEach((p) => {
+      const cat = p.category || "Lainnya";
+      if (!stockByCategoryMap[cat]) {
+        stockByCategoryMap[cat] = { stock: 0, productCount: 0, value: 0 };
+      }
+      stockByCategoryMap[cat].stock += p.stock;
+      stockByCategoryMap[cat].productCount += 1;
+      stockByCategoryMap[cat].value += p.stock * p.price;
+      totalStockUnits += p.stock;
+      totalStockValue += p.stock * p.price;
+    });
+    const stockByCategory = Object.entries(stockByCategoryMap)
+      .map(([category, data]) => ({ category, ...data }))
+      .sort((a, b) => b.stock - a.stock);
+
+    // ERPNext sync status
+    const totalProducts = await db.product.count();
+    const syncedProducts = await db.product.count({ where: { erpSyncedAt: { not: null } } });
+    const latestSynced = await db.product.findFirst({
+      where: { erpSyncedAt: { not: null } },
+      orderBy: { erpSyncedAt: "desc" },
+      select: { erpSyncedAt: true },
+    });
+    const erpSyncStatus = {
+      totalProducts,
+      syncedProducts,
+      lastSyncAt: latestSynced?.erpSyncedAt?.toISOString() || null,
+      isConfigured: Boolean(
+        process.env.ERPNEXT_URL && process.env.ERPNEXT_API_KEY && process.env.ERPNEXT_API_SECRET
+      ),
+    };
+
     const stats: DashboardStats = {
       totalRevenue,
       totalOrders,
@@ -322,6 +373,11 @@ export async function GET() {
       ordersByPaymentMethod,
       recentOrders,
       lowStockProducts,
+      // Phase 2
+      stockByCategory,
+      totalStockUnits,
+      totalStockValue,
+      erpSyncStatus,
     };
 
     return NextResponse.json({ success: true, stats });
