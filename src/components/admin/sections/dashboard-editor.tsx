@@ -155,6 +155,7 @@ export function DashboardEditor() {
   const stats = data?.stats;
   const topProducts = stats?.topProducts ?? [];
   const revenueByCategory = stats?.revenueByCategory ?? [];
+  const revenueLast7Days = stats?.revenueLast7Days ?? [];
 
   // Memo: top products with index for color
   const topProductsColored = useMemo(() => {
@@ -172,11 +173,48 @@ export function DashboardEditor() {
     }));
   }, [revenueByCategory]);
 
+  // Calculate revenue trend (this week vs last week, from 7-day data)
+  const revenueTrend = useMemo(() => {
+    if (revenueLast7Days.length < 7) return null;
+    // Compare last 3 days vs first 4 days as a simple trend proxy
+    const last3 = revenueLast7Days.slice(-3).reduce((s, d) => s + d.revenue, 0);
+    const first4 = revenueLast7Days.slice(0, 4).reduce((s, d) => s + d.revenue, 0);
+    if (first4 === 0) return null;
+    const change = Math.round(((last3 - first4) / first4) * 100);
+    return { value: change, label: "trend mingguan" };
+  }, [revenueLast7Days]);
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Memuat dashboard...</span>
+      <div className="space-y-4">
+        {/* Skeleton header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-7 w-48 animate-pulse rounded-lg bg-secondary" />
+            <div className="mt-2 h-4 w-64 animate-pulse rounded bg-secondary/70" />
+          </div>
+        </div>
+        {/* Skeleton KPI cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-[100px] animate-pulse rounded-xl bg-gradient-to-br opacity-60"
+              style={{
+                background: `linear-gradient(135deg, ${CHART_COLORS[(i - 1) % CHART_COLORS.length]}33, ${CHART_COLORS[(i - 1) % CHART_COLORS.length]}11)`,
+              }}
+            />
+          ))}
+        </div>
+        {/* Skeleton charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 h-[280px] animate-pulse rounded-xl bg-secondary/50" />
+          <div className="h-[280px] animate-pulse rounded-xl bg-secondary/50" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="h-[280px] animate-pulse rounded-xl bg-secondary/50" />
+          <div className="h-[280px] animate-pulse rounded-xl bg-secondary/50" />
+        </div>
       </div>
     );
   }
@@ -200,6 +238,26 @@ export function DashboardEditor() {
         description="Overview performa SayurLogi — 30 hari terakhir"
       />
 
+      {/* === Colorful Header Banner === */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-5 text-white shadow-lg">
+        <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">📊 Dashboard SayurLogi</h2>
+            <p className="text-sm text-white/80">
+              Overview performa — 30 hari terakhir
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold">{formatIDR(stats.totalRevenue)}</p>
+            <p className="text-xs text-white/70">Total Revenue</p>
+          </div>
+        </div>
+        {/* Decorative circles */}
+        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
+        <div className="absolute -right-4 -bottom-8 h-24 w-24 rounded-full bg-white/5" />
+      </div>
+
       {/* === KPI Cards === */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard
@@ -208,6 +266,7 @@ export function DashboardEditor() {
           icon={<DollarSign className="h-5 w-5" />}
           gradient="from-emerald-500 to-teal-600"
           subtitle="30 hari terakhir"
+          trend={revenueTrend || undefined}
         />
         <KpiCard
           title="Total Pesanan"
@@ -1022,7 +1081,7 @@ export function DashboardEditor() {
 }
 
 // ============================================================
-// KPI Card — colorful gradient card with icon + value + subtitle
+// KPI Card — colorful gradient card with glassmorphism + trend
 // ============================================================
 function KpiCard({
   title,
@@ -1031,6 +1090,7 @@ function KpiCard({
   gradient,
   subtitle,
   subtitleIcon,
+  trend,
 }: {
   title: string;
   value: string;
@@ -1038,32 +1098,53 @@ function KpiCard({
   gradient: string;
   subtitle?: string;
   subtitleIcon?: React.ReactNode;
+  trend?: { value: number; label: string }; // percentage + label, e.g. { value: 12, label: "vs last week" }
 }) {
+  const isPositiveTrend = trend && trend.value >= 0;
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ y: -2, transition: { duration: 0.15 } }}
       className={cn(
-        "relative overflow-hidden rounded-xl bg-gradient-to-br p-4 text-white shadow-sm",
+        "relative overflow-hidden rounded-xl bg-gradient-to-br p-4 text-white shadow-md",
         gradient
       )}
     >
+      {/* Glassmorphism overlay */}
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+
       <div className="relative z-10">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-white/80">{title}</p>
-          <div className="rounded-lg bg-white/20 p-1.5">{icon}</div>
+          <div className="rounded-lg bg-white/20 p-1.5 backdrop-blur-sm">{icon}</div>
         </div>
         <p className="mt-2 text-xl font-bold tracking-tight">{value}</p>
-        {subtitle && (
+        {trend && (
+          <div className="mt-1 flex items-center gap-1 text-[10px]">
+            {isPositiveTrend ? (
+              <TrendingUp className="h-3 w-3 text-white/90" />
+            ) : (
+              <TrendingDown className="h-3 w-3 text-white/90" />
+            )}
+            <span className="font-medium text-white/90">
+              {isPositiveTrend ? "+" : ""}{trend.value}%
+            </span>
+            <span className="text-white/60">{trend.label}</span>
+          </div>
+        )}
+        {subtitle && !trend && (
           <p className="mt-1 flex items-center gap-1 text-[10px] text-white/70">
             {subtitleIcon}
             {subtitle}
           </p>
         )}
       </div>
-      {/* Decorative circle */}
-      <div className="absolute -right-6 -bottom-6 h-20 w-20 rounded-full bg-white/10" />
-      <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/5" />
+
+      {/* Decorative circles */}
+      <div className="absolute -right-8 -bottom-8 h-24 w-24 rounded-full bg-white/10" />
+      <div className="absolute -right-2 -top-2 h-14 w-14 rounded-full bg-white/5" />
     </motion.div>
   );
 }
