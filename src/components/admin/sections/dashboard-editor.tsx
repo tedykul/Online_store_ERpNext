@@ -108,6 +108,11 @@ interface DashboardStats {
     lastSyncAt: string | null;
     isConfigured: boolean;
   };
+  // Phase 3
+  revenueVsTarget: (DailyRevenue & { target: number; achievement: number })[];
+  customerGrowth7Days: { date: string; label: string; newCustomers: number; cumulative: number }[];
+  ordersByDeliveryMethod: { method: string; label: string; count: number; revenue: number }[];
+  dailyTarget: number;
 }
 
 // Colorful palette for charts (8 distinct colors)
@@ -812,6 +817,206 @@ export function DashboardEditor() {
           </div>
         </AdminCard>
       )}
+
+      {/* === Phase 3: Order Dashboard Section === */}
+      {/* Revenue vs Target — Bar chart with target line */}
+      <AdminCard>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">
+                🎯 Revenue vs Target
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Target harian: {formatIDR(stats.dailyTarget)}
+              </p>
+            </div>
+            <div className="text-right">
+              {(() => {
+                const totalRev = stats.revenueVsTarget.reduce((s, d) => s + d.revenue, 0);
+                const totalTarget = stats.dailyTarget * 7;
+                const pct = totalTarget > 0 ? Math.round((totalRev / totalTarget) * 100) : 0;
+                return (
+                  <>
+                    <p className={cn("text-lg font-bold", pct >= 100 ? "text-emerald-600" : "text-amber-600")}>
+                      {pct}%
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">achievement 7 hari</p>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+          <div className="h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.revenueVsTarget} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload as DailyRevenue & { target: number; achievement: number };
+                    return (
+                      <div className="rounded-lg border border-border bg-popover p-2 shadow-md text-xs">
+                        <p className="font-medium text-foreground">{label}</p>
+                        <p className="text-emerald-600">Revenue: {formatIDR(d.revenue)}</p>
+                        <p className="text-amber-600">Target: {formatIDR(d.target)}</p>
+                        <p className="text-blue-600">Achievement: {d.achievement}%</p>
+                      </div>
+                    );
+                  }}
+                />
+                <Bar dataKey="revenue" radius={[6, 6, 0, 0]}>
+                  {stats.revenueVsTarget.map((d) => (
+                    <Cell
+                      key={d.date}
+                      fill={d.revenue >= d.target ? "#10b981" : "#f59e0b"}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-2 flex items-center justify-center gap-4 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <span className="text-muted-foreground">Capai target</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <span className="text-muted-foreground">Di bawah target</span>
+            </div>
+          </div>
+        </div>
+      </AdminCard>
+
+      {/* Customer Growth + Delivery Method — 2 cols */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Customer Growth — Line chart */}
+        <AdminCard>
+          <div className="p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-1">
+              👥 Customer Growth
+            </h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Customer baru per hari (7 hari terakhir)
+            </p>
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.customerGrowth7Days} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorCustomers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const d = payload[0].payload as { newCustomers: number; cumulative: number };
+                      return (
+                        <div className="rounded-lg border border-border bg-popover p-2 shadow-md text-xs">
+                          <p className="font-medium text-foreground">{label}</p>
+                          <p className="text-violet-600">Baru: {d.newCustomers} customer</p>
+                          <p className="text-blue-600">Cumulative: {d.cumulative}</p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="newCustomers"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    fill="url(#colorCustomers)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </AdminCard>
+
+        {/* Delivery Method — Donut */}
+        <AdminCard>
+          <div className="p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-1">
+              🚚 Metode Pengiriman
+            </h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Distribusi pesanan (30 hari)
+            </p>
+            {stats.ordersByDeliveryMethod.length === 0 ? (
+              <div className="py-10 text-center text-sm text-muted-foreground">
+                Belum ada pesanan
+              </div>
+            ) : (
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.ordersByDeliveryMethod.map((d, i) => ({
+                        ...d,
+                        fill: CHART_COLORS[i % CHART_COLORS.length],
+                      }))}
+                      dataKey="count"
+                      nameKey="label"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={75}
+                      paddingAngle={2}
+                      label={({ label, count }) => `${label}: ${count}`}
+                      labelLine={false}
+                      style={{ fontSize: 11 }}
+                    >
+                      {stats.ordersByDeliveryMethod.map((d, i) => (
+                        <Cell key={d.method} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const d = payload[0].payload as { label: string; count: number; revenue: number };
+                        return (
+                          <div className="rounded-lg border border-border bg-popover p-2 shadow-md text-xs">
+                            <p className="font-medium text-foreground">{d.label}</p>
+                            <p className="text-blue-600">{d.count} pesanan</p>
+                            <p className="text-emerald-600">{formatIDR(d.revenue)}</p>
+                          </div>
+                        );
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </AdminCard>
+      </div>
     </div>
   );
 }

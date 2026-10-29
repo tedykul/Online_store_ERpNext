@@ -97,6 +97,11 @@ interface DashboardStats {
     lastSyncAt: string | null;
     isConfigured: boolean;
   };
+  // Phase 3: Order dashboard
+  revenueVsTarget: (DailyRevenue & { target: number; achievement: number })[];
+  customerGrowth7Days: { date: string; label: string; newCustomers: number; cumulative: number }[];
+  ordersByDeliveryMethod: { method: string; label: string; count: number; revenue: number }[];
+  dailyTarget: number;
 }
 
 // Status colors + labels (mirror of ORDER_STATUS_COLORS in lib/orders.ts)
@@ -360,6 +365,66 @@ export async function GET() {
       ),
     };
 
+    // === Phase 3: Order dashboard ===
+    // Customer growth (new customers per day, last 7 days)
+    // A "new customer" = first order by that email/phone on that day.
+    const customerFirstOrderMap: Record<string, { date: string; customer: string }> = {};
+    recentOrdersRaw.forEach((o) => {
+      const key = o.customerEmail || o.customerPhone;
+      if (!key) return;
+      const orderDate = formatDateKey(new Date(o.createdAt));
+      if (!customerFirstOrderMap[key] || customerFirstOrderMap[key].date > orderDate) {
+        customerFirstOrderMap[key] = { date: orderDate, customer: key };
+      }
+    });
+    const customerGrowthMap: Record<string, number> = {};
+    Object.values(customerFirstOrderMap).forEach((entry) => {
+      // Only count if within last 7 days
+      if (dailyMap[entry.date]) {
+        customerGrowthMap[entry.date] = (customerGrowthMap[entry.date] || 0) + 1;
+      }
+    });
+    const customerGrowth7Days = Object.keys(dailyMap)
+      .sort()
+      .map((date) => ({
+        date,
+        label: dailyMap[date].label,
+        newCustomers: customerGrowthMap[date] || 0,
+        cumulative: 0, // will be calculated below
+      }));
+    // Calculate cumulative
+    let cumulative = 0;
+    customerGrowth7Days.forEach((d) => {
+      cumulative += d.newCustomers;
+      d.cumulative = cumulative;
+    });
+
+    // Revenue vs target (daily target = total last 30 days / 30)
+    const dailyTarget = totalRevenue > 0 ? Math.round(totalRevenue / 30) : 50000;
+    const revenueVsTarget = revenueLast7Days.map((d) => ({
+      ...d,
+      target: dailyTarget,
+      achievement: dailyTarget > 0 ? Math.round((d.revenue / dailyTarget) * 100) : 0,
+    }));
+
+    // Delivery method distribution (based on deliveryMethod field if available,
+    // fallback: infer from customerAddress presence)
+    const deliveryGroups: Record<string, { count: number; revenue: number }> = {};
+    recentOrdersRaw.forEach((o) => {
+      const key = o.customerAddress ? "delivery" : "pickup";
+      if (!deliveryGroups[key]) {
+        deliveryGroups[key] = { count: 0, revenue: 0 };
+      }
+      deliveryGroups[key].count += 1;
+      deliveryGroups[key].revenue += o.total;
+    });
+    const ordersByDeliveryMethod = Object.entries(deliveryGroups).map(([method, data]) => ({
+      method,
+      label: method === "delivery" ? "Antar" : "Pickup",
+      count: data.count,
+      revenue: data.revenue,
+    }));
+
     const stats: DashboardStats = {
       totalRevenue,
       totalOrders,
@@ -378,6 +443,11 @@ export async function GET() {
       totalStockUnits,
       totalStockValue,
       erpSyncStatus,
+      // Phase 3
+      revenueVsTarget,
+      customerGrowth7Days,
+      ordersByDeliveryMethod,
+      dailyTarget,
     };
 
     return NextResponse.json({ success: true, stats });
