@@ -19,6 +19,7 @@ export interface SyncResult {
   source: "erpnext" | "mock" | "unknown";
   synced: number;
   total: number;
+  unpublished: number;
   message: string;
   lastSyncAt: Date | null;
 }
@@ -29,6 +30,10 @@ export interface SyncResult {
  *   mock products into DB so admin can edit them.
  * - If ERPNext configured but unreachable → fetchProducts returns
  *   mock data (handled in erpnext.ts).
+ * - Auto-unpublish: products in DB that no longer exist in ERPNext
+ *   are marked published=false (NOT deleted — admin can re-publish
+ *   manually if needed). Only runs when source is genuinely "erpnext"
+ *   (not mock fallback), to avoid mass-unpublish on transient outage.
  */
 export async function syncAllFromErpnext(): Promise<SyncResult> {
   const configured = isErpnextConfigured();
@@ -39,8 +44,10 @@ export async function syncAllFromErpnext(): Promise<SyncResult> {
   try {
     const { products, source: fetchedSource } = await fetchProducts();
     let synced = 0;
+    const syncedItemCodes: string[] = [];
     for (const p of products) {
       if (!p.itemCode) continue;
+      syncedItemCodes.push(p.itemCode);
       // Rewrite ERPNext file paths to proxy endpoint.
       // ERPNext stores uploaded files at "/files/xxx.png" (internal URL
       // not accessible from browser). We proxy via /api/erp-image/ so
@@ -79,15 +86,45 @@ export async function syncAllFromErpnext(): Promise<SyncResult> {
       synced++;
     }
 
+    // Auto-unpublish: products in DB that no longer exist in ERPNext.
+    // Only run when source is genuinely ERPNext (not mock fallback),
+    // to avoid mass-unpublish on transient ERPNext outage.
+    let unpublished = 0;
+    if (fetchedSource === "erpnext" && syncedItemCodes.length > 0) {
+      // Find DB products with erpSyncedAt (sourced from ERPNext before)
+      // whose itemCode is NOT in the current ERPNext list.
+      const orphans = await db.product.findMany({
+        where: {
+          erpSyncedAt: { not: null },
+          NOT: { itemCode: { in: syncedItemCodes } },
+        },
+        select: { id: true, itemCode: true, published: true },
+      });
+      const toUnpublish = orphans.filter((o) => o.published);
+      if (toUnpublish.length > 0) {
+        await db.product.updateMany({
+          where: { id: { in: toUnpublish.map((o) => o.id) } },
+          data: { published: false },
+        });
+        unpublished = toUnpublish.length;
+        console.log(
+          `[erpnext-sync] Auto-unpublished ${unpublished} orphaned product(s) (no longer in ERPNext): ${toUnpublish
+            .map((o) => o.itemCode)
+            .join(", ")}`
+        );
+      }
+    }
+
     return {
       source: fetchedSource === "erpnext" ? "erpnext" : source,
       synced,
       total: products.length,
+      unpublished,
       message:
         synced > 0
           ? `${synced} produk tersinkron dari ${
               fetchedSource === "erpnext" ? "ERPNext" : "mock data"
-            }`
+            }${unpublished > 0 ? ` (${unpublished} di-unpublish)` : ""}`
           : "Tidak ada produk untuk disinkron",
       lastSyncAt: new Date(),
     };
@@ -97,6 +134,7 @@ export async function syncAllFromErpnext(): Promise<SyncResult> {
       source,
       synced: 0,
       total: 0,
+      unpublished: 0,
       message: `Sync gagal: ${err instanceof Error ? err.message : "unknown error"}`,
       lastSyncAt: null,
     };
