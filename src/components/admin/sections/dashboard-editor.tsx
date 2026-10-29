@@ -148,11 +148,12 @@ function timeAgo(iso: string): string {
 }
 
 export function DashboardEditor() {
-  const { data, loading, error } = useAdminFetch<{ success: boolean; stats: DashboardStats }>(
+  // useAdminFetch auto-extracts first non-success key as data.
+  // API returns { success, stats }, so data = stats object directly.
+  const { data: stats, loading, error } = useAdminFetch<DashboardStats>(
     "/api/admin/dashboard"
   );
 
-  const stats = data?.stats;
   const topProducts = stats?.topProducts ?? [];
   const revenueByCategory = stats?.revenueByCategory ?? [];
   const revenueLast7Days = stats?.revenueLast7Days ?? [];
