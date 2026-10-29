@@ -7,7 +7,7 @@ import {
   X, Lock, Loader2, AlertCircle, LogOut, Mail, UserCog,
   Home, Sparkles, Phone, HelpCircle, Users, MessageSquare,
   Layers, PanelBottom, PanelTop, ScrollText, Package, Palette,
-  ShoppingCart,
+  ShoppingCart, LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +35,7 @@ import { BrandSettingsEditor } from "./sections/brand-settings-editor";
 import { ProductEditor } from "./sections/product-editor";
 import { UserEditor } from "./sections/user-editor";
 import { HeaderEditor } from "./sections/header-editor";
+import { DashboardEditor } from "./sections/dashboard-editor";
 import { toast } from "sonner";
 
 // ============================================================
@@ -65,6 +66,7 @@ export function AdminOverlay(props: AdminOverlayProps) {
 }
 
 type Tab =
+  | "dashboard"
   | "orders"
   | "products"
   | "header"
@@ -88,6 +90,7 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "orders", label: "Pesanan", icon: Package },
   { id: "products", label: "Produk", icon: ShoppingCart },
   { id: "header", label: "Header", icon: PanelTop },
@@ -112,7 +115,7 @@ function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
   // mounted: false on SSR, true on client. Used to skip rendering
   // during hydration (avoid flash of login form when token exists).
   const [mounted] = useState(() => typeof window !== "undefined");
-  const [activeTab, setActiveTab] = useState<Tab>("orders");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
   // On mount: if token exists, validate via /api/admin/auth/me.
   // If valid, populate user + keep authed=true. If invalid, clear.
@@ -270,6 +273,7 @@ function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
               {/* Content area */}
               <div className="flex-1 overflow-y-auto scrollbar-grocery p-4 md:p-6">
                 <div className="mx-auto max-w-3xl">
+                  {activeTab === "dashboard" && <DashboardEditor />}
                   {activeTab === "orders" && <OrderEditor />}
                   {activeTab === "products" && <ProductEditor />}
                   {activeTab === "header" && <HeaderEditor />}
