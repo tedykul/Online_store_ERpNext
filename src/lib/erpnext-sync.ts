@@ -41,6 +41,17 @@ export async function syncAllFromErpnext(): Promise<SyncResult> {
     let synced = 0;
     for (const p of products) {
       if (!p.itemCode) continue;
+      // Rewrite ERPNext file paths to proxy endpoint.
+      // ERPNext stores uploaded files at "/files/xxx.png" (internal URL
+      // not accessible from browser). We proxy via /api/erp-image/ so
+      // the storefront can serve them same-origin without CORS issues.
+      const rewrittenImage = (() => {
+        if (!p.image) return null;
+        if (p.image.startsWith("/files/")) {
+          return `/api/erp-image${p.image.replace(/^\/files\//, "/")}`;
+        }
+        return p.image;
+      })();
       // ERPNext-sourced fields to upsert.
       const erpData = {
         name: p.name,
@@ -51,7 +62,7 @@ export async function syncAllFromErpnext(): Promise<SyncResult> {
         unit: p.unit || "pcs",
         stock: p.stock ?? 0,
         emoji: p.emoji || "🛒",
-        image: p.image || null,
+        image: rewrittenImage,
         erpSyncedAt: new Date(),
       };
       await db.product.upsert({
@@ -106,6 +117,14 @@ export async function syncSingleItem(itemCode: string): Promise<{
     if (!match) {
       return { ok: false, message: `Item ${itemCode} tidak ditemukan di ERPNext` };
     }
+    // Rewrite ERPNext file paths to proxy endpoint (same as syncAllFromErpnext).
+    const rewrittenImage = (() => {
+      if (!match.image) return null;
+      if (match.image.startsWith("/files/")) {
+        return `/api/erp-image${match.image.replace(/^\/files\//, "/")}`;
+      }
+      return match.image;
+    })();
     await db.product.upsert({
       where: { itemCode: match.itemCode },
       create: {
@@ -117,7 +136,7 @@ export async function syncSingleItem(itemCode: string): Promise<{
         unit: match.unit || "pcs",
         stock: match.stock ?? 0,
         emoji: match.emoji || "🛒",
-        image: match.image || null,
+        image: rewrittenImage,
         published: true,
         erpSyncedAt: new Date(),
       },
@@ -129,7 +148,7 @@ export async function syncSingleItem(itemCode: string): Promise<{
         unit: match.unit || "pcs",
         stock: match.stock ?? 0,
         emoji: match.emoji || "🛒",
-        image: match.image || null,
+        image: rewrittenImage,
         erpSyncedAt: new Date(),
       },
     });
