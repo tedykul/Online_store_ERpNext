@@ -31,6 +31,8 @@ import { AdminOverlay } from "@/components/admin/admin-overlay";
 import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
 import { OrderHistoryDialog } from "@/components/grocery/order-history-dialog";
 import { SharedWishlistDialog } from "@/components/grocery/shared-wishlist-dialog";
+import { CustomerAuthDialog } from "@/components/grocery/customer-auth-dialog";
+import { useCustomerStore } from "@/lib/store/customer";
 import { Suspense } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Product, Category } from "@/types/grocery";
@@ -93,6 +95,13 @@ export function HomeClient({ content }: HomeClientProps) {
       cancelled = true;
     };
   }, [fetchProducts]);
+
+  // Fetch customer profile on mount (cookie sent automatically).
+  // Sets customer in store → header shows avatar instead of "Masuk".
+  const fetchCustomer = useCustomerStore((s) => s.fetchCustomer);
+  useEffect(() => {
+    fetchCustomer();
+  }, [fetchCustomer]);
 
   // Handler: called when checkout succeeds → re-fetch products to update stock
   const handleCheckoutSuccess = useCallback(() => {
@@ -166,6 +175,7 @@ export function HomeClient({ content }: HomeClientProps) {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         brandName={content.brandName ?? "SayurLogi"}
+        onOpenOrderHistory={() => setHistoryOpen(true)}
       />
 
       <main className="flex-1">
@@ -317,6 +327,9 @@ export function HomeClient({ content }: HomeClientProps) {
       <Suspense fallback={null}>
         <SharedWishlistDialog />
       </Suspense>
+
+      {/* Customer auth dialog (login/register) — controlled by useCustomerStore */}
+      <CustomerAuthDialog />
     </div>
   );
 }

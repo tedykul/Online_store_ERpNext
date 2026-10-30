@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package, Ticket, X } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
+import { useCustomerStore } from "@/lib/store/customer";
 import { formatIDR } from "@/lib/mock-data";
 import type { CheckoutResponse } from "@/types/grocery";
 import { toast } from "sonner";
@@ -41,6 +42,21 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   });
   const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer" | "ewallet">("cod");
+
+  // Prefill form when customer is logged in (default address/name/phone).
+  // Only prefill empty fields — don't overwrite if customer already typed.
+  const customer = useCustomerStore((s) => s.customer);
+  useEffect(() => {
+    if (!customer) return;
+    setForm((prev) => ({
+      ...prev,
+      name: prev.name || customer.name,
+      email: prev.email || customer.email,
+      phone: prev.phone || customer.phone,
+      address: prev.address || customer.defaultAddress || "",
+      city: prev.city || customer.defaultCity || "",
+    }));
+  }, [customer]);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");

@@ -8,15 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MainNav, MobileNav } from "./main-nav";
+import { CustomerMenuButton } from "./customer-menu-button";
 
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   /** Brand name from DB (defaults to "SayurLogi") */
   brandName?: string;
+  /** Called when user clicks "Riwayat Pesanan" in the customer menu. */
+  onOpenOrderHistory?: () => void;
 }
 
-export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi" }: HeaderProps) {
+export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi", onOpenOrderHistory }: HeaderProps) {
   const totalItems = useCartStore((s) => s.getTotalItems());
   const openCart = useCartStore((s) => s.openCart);
   const wishlistCount = useWishlistStore((s) => s.getCount());
@@ -109,6 +112,9 @@ export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi" }:
               </Badge>
             )}
           </Button>
+
+          {/* Customer account — login button or avatar dropdown */}
+          <CustomerMenuButton onOpenOrderHistory={onOpenOrderHistory} />
 
           {/* Cart button — desktop only (mobile moved to bottom nav center FAB) */}
           <Button
