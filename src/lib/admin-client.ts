@@ -1,91 +1,102 @@
 // ============================================================
-// Admin client helpers — auth token management + fetch wrapper.
+// Admin client helpers — session-cookie based auth.
 // ============================================================
-// Token stored in sessionStorage (cleared when tab closes — more
-// secure than localStorage for admin session). All admin API calls
-// go through adminFetch which auto-attaches Bearer token.
+// The login route sets an httpOnly `admin_session` cookie on
+// the response, so the browser sends it automatically with
+// every same-origin request. adminFetch therefore does NOT
+// attach any Authorization header — credentials:"include"
+// (same-origin default) is enough.
 //
-// Two login paths supported:
-//   1. NextAuth (preferred): email + password → /api/admin/login
-//      returns AdminUser + token. Used by AdminOverlay LoginGate
-//      when email field is filled.
-//   2. Legacy password gate (fallback): password-only → same
-//      endpoint, empty email. Used when NextAuth not configured.
+// The only thing we keep in sessionStorage is a small flag +
+// the current user object, purely for UI display (so the
+// overlay can render the avatar/name without an extra round
+// trip). These are NOT secrets — the cookie is the credential.
 //
-// After login, current user id is stored in sessionStorage under
-// "admin-user-id" so admin sections (e.g. UserEditor) can read it
-// for self-protection (prevent disabling/deleting own account).
+// Two login paths (unchanged signatures):
+//   1. Email + password → /api/admin/login → returns AdminUser
+//   2. Password only (empty email) → same endpoint, legacy gate
 // ============================================================
 
-const TOKEN_KEY = "admin-token";
-const USER_ID_KEY = "admin-user-id";
+const USER_KEY = "admin-user";
+const AUTHED_KEY = "admin-authed";
 
 // ============================================================
 // Types
 // ============================================================
 
-export type AdminRole = "super_admin" | "admin" | "staff";
+export type AdminRole = "super_admin" | "admin" | "staff" | "viewer";
 
 export interface AdminUser {
-  id: string;
+  id: string | null;
   email: string;
   name: string | null;
   role: AdminRole;
-  isActive: boolean;
-  lastLoginAt: string | null;
-  createdAt: string;
+  isActive?: boolean;
+  lastLoginAt?: string | null;
+  createdAt?: string;
 }
 
 // ============================================================
-// Token + user id storage (sessionStorage)
+// UI-only storage (NOT credentials). The httpOnly cookie is
+// the real session token and lives only on the server side.
 // ============================================================
 
-/** Get stored admin password (sessionStorage). */
-export function getAdminToken(): string | null {
+/** Persist the current user for UI display (avatar, name, role). */
+export function setAdminUser(user: AdminUser | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (user) {
+      sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+      sessionStorage.setItem(AUTHED_KEY, "1");
+    } else {
+      sessionStorage.removeItem(USER_KEY);
+      sessionStorage.removeItem(AUTHED_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/** Read the cached UI user (or null). Not authoritative —
+ *  always confirm via checkAuthStatus() before trusting. */
+export function getAdminUser(): AdminUser | null {
   if (typeof window === "undefined") return null;
   try {
-    return sessionStorage.getItem(TOKEN_KEY);
+    const raw = sessionStorage.getItem(USER_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as AdminUser;
   } catch {
     return null;
   }
 }
 
-/** Store admin password (sessionStorage). Cleared on tab close. */
-export function setAdminToken(token: string): void {
-  if (typeof window === "undefined") return;
+/** Quick UI flag (no network). Use only to avoid a flash of the
+ *  login form; verify with checkAuthStatus() on mount. */
+export function getAdminAuthedFlag(): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    sessionStorage.setItem(TOKEN_KEY, token);
+    return sessionStorage.getItem(AUTHED_KEY) === "1";
   } catch {
-    // ignore
+    return false;
   }
 }
 
-/** Clear admin password. */
-export function clearAdminToken(): void {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-/** Store current user id (sessionStorage) for self-protection. */
+/** Store current user id (sessionStorage) for self-protection in
+ *  the user editor (prevent disabling/deleting own account). */
 export function setCurrentUserId(id: string | null): void {
   if (typeof window === "undefined") return;
   try {
-    if (id) sessionStorage.setItem(USER_ID_KEY, id);
-    else sessionStorage.removeItem(USER_ID_KEY);
+    if (id) sessionStorage.setItem("admin-user-id", id);
+    else sessionStorage.removeItem("admin-user-id");
   } catch {
     // ignore
   }
 }
 
-/** Read current user id (sessionStorage) — used for self-protection. */
 export function getCurrentUserId(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    return sessionStorage.getItem(USER_ID_KEY);
+    return sessionStorage.getItem("admin-user-id");
   } catch {
     return null;
   }
@@ -96,13 +107,9 @@ export function getCurrentUserId(): string | null {
 // ============================================================
 
 /**
- * Login via NextAuth credentials provider.
- * Sends email + password to /api/admin/login. On success, stores
- * token + user id in sessionStorage and returns AdminUser.
- *
- * Email is optional — if empty/undefined, server treats request as
- * legacy password gate (password only). This keeps backward compat
- * with the old single-password admin.
+ * Login with email + password. The server sets the httpOnly
+ * session cookie on success; we only cache the returned user
+ * for UI display. Returns the AdminUser on success.
  */
 export async function loginAdminNextAuth(
   email: string,
@@ -113,16 +120,16 @@ export async function loginAdminNextAuth(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: email || undefined, password }),
+      credentials: "include",
     });
     const data = await res.json();
     if (data.success) {
-      setAdminToken(password);
-      if (data.user?.id) setCurrentUserId(data.user.id);
-      return {
-        success: true,
-        message: data.message || "Login berhasil",
-        user: data.user as AdminUser | undefined,
-      };
+      const user = data.user as AdminUser | undefined;
+      if (user) {
+        setAdminUser(user);
+        if (user.id) setCurrentUserId(user.id);
+      }
+      return { success: true, message: data.message || "Login berhasil", user };
     }
     return { success: false, message: data.message || "Login gagal" };
   } catch {
@@ -141,10 +148,8 @@ export async function loginAdminLegacy(
   return loginAdminNextAuth("", password);
 }
 
-/**
- * Legacy alias kept for any external callers still using the old
- * single-argument signature. Behaves identically to loginAdminLegacy.
- */
+/** Legacy alias kept for external callers using the old
+ *  single-argument signature. Behaves like loginAdminLegacy. */
 export async function loginAdmin(
   password: string
 ): Promise<{ success: boolean; message: string }> {
@@ -153,43 +158,48 @@ export async function loginAdmin(
 }
 
 /**
- * Logout — clear token + user id from sessionStorage.
- * Optionally calls /api/admin/logout to invalidate server-side
- * session (best-effort, non-blocking).
+ * Logout — destroy the server session + clear the cookie, then
+ * wipe the UI cache. Best-effort server call (non-blocking on
+ * error — the client-side clear is what matters for UX).
  */
 export async function logoutAdmin(): Promise<void> {
-  // Fire-and-forget server logout (may 404 if route not configured)
   try {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      credentials: "include",
+    });
   } catch {
     // ignore — client-side clear is what matters
   }
-  clearAdminToken();
+  setAdminUser(null);
   setCurrentUserId(null);
 }
 
 /**
- * Check auth status — calls /api/admin/auth/me to validate the
- * current token and fetch the AdminUser. Returns null if not
- * authenticated (no token, 401, network error, etc.).
- *
- * Used by AdminOverlay on mount to determine if session is still
- * valid and to populate the user display in the header.
+ * Check auth status via GET /api/admin/login. The httpOnly cookie
+ * is sent automatically (credentials:"include"). Returns the
+ * AdminUser if authenticated, null otherwise. Also refreshes the
+ * cached UI user so the header stays in sync.
  */
 export async function checkAuthStatus(): Promise<AdminUser | null> {
-  const token = getAdminToken();
-  if (!token) return null;
   try {
     const res = await fetch("/api/admin/login", {
       method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      setAdminUser(null);
+      return null;
+    }
     const data = await res.json();
-    if (!data.authed || !data.user) return null;
-    // Keep user id fresh in sessionStorage
-    if (data.user.id) setCurrentUserId(data.user.id);
-    return data.user as AdminUser;
+    if (!data.authed || !data.user) {
+      setAdminUser(null);
+      return null;
+    }
+    const user = data.user as AdminUser;
+    setAdminUser(user);
+    if (user.id) setCurrentUserId(user.id);
+    return user;
   } catch {
     return null;
   }
@@ -200,24 +210,30 @@ export async function checkAuthStatus(): Promise<AdminUser | null> {
 // ============================================================
 
 /**
- * Fetch wrapper that auto-attaches Bearer token. Returns parsed JSON.
- * Throws Error with `status` and `message` on non-OK response.
+ * Fetch wrapper for admin API routes. No Authorization header —
+ * the httpOnly session cookie is sent automatically with
+ * same-origin requests (credentials:"include"). Returns parsed
+ * JSON. Throws Error with `status` + `message` on non-OK.
  */
 export async function adminFetch<T = unknown>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getAdminToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(url, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
   const data = await res.json();
   if (!res.ok || !data.success) {
-    const err = new Error(data.message || "Request failed") as Error & { status?: number };
+    const err = new Error(data.message || "Request failed") as Error & {
+      status?: number;
+    };
     err.status = res.status;
     throw err;
   }

@@ -1,9 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { verifyPassword, verifyAuth } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/audit";
 import { checkRateLimit } from "@/lib/rate-limit";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import {
+  createSession,
+  setSessionCookieOnResponse,
+} from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +15,23 @@ interface LoginRequestBody {
   email?: unknown;
   password?: unknown;
 }
+
+// ============================================================
+// POST /api/admin/login
+// ============================================================
+// Two modes (kept for backwards compatibility):
+//   1. Email + password — verify bcrypt against User table.
+//      On success, mint a Session bound to the real User and
+//      set the admin_session httpOnly cookie. Returns the
+//      authenticated user (id, email, name, role).
+//   2. Password only (email empty) — compare against the
+//      ADMIN_PASSWORD env var (legacy gate). Mints an anonymous
+//      Session (no userId, role "admin").
+//
+// Both modes return { success, message, user? } and set the
+// httpOnly session cookie. The frontend no longer stores the
+// password anywhere — the cookie is the credential.
+// ============================================================
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +66,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Mode 1: NextAuth (email + password) — check User table with bcrypt
+    // --- Mode 1: NextAuth-style (email + password) ---
     if (email && typeof email === "string") {
       const normalizedEmail = email.toLowerCase().trim();
       const user = await db.user.findUnique({
@@ -79,6 +100,19 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Success — mint a session bound to the real user.
+      const { token, expiresAt } = await createSession({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        method: "nextauth",
+      });
+
+      // Refresh lastLoginAt (best-effort).
+      db.user
+        .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+        .catch(() => {});
+
       await logAdminAction({
         action: "login_success",
         target: `login:${normalizedEmail}`,
@@ -86,21 +120,37 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         userEmail: user.email,
       });
-      return NextResponse.json({
+
+      const res = NextResponse.json({
         success: true,
         message: "Login berhasil.",
-        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
       });
+      setSessionCookieOnResponse(res, token, expiresAt);
+      return res;
     }
 
-    // Mode 2: Password gate fallback (password only)
+    // --- Mode 2: legacy password gate (email empty) ---
     if (verifyPassword(password)) {
+      const { token, expiresAt } = await createSession({
+        userId: null,
+        email: "admin@password-gate",
+        role: "admin",
+        method: "password_gate",
+      });
       await logAdminAction({
         action: "login_success",
         target: "login:password-gate",
         success: true,
       });
-      return NextResponse.json({ success: true, message: "Login berhasil." });
+      const res = NextResponse.json({ success: true, message: "Login berhasil." });
+      setSessionCookieOnResponse(res, token, expiresAt);
+      return res;
     }
 
     await logAdminAction({
@@ -121,7 +171,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/admin/login — check current auth status
+// ============================================================
+// GET /api/admin/login — current auth status.
+// ============================================================
+// Used by the admin overlay on mount to decide whether to show
+// the login form or the dashboard, and to populate the user
+// display in the header. Returns { authed, method, user? }.
+// ============================================================
+
 export async function GET() {
   const result = await verifyAuth();
   if (!result) {
@@ -131,7 +188,7 @@ export async function GET() {
     authed: true,
     method: result.method,
     user: {
-      id: result.userId,
+      id: result.userId || null,
       email: result.email,
       name: result.name,
       role: result.role,

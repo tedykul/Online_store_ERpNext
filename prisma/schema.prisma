@@ -27,6 +27,39 @@ model User {
   lastLoginAt  DateTime?
 
   auditLogs AdminAuditLog[]
+  sessions  Session[]
+}
+
+// ============================================================
+// Session — opaque-token server sessions for admin auth.
+// ============================================================
+// Replaces the legacy "Bearer password" scheme. Login route
+// mints a random 32-byte token, stores it here, and sets it as
+// an httpOnly cookie. verifyAuth() reads the cookie → looks up
+// the row → returns the real User (id, email, role).
+//
+// userId is nullable to support the legacy password-gate mode
+// (anonymous admin session when no User row is linked). Real
+// logins always attach a userId.
+// ============================================================
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Snapshot of email for display/audit when userId is null (password-gate).
+  email     String?
+  /// Snapshot of role at session-create time. One of:
+  /// super_admin | admin | staff | viewer | password_gate
+  role      String   @default("viewer")
+  /// "nextauth" (real user login) | "password_gate" (legacy fallback)
+  method    String   @default("nextauth")
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Post {

@@ -14,12 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-  getAdminToken,
+  getAdminAuthedFlag,
+  getAdminUser,
   loginAdminNextAuth,
   loginAdminLegacy,
   logoutAdmin,
   checkAuthStatus,
   setCurrentUserId,
+  setAdminUser,
   type AdminUser,
   type AdminRole,
 } from "@/lib/admin-client";
@@ -112,18 +114,22 @@ const TABS: TabDef[] = [
 
 function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
   const { data: session } = useSession();
-  // Lazy init: read token from sessionStorage on client, false on SSR.
-  const [authed, setAuthed] = useState(() => !!getAdminToken());
-  const [user, setUser] = useState<AdminUser | null>(null);
+  // Lazy init: read UI flag + cached user from sessionStorage on
+  // client, false/null on SSR. The flag is NOT authoritative —
+  // checkAuthStatus() runs on mount to confirm against the server.
+  const [authed, setAuthed] = useState(() => getAdminAuthedFlag());
+  const [user, setUser] = useState<AdminUser | null>(() => getAdminUser());
   // mounted: false on SSR, true on client. Used to skip rendering
-  // during hydration (avoid flash of login form when token exists).
+  // during hydration (avoid flash of login form when flag exists).
   const [mounted] = useState(() => typeof window !== "undefined");
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
-  // On mount: if token exists, validate via /api/admin/auth/me.
-  // If valid, populate user + keep authed=true. If invalid, clear.
+  // On mount: always validate the session against the server.
+  // The httpOnly cookie is sent automatically; if valid, populate
+  // user + keep authed=true. If invalid, clear the UI cache so the
+  // login form shows.
   useEffect(() => {
-    if (!mounted || !getAdminToken()) return;
+    if (!mounted) return;
     let cancelled = false;
     checkAuthStatus().then((u) => {
       if (cancelled) return;
@@ -132,10 +138,9 @@ function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
         setCurrentUserId(u.id);
         setAuthed(true);
       } else {
-        // Token invalid or endpoint missing — fall back to legacy
-        // authed=true so admin can still use the password-gate UI.
-        // (Session may still be valid for /api/admin/* via bearer.)
-        setAuthed(true);
+        setAdminUser(null);
+        setUser(null);
+        setAuthed(false);
       }
     });
     return () => {
