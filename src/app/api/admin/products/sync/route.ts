@@ -50,7 +50,7 @@ export async function POST() {
     const result = await syncAllFromErpnext();
     await logAdminAction({
       action: "update",
-      target: `products:sync:${result.synced}/${result.total}`,
+      target: `products:sync:${result.synced}/${result.total}${result.unpublished > 0 ? ` (unpublish ${result.unpublished})` : ""}`,
       success: true,
       userId: auth.userId,
       userEmail: auth.email,
@@ -63,6 +63,7 @@ export async function POST() {
         source: result.source,
         totalProducts: result.total,
         syncedProducts: result.synced,
+        unpublishedProducts: result.unpublished,
       },
     });
   } catch (err: any) {

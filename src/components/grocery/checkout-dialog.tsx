@@ -22,11 +22,13 @@ interface CheckoutDialogProps {
   onOpenChange: (o: boolean) => void;
   /** Called when user clicks "Lacak Pesanan" in success view. Optional. */
   onTrackOrder?: (trackingId: string) => void;
+  /** Called when checkout succeeds (e.g. to refresh product stock). Optional. */
+  onCheckoutSuccess?: () => void;
 }
 
 type Step = "form" | "loading" | "success";
 
-export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDialogProps) {
+export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuccess }: CheckoutDialogProps) {
   const [step, setStep] = useState<Step>("form");
   const [result, setResult] = useState<CheckoutResponse | null>(null);
   const [form, setForm] = useState({
@@ -76,6 +78,8 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder }: CheckoutDia
         setStep("success");
         clear();
         toast.success("Pesanan berhasil dibuat!");
+        // Trigger parent to re-fetch products (stock update) after ERPNext sync
+        if (onCheckoutSuccess) onCheckoutSuccess();
       } else {
         setStep("form");
         toast.error(data.message || "Gagal membuat pesanan");

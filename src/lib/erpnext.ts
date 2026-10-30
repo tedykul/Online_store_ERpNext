@@ -224,7 +224,13 @@ export async function createSalesOrder(payload: {
   items: { itemCode: string; qty: number; rate: number }[];
   deliveryMethod: string;
   paymentMethod: string;
-}): Promise<{ success: boolean; salesOrderName?: string; message: string; mock?: boolean }> {
+}): Promise<{
+  success: boolean;
+  salesOrderName?: string;
+  deliveryNoteName?: string;
+  message: string;
+  mock?: boolean;
+}> {
   if (!isErpnextConfigured()) {
     // Mock — generate a fake SO name
     const fakeName = `SO-MOCK-${Date.now().toString(36).toUpperCase()}`;
@@ -238,15 +244,25 @@ export async function createSalesOrder(payload: {
 
   try {
     // Step 1: Ensure Customer exists (by email). If not, create.
-    const customerName = await ensureCustomer(payload);
+    const customerId = await ensureCustomer(payload);
 
-    // Step 2: Build Sales Order payload
+    // Step 2: Ensure Address exists + link to Customer (Opsi B)
+    // Returns Address ID (e.g. "ADDR-001") or null if creation fails
+    // (we gracefully skip address linking if it fails, to not block checkout)
+    const addressId = await ensureAddress(payload, customerId).catch((err) => {
+      console.warn("[ERPNext] ensureAddress failed, continuing without address link:", err);
+      return null;
+    });
+
+    // Step 3: Build Sales Order payload
     const today = new Date().toISOString().split("T")[0];
-    const soPayload = {
-      customer: customerName,
+    const soPayload: Record<string, unknown> = {
+      customer: customerId,
       transaction_date: today,
       delivery_date: today,
-      customer_address: payload.address,
+      // Link address ONLY if we got a valid Address ID (Opsi B fix)
+      // Old code sent raw text (payload.address) → LinkValidationError
+      ...(addressId ? { customer_address: addressId } : {}),
       // Items
       items: payload.items.map((it) => ({
         item_code: it.itemCode,
@@ -257,12 +273,13 @@ export async function createSalesOrder(payload: {
       ...(payload.notes ? { additional_notes: payload.notes } : {}),
     };
 
-    // Step 3: Create via Frappe REST API
+    // Step 4: Create Sales Order via Frappe REST API
+    // Use longer timeout (15s) because checkout flow has multiple API calls
     const url = erpUrl("/api/resource/Sales Order");
     const res = await fetchWithTimeout(url, {
       method: "POST",
       body: JSON.stringify(soPayload),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const errText = await res.text();
@@ -271,10 +288,21 @@ export async function createSalesOrder(payload: {
     const json = await res.json();
     const soName = json.data?.name;
 
+    // Step 5: Submit Sales Order (Opsi C — part 1)
+    // Changes docstatus from 0 (Draft) to 1 (Submitted)
+    await submitDoc(json.data);
+
+    // Step 6: Create + Submit Delivery Note (Opsi C — part 2)
+    // This is what actually reduces stock in ERPNext
+    const dnName = await createAndSubmitDeliveryNote(soName, json.data);
+
     return {
       success: true,
       salesOrderName: soName,
-      message: `Pesanan ${soName} berhasil dibuat di ERPNext.`,
+      deliveryNoteName: dnName || undefined,
+      message: dnName
+        ? `Pesanan ${soName} dibuat + stok di-update via Delivery Note ${dnName}.`
+        : `Pesanan ${soName} dibuat (DN creation skipped).`,
     };
   } catch (err: any) {
     console.error("[ERPNext] createSalesOrder failed:", err);
@@ -282,6 +310,160 @@ export async function createSalesOrder(payload: {
       success: false,
       message: `Gagal membuat pesanan: ${err.message || "unknown error"}`,
     };
+  }
+}
+
+// ============================================================
+// Helper: Submit a Frappe document (Draft → Submitted)
+// ============================================================
+// Uses frappe.client.submit which accepts the full doc object.
+// Changes docstatus from 0 (Draft) to 1 (Submitted).
+// ============================================================
+async function submitDoc(doc: Record<string, unknown>): Promise<void> {
+  const url = erpUrl("/api/method/frappe.client.submit");
+  // Submit can be slow (validates + writes to DB) — use 15s timeout
+  const res = await fetchWithTimeout(url, {
+    method: "POST",
+    body: JSON.stringify({ doc }),
+  }, 15000);
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Submit failed (${res.status}): ${errText.substring(0, 200)}`);
+  }
+}
+
+// ============================================================
+// Helper: Create + Submit Delivery Note from Sales Order (Opsi C)
+// ============================================================
+// Creates a Delivery Note by copying items from the Sales Order,
+// then submits it. Submitting the DN reduces stock in ERPNext.
+//
+// Returns the Delivery Note name (e.g. "DN-2026-00001") or null
+// if creation fails (we don't block checkout if DN fails — admin
+// can create DN manually from SO in ERPNext UI).
+// ============================================================
+async function createAndSubmitDeliveryNote(
+  soName: string,
+  soDoc: Record<string, unknown>
+): Promise<string | null> {
+  try {
+    // Build Delivery Note payload from Sales Order
+    const today = new Date().toISOString().split("T")[0];
+    const items = (soDoc.items as Array<Record<string, unknown>> || []).map((it) => ({
+      item_code: it.item_code,
+      qty: it.qty,
+      rate: it.rate,
+      against_sales_order: soName,
+      // Link to SO item (so_dn maintains the connection)
+      so_detail: it.name,
+      warehouse: "Stores - S", // default warehouse
+    }));
+
+    const dnPayload: Record<string, unknown> = {
+      customer: soDoc.customer,
+      posting_date: today,
+      set_posting_time: 0,
+      // Link back to Sales Order
+      ...(soDoc.customer_address ? { customer_address: soDoc.customer_address } : {}),
+      items,
+    };
+
+    // Create Delivery Note
+    const createUrl = erpUrl("/api/resource/Delivery Note");
+    const createRes = await fetchWithTimeout(createUrl, {
+      method: "POST",
+      body: JSON.stringify(dnPayload),
+    }, 15000);
+
+    if (!createRes.ok) {
+      const errText = await createRes.text();
+      console.warn(`[ERPNext] DN creation failed (${createRes.status}): ${errText.substring(0, 200)}`);
+      return null;
+    }
+
+    const createJson = await createRes.json();
+    const dnName = createJson.data?.name;
+
+    if (!dnName) {
+      console.warn("[ERPNext] DN creation returned no name");
+      return null;
+    }
+
+    // Submit Delivery Note → stock reduced
+    await submitDoc(createJson.data);
+    return dnName;
+  } catch (err: any) {
+    // Don't throw — checkout already succeeded (SO created + submitted).
+    // Admin can create DN manually from SO in ERPNext UI.
+    console.warn("[ERPNext] Delivery Note creation failed (non-blocking):", err.message);
+    return null;
+  }
+}
+
+// ============================================================
+// Helper: Ensure Address exists + link to Customer (Opsi B)
+// ============================================================
+// Creates a proper Address document in ERPNext master data,
+// then links it to the Customer. Returns Address ID (e.g.
+// "ADDR-001") that can be used in Sales Order customer_address.
+//
+// Address structure in ERPNext:
+//   - address_title: e.g. "John Doe-Office"
+//   - address_type: "Shipping" or "Billing"
+//   - address_line1: street address
+//   - city: city name
+//   - country: "Indonesia"
+//   - links: [{ link_doctype: "Customer", link_name: customerId }]
+// ============================================================
+async function ensureAddress(
+  payload: { customerName: string; address: string; city: string },
+  customerId: string
+): Promise<string | null> {
+  if (!payload.address) return null;
+
+  try {
+    // Create Address document
+    const addressTitle = `${payload.customerName}-Shipping`.substring(0, 100);
+    const addressPayload = {
+      address_title: addressTitle,
+      address_type: "Shipping",
+      address_line1: payload.address,
+      city: payload.city || "Unknown",
+      country: "Indonesia",
+      is_primary_address: 1,
+      // Link to Customer
+      links: [
+        {
+          link_doctype: "Customer",
+          link_name: customerId,
+        },
+      ],
+    };
+
+    const url = erpUrl("/api/resource/Address");
+    const res = await fetchWithTimeout(url, {
+      method: "POST",
+      body: JSON.stringify(addressPayload),
+    }, 15000);
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn(`[ERPNext] Address creation failed (${res.status}): ${errText.substring(0, 200)}`);
+      return null;
+    }
+
+    const json = await res.json();
+    const addressId = json.data?.name;
+
+    if (!addressId) {
+      console.warn("[ERPNext] Address creation returned no name");
+      return null;
+    }
+
+    return addressId;
+  } catch (err: any) {
+    console.warn("[ERPNext] ensureAddress error (non-blocking):", err.message);
+    return null;
   }
 }
 
@@ -300,7 +482,7 @@ async function ensureCustomer(payload: {
       fields: JSON.stringify(["name", "links"]),
       limit_page_length: 1,
     });
-    const res = await fetchWithTimeout(url);
+    const res = await fetchWithTimeout(url, {}, 15000);
     if (res.ok) {
       const json = await res.json();
       const contact = json.data?.[0];
@@ -325,7 +507,7 @@ async function ensureCustomer(payload: {
   const res = await fetchWithTimeout(custUrl, {
     method: "POST",
     body: JSON.stringify(custPayload),
-  });
+  }, 15000);
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Gagal membuat customer: ${errText}`);

@@ -1,0 +1,9 @@
+{
+  "name": "erpnext-sync-service",
+  "version": "1.0.0",
+  "description": "Scheduled ERPNext → Prisma DB sync (every 15 minutes)",
+  "scripts": {
+    "dev": "bun --hot index.ts"
+  },
+  "dependencies": {}
+}

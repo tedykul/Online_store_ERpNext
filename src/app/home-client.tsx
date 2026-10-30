@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { Header } from "@/components/grocery/header";
 import { Hero } from "@/components/grocery/hero";
 import { CategoryTabs } from "@/components/grocery/category-tabs";
@@ -67,26 +67,38 @@ export function HomeClient({ content }: HomeClientProps) {
   // No need to fetch client-side anymore.
 
   // Fetch products when category changes
-  useEffect(() => {
-    let cancelled = false;
+  // Wrapped in useCallback so it can be called manually (e.g. after checkout)
+  const fetchProducts = useCallback(() => {
     const url = activeCategory
       ? `/api/products?category=${encodeURIComponent(activeCategory)}`
       : "/api/products";
-    fetch(url)
+    return fetch(url)
       .then((r) => r.json())
       .then((data) => {
-        if (cancelled) return;
         setProducts(data.products || []);
         setSource(data.source || null);
       })
       .catch(console.error)
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      .finally(() => setLoading(false));
+  }, [activeCategory]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchProducts().then(() => {
+      if (cancelled) return;
+    });
     return () => {
       cancelled = true;
     };
-  }, [activeCategory]);
+  }, [fetchProducts]);
+
+  // Handler: called when checkout succeeds → re-fetch products to update stock
+  const handleCheckoutSuccess = useCallback(() => {
+    // Delay 2s to allow background ERPNext sync to complete
+    setTimeout(() => {
+      fetchProducts();
+    }, 2000);
+  }, [fetchProducts]);
 
   const handleCategoryChange = (id: string | null) => {
     setActiveCategory(id);
@@ -259,6 +271,7 @@ export function HomeClient({ content }: HomeClientProps) {
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}
         onTrackOrder={handleTrackOrder}
+        onCheckoutSuccess={handleCheckoutSuccess}
       />
       <ProductDetailDialog
         product={detailProduct}

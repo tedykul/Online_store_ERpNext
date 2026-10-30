@@ -218,6 +218,40 @@ export function ProductEditor() {
     return list;
   }, [products, filterCategory, filterPublished, search]);
 
+  // Dynamic category list — derived from actual products in DB.
+  // This ensures the filter dropdown always matches real data (e.g.
+  // "Bumbu dapur", "Makanan Beku" from ERPNext sync), instead of a
+  // hardcoded list that may drift out of sync.
+  const categoryOptions = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach((p) => {
+      if (p.category) cats.add(p.category);
+    });
+    return Array.from(cats).sort();
+  }, [products]);
+
+  // Count per category (for badge display in dropdown)
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    products.forEach((p) => {
+      if (p.category) {
+        counts[p.category] = (counts[p.category] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [products]);
+
+  // Count per publish status (for badge display in dropdown)
+  const statusCounts = useMemo(() => {
+    let published = 0;
+    let unpublished = 0;
+    products.forEach((p) => {
+      if (p.published) published++;
+      else unpublished++;
+    });
+    return { published, unpublished, total: products.length };
+  }, [products]);
+
   const allFilteredSelected =
     filtered.length > 0 && filtered.every((p) => selected.has(p.id));
 
@@ -428,28 +462,36 @@ export function ProductEditor() {
       {/* Filters + bulk actions */}
       <div className="mb-3 flex flex-wrap gap-2">
         <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-[140px] h-9 rounded-lg text-xs">
+          <SelectTrigger className="w-[160px] h-9 rounded-lg text-xs">
             <Filter className="h-3.5 w-3.5 mr-1" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Kategori</SelectItem>
-            {CATEGORIES.map((c) => (
+            <SelectItem value="all">
+              Semua Kategori ({statusCounts.total})
+            </SelectItem>
+            {categoryOptions.map((c) => (
               <SelectItem key={c} value={c}>
-                {c}
+                {c} ({categoryCounts[c] || 0})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Select value={filterPublished} onValueChange={setFilterPublished}>
-          <SelectTrigger className="w-[140px] h-9 rounded-lg text-xs">
+          <SelectTrigger className="w-[160px] h-9 rounded-lg text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Semua Status</SelectItem>
-            <SelectItem value="published">Published</SelectItem>
-            <SelectItem value="unpublished">Hidden</SelectItem>
+            <SelectItem value="all">
+              Semua Status ({statusCounts.total})
+            </SelectItem>
+            <SelectItem value="published">
+              Published ({statusCounts.published})
+            </SelectItem>
+            <SelectItem value="unpublished">
+              Hidden ({statusCounts.unpublished})
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -1117,11 +1159,15 @@ function ProductForm({ initial, isNew, onSave, onCancel }: ProductFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
+                {/* Merge dynamic categories (from existing products) with
+                    hardcoded fallback. Dedupe + sort for consistency. */}
+                {Array.from(new Set([...categoryOptions, ...CATEGORIES]))
+                  .sort()
+                  .map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </AdminField>
