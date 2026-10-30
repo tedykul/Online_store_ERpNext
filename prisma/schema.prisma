@@ -345,6 +345,52 @@ model Order {
 }
 
 // ============================================================
+// OrderReview — customer review per order (grocery model).
+// ============================================================
+// One review per order (orderId unique). Customer can submit
+// only after order status = "delivered". Moderated by admin
+// before publishing to the storefront (status: pending →
+// published | rejected).
+//
+// Sub-ratings (1-5, optional) are grocery-specific:
+//   freshnessRating — quality of produce
+//   deliveryRating   — speed + condition on arrival
+//   packingRating    — packaging quality
+//
+// adminReply (optional) — admin response shown alongside the
+// review on the storefront.
+// ============================================================
+
+model OrderReview {
+  id              String   @id @default(cuid())
+  /// One review per order. orderId is unique.
+  orderId         String   @unique
+  /// Snapshot of trackingId for display.
+  trackingId      String
+  customerName    String
+  /// Overall rating 1-5.
+  rating          Int
+  /// Optional sub-ratings 1-5 (null = not provided).
+  freshnessRating Int?
+  deliveryRating   Int?
+  packingRating    Int?
+  title           String?
+  comment         String?
+  /// Moderation status: pending | published | rejected
+  status          String   @default("pending")
+  /// Optional admin reply (shown alongside review when published).
+  adminReply      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  /// Set when admin publishes. Null while pending/rejected.
+  publishedAt     DateTime?
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([rating])
+}
+
+// ============================================================
 // Coupon — discount code system (customer-input codes).
 // ============================================================
 // Dual-layer with ERPNext Pricing Rule:

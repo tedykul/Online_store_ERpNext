@@ -21,6 +21,7 @@ import {
 } from "@/lib/orders";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { OrderReviewForm } from "./order-review-form";
 
 interface OrderTrackingDialogProps {
   open: boolean;
@@ -284,6 +285,11 @@ export function OrderTrackingDialog({ open, onOpenChange, initialTrackingId }: O
                   </p>
                 </div>
               </div>
+            )}
+
+            {/* Review form (only for delivered orders) */}
+            {order.status !== "cancelled" && (
+              <OrderReviewForm trackingId={order.trackingId} orderStatus={order.status} />
             )}
           </motion.div>
         )}
