@@ -491,7 +491,7 @@ async function ensureAddress(
 }
 
 /** Find customer by email; if not found, create new Customer in ERPNext */
-async function ensureCustomer(payload: {
+export async function ensureCustomer(payload: {
   customerName: string;
   email: string;
   phone: string;

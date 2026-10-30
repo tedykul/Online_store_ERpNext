@@ -18,6 +18,7 @@ import { db } from "@/lib/db";
 // ============================================================
 
 export const SESSION_COOKIE = "admin_session";
+export const CUSTOMER_SESSION_COOKIE = "customer_session";
 const SESSION_TTL_DAYS = 7;
 const TOKEN_BYTES = 32;
 
@@ -30,6 +31,7 @@ export interface SessionPayload {
   id: string;
   token: string;
   userId: string | null;
+  customerId: string | null;
   email: string | null;
   role: string;
   method: string;
@@ -41,14 +43,16 @@ export interface SessionPayload {
 // ============================================================
 // userId may be null for the legacy password-gate mode
 // (anonymous admin). email + role are snapshotted for display
-// and audit when userId is null.
+// and audit when userId is null. customerId is set for
+// storefront customer sessions (method='customer').
 // ============================================================
 
 export async function createSession(opts: {
   userId?: string | null;
+  customerId?: string | null;
   email?: string | null;
   role?: string;
-  method?: "nextauth" | "password_gate";
+  method?: "nextauth" | "password_gate" | "customer";
 }): Promise<SessionCreateResult> {
   const token = randomBytes(TOKEN_BYTES).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
@@ -57,6 +61,7 @@ export async function createSession(opts: {
     data: {
       token,
       userId: opts.userId ?? null,
+      customerId: opts.customerId ?? null,
       email: opts.email ?? null,
       role: opts.role ?? "viewer",
       method: opts.method ?? "nextauth",
@@ -82,6 +87,7 @@ export async function getSessionByToken(token: string): Promise<SessionPayload |
       id: true,
       token: true,
       userId: true,
+      customerId: true,
       email: true,
       role: true,
       method: true,
@@ -115,6 +121,17 @@ export async function readSessionToken(): Promise<string | null> {
   return store.get(SESSION_COOKIE)?.value ?? null;
 }
 
+// ============================================================
+// Customer cookie helpers — separate cookie name so a customer
+// can be logged in as customer AND admin at the same time
+// (useful for testing/operating both sides).
+// ============================================================
+
+export async function readCustomerSessionToken(): Promise<string | null> {
+  const store = await cookies();
+  return store.get(CUSTOMER_SESSION_COOKIE)?.value ?? null;
+}
+
 export function sessionCookieSet(token: string, expiresAt: Date) {
   return {
     name: SESSION_COOKIE,
@@ -141,6 +158,35 @@ export function sessionCookieClear() {
 }
 
 // ============================================================
+// Customer cookie builders (mirror admin helpers, different name)
+// ============================================================
+
+export function customerSessionCookieSet(token: string, expiresAt: Date) {
+  return {
+    name: CUSTOMER_SESSION_COOKIE,
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    sameSite: "lax" as const,
+    expires: expiresAt,
+    maxAge: Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 1000)),
+  };
+}
+
+export function customerSessionCookieClear() {
+  return {
+    name: CUSTOMER_SESSION_COOKIE,
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    sameSite: "lax" as const,
+    maxAge: 0,
+  };
+}
+
+// ============================================================
 // Convenience — attach a Set-Cookie header to a NextResponse.
 // ============================================================
 
@@ -154,4 +200,16 @@ export function setSessionCookieOnResponse(
 
 export function clearSessionCookieOnResponse(res: NextResponse): void {
   res.cookies.set(sessionCookieClear());
+}
+
+export function setCustomerSessionCookieOnResponse(
+  res: NextResponse,
+  token: string,
+  expiresAt: Date
+): void {
+  res.cookies.set(customerSessionCookieSet(token, expiresAt));
+}
+
+export function clearCustomerSessionCookieOnResponse(res: NextResponse): void {
+  res.cookies.set(customerSessionCookieClear());
 }

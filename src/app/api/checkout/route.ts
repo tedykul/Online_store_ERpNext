@@ -5,6 +5,7 @@ import { createPayment } from "@/lib/payments";
 import { estimateDelivery } from "@/lib/delivery";
 import { syncAllFromErpnext } from "@/lib/erpnext-sync";
 import { validateCoupon, redeemCoupon } from "@/lib/coupons";
+import { verifyCustomerAuth } from "@/lib/customer-auth";
 import type { CheckoutPayload } from "@/types/grocery";
 
 export const dynamic = "force-dynamic";
@@ -105,7 +106,11 @@ export async function POST(req: NextRequest) {
     // 4. Estimate delivery time
     const estimate = estimateDelivery(payload.deliveryMethod);
 
-    // 5. Create Order record in Prisma for tracking
+    // 5. Resolve customer account (if logged in). Guest checkout
+    //    still works (customerId stays null).
+    const customerAuth = await verifyCustomerAuth();
+
+    // 6. Create Order record in Prisma for tracking
     const order = await createOrder({
       customerName: payload.customer.name,
       customerEmail: payload.customer.email,
@@ -123,9 +128,10 @@ export async function POST(req: NextRequest) {
       paymentMethod: payload.paymentMethod,
       erpSalesOrderName: erpResult.salesOrderName,
       estimatedDelivery: estimate.earliestDate.toISOString(),
+      customerId: customerAuth?.customerId,
     });
 
-    // 6. Redeem coupon (best-effort, after order success).
+    // 7. Redeem coupon (best-effort, after order success).
     //    Increments usedCount + inserts CouponUsage for anti-abuse.
     if (couponId && couponCode) {
       redeemCoupon({
@@ -148,7 +154,7 @@ export async function POST(req: NextRequest) {
       total
     );
 
-    // 8. Sync product stock from ERPNext (non-blocking, background)
+    // 9. Sync product stock from ERPNext (non-blocking, background)
     if (!erpResult.mock) {
       syncAllFromErpnext()
         .then((result) => {

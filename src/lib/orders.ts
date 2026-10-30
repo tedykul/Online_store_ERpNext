@@ -89,6 +89,9 @@ interface CreateOrderInput {
   discount?: number;
   /// Coupon code applied (snapshot). Stored on Order row for display.
   couponCode?: string;
+  /// Customer account link (null for guest checkout). When set,
+  /// the order shows up in the customer's order history.
+  customerId?: string | null;
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "cod" | "transfer" | "ewallet";
   erpSalesOrderName?: string;
@@ -112,6 +115,8 @@ export interface OrderWithItems {
   discount: number;
   /// Coupon code applied (snapshot). null if none.
   couponCode: string | null;
+  /// Customer account link (null for guest checkout).
+  customerId: string | null;
   deliveryMethod: string;
   paymentMethod: string;
   status: OrderStatus;
@@ -145,6 +150,7 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderWithIte
       paymentMethod: input.paymentMethod,
       discount: input.discount ?? 0,
       couponCode: input.couponCode ?? null,
+      customerId: input.customerId ?? null,
       status: "pending",
       erpSalesOrderName: input.erpSalesOrderName || null,
       estimatedDelivery: input.estimatedDelivery || null,
@@ -248,6 +254,7 @@ function serializeOrder(order: any): OrderWithItems {
     total: order.total,
     discount: order.discount ?? 0,
     couponCode: order.couponCode ?? null,
+    customerId: order.customerId ?? null,
     deliveryMethod: order.deliveryMethod,
     paymentMethod: order.paymentMethod,
     status: order.status as OrderStatus,

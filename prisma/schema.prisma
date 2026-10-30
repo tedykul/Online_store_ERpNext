@@ -48,18 +48,62 @@ model Session {
   token     String   @unique
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Customer (storefront) user — set when method='customer'.
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
   /// Snapshot of email for display/audit when userId is null (password-gate).
   email     String?
   /// Snapshot of role at session-create time. One of:
-  /// super_admin | admin | staff | viewer | password_gate
+  /// super_admin | admin | staff | viewer | password_gate | customer
   role      String   @default("viewer")
-  /// "nextauth" (real user login) | "password_gate" (legacy fallback)
+  /// "nextauth" (admin user) | "password_gate" (legacy) | "customer" (storefront)
   method    String   @default("nextauth")
   expiresAt DateTime
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([customerId])
   @@index([expiresAt])
+}
+
+// ============================================================
+// Customer — storefront customer account (separate from admin User).
+// ============================================================
+// Storefront customers register/login to track orders, save
+// default address, reorder, and (future) earn loyalty points.
+// Separate from admin User because roles/permissions differ and
+// customer data syncs to ERPNext Customer master.
+//
+// passwordHash: bcrypt-hashed (same scheme as admin User).
+// erpCustomerId: link to ERPNext Customer.name (set on first
+//   sync via ensureCustomer). Null if ERPNext not configured.
+// defaultAddress/City/Notes: prefill checkout form when logged in.
+// ============================================================
+
+model Customer {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  /// Phone used as login alternative identifier + ERPNext sync key.
+  phone           String   @unique
+  name            String
+  passwordHash    String
+  /// Default shipping address (prefill checkout). Nullable.
+  defaultAddress  String?
+  defaultCity     String?
+  defaultNotes    String?
+  /// Link to ERPNext Customer master (set on register via
+  /// ensureCustomer). Null when ERPNext not configured (mock mode).
+  erpCustomerId   String?
+  active          Boolean  @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders          Order[]
+  sessions        Session[]
+
+  @@index([email])
+  @@index([phone])
 }
 
 model Post {
@@ -322,6 +366,10 @@ model Order {
   discount        Int      @default(0)
   /// Coupon code applied (snapshot). Null = no coupon used.
   couponCode      String?
+  /// Customer account link (null for guest checkout). When set,
+  /// the order shows up in the customer's order history.
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   deliveryMethod  String   // "delivery" | "pickup"
   paymentMethod   String   // "cod" | "transfer" | "ewallet"
   /// Status workflow: pending → confirmed → preparing →
@@ -342,6 +390,7 @@ model Order {
   @@index([customerPhone])
   @@index([customerEmail])
   @@index([couponCode])
+  @@index([customerId])
 }
 
 // ============================================================
