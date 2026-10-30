@@ -24,6 +24,21 @@ import {
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
+// ============================================================
+// Production safety — warn if the legacy password-gate fallback
+// is active in production. For prod, prefer Mode 1 (email +
+// password via User table) only. Set ADMIN_PASSWORD="" (empty)
+// in production .env to fully disable the bearer fallback.
+// ============================================================
+if (process.env.NODE_ENV === "production" && ADMIN_PASSWORD) {
+  console.warn(
+    "[admin-auth] WARNING: ADMIN_PASSWORD is set in production. " +
+      "The legacy bearer-token password-gate is ACTIVE. " +
+      "Set ADMIN_PASSWORD='' in .env to disable it and use Mode 1 " +
+      "(email + password via User table) only."
+  );
+}
+
 function safeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
