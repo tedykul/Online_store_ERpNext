@@ -159,6 +159,30 @@ export async function getAllProducts() {
   return rows.map(serializeProduct);
 }
 
+/** Get products with pagination (admin). Returns products + total count. */
+export async function getProductsPaginated(options: {
+  page?: number;
+  limit?: number;
+} = {}): Promise<{ products: ReturnType<typeof serializeProduct>[]; total: number }> {
+  const { page = 1, limit = 10 } = options;
+  const skip = (page - 1) * limit;
+
+  const [rows, total] = await Promise.all([
+    db.product.findMany({
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+      include: { variants: { orderBy: { createdAt: "asc" } } },
+      take: limit,
+      skip,
+    }),
+    db.product.count(),
+  ]);
+
+  return {
+    products: rows.map(serializeProduct),
+    total,
+  };
+}
+
 /** Get a single product by id (admin). */
 export async function getProductById(id: string) {
   const row = await db.product.findUnique({

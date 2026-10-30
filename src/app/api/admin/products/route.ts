@@ -1,18 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllProducts, createProduct, type ProductInput } from "@/lib/products-db";
+import { getAllProducts, getProductsPaginated, createProduct, type ProductInput } from "@/lib/products-db";
 import { requirePermission, isAuthResult } from "@/lib/permissions";
 import { logAdminAction } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/admin/products — list all products (admin)
-export async function GET() {
+// GET /api/admin/products — list products (admin)
+// Query params (all optional, backward compatible):
+//   page  — page number (1-based, default: 1)
+//   limit — items per page (default: 10)
+//   no pagination if neither page nor limit is provided (returns all)
+export async function GET(req: NextRequest) {
   const auth = await requirePermission("products:read");
   if (!isAuthResult(auth)) return auth; // 401/403 NextResponse
 
   try {
-    const products = await getAllProducts();
-    return NextResponse.json({ success: true, products });
+    const { searchParams } = new URL(req.url);
+    const pageParam = searchParams.get("page");
+    const limitParam = searchParams.get("limit");
+
+    // Backward compatible: if no page/limit params, return all
+    if (!pageParam && !limitParam) {
+      const products = await getAllProducts();
+      return NextResponse.json({ success: true, products, total: products.length });
+    }
+
+    // Paginated mode
+    const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(limitParam || "10", 10) || 10));
+
+    const { products, total } = await getProductsPaginated({ page, limit });
+    const totalPages = Math.ceil(total / limit);
+
+    return NextResponse.json({
+      success: true,
+      products,
+      total,
+      page,
+      limit,
+      totalPages,
+    });
   } catch (err: any) {
     console.error("[api/admin/products] GET error:", err);
     return NextResponse.json(
