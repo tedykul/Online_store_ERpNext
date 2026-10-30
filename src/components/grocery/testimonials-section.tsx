@@ -121,9 +121,87 @@ interface TestimonialsSectionProps {
   testimonials?: TestimonialItem[];
 }
 
+// ============================================================
+// Live reviews — fetched from /api/reviews (published only).
+// ============================================================
+// Merges real customer reviews (top of carousel) with the
+// curated TESTIMONIALS fallback. If the API fails or returns
+// zero reviews, the section renders exactly as before — fully
+// backward compatible.
+// ============================================================
+
+interface LiveReview {
+  id: string;
+  customerName: string;
+  rating: number;
+  title: string | null;
+  comment: string | null;
+}
+
+interface ReviewAggregate {
+  average: number;
+  count: number;
+  distribution: number[];
+  freshnessAvg: number | null;
+  deliveryAvg: number | null;
+  packingAvg: number | null;
+}
+
 export function TestimonialsSection({ testimonials: dbTestimonials }: TestimonialsSectionProps = {}) {
   // Use DB testimonials if provided and non-empty, else hardcoded
-  const items = dbTestimonials && dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
+  const baseItems = dbTestimonials && dbTestimonials.length > 0 ? dbTestimonials : TESTIMONIALS;
+
+  // Live review state (backward-compat: starts empty, no flash)
+  const [liveReviews, setLiveReviews] = useState<LiveReview[]>([]);
+  const [aggregate, setAggregate] = useState<ReviewAggregate | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/reviews?aggregate=true&limit=6")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.success) {
+          return;
+        }
+        if (Array.isArray(data.reviews)) {
+          setLiveReviews(data.reviews);
+        }
+        if (data.aggregate) {
+          setAggregate(data.aggregate);
+        }
+      })
+      .catch(() => {
+        // Silent fail — fallback to hardcoded stats + testimonials.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Merge: live reviews first (most recent), then curated fallback.
+  // De-dup by id (live reviews have ids; curated ones don't, so no clash).
+  const liveAsTestimonials: TestimonialItem[] = liveReviews.map((r) => ({
+    id: `live-${r.id}`,
+    name: r.customerName,
+    role: "Pelanggan SayurLogi",
+    avatar: "🛒",
+    rating: r.rating,
+    text: r.comment || r.title || "Pengalaman belanja yang menyenangkan!",
+    location: "Indonesia",
+  }));
+  const items = [...liveAsTestimonials, ...baseItems].slice(0, 12);
+
+  // Override the rating stat with live aggregate when available.
+  const platformStats = PLATFORM_STATS.map((stat) => {
+    if (stat.label === "Rating Rata-rata" && aggregate && aggregate.count > 0) {
+      return {
+        ...stat,
+        value: `${aggregate.average.toFixed(1)}/5`,
+        subtext: `dari ${aggregate.count.toLocaleString("id-ID")} ulasan nyata`,
+      };
+    }
+    return stat;
+  });
 
   // Mobile carousel state
   const [activeIndex, setActiveIndex] = useState(0);
@@ -229,7 +307,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           transition={{ duration: 0.5, delay: 0.1 }}
           className="hidden mt-12 md:grid md:grid-cols-4 md:gap-6"
         >
-          {PLATFORM_STATS.map((stat, i) => (
+          {platformStats.map((stat, i) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, scale: 0.9 }}
