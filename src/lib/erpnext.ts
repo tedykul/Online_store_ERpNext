@@ -1,38 +1,50 @@
 import type { Product, Category } from "@/types/grocery";
 import { MOCK_PRODUCTS, MOCK_PRODUCTS_ENRICHED, MOCK_CATEGORIES } from "./mock-data";
+import { getErpConfig, isConfigured, loadErpConfig } from "./integration-config";
 
 // ============================================================
 // ERPNext Client — talks to Frappe REST API
 // ============================================================
-// Env variables (set in .env.local):
-//   ERPNEXT_URL      = http://192.168.1.14:8001
-//   ERPNEXT_API_KEY  = <from ERPNext User > API Access>
-//   ERPNEXT_API_SECRET = <from ERPNext User > API Access>
+// Config priority: DB (IntegrationConfig table) > env vars > empty
+// Admin can edit config via admin panel → "Integrasi ERPNext" tab.
+// No need to restart server when changing config.
 // ============================================================
 
-const ERP_URL = process.env.ERPNEXT_URL || "";
-const API_KEY = process.env.ERPNEXT_API_KEY || "";
-const API_SECRET = process.env.ERPNEXT_API_SECRET || "";
+// Load config from DB on module init (async, non-blocking)
+// Falls back to env vars until DB loads
+loadErpConfig().catch(() => {});
 
-/** Whether ERPNext is configured in env */
+/** Whether ERPNext is configured (DB or env) */
 export function isErpnextConfigured(): boolean {
-  return Boolean(ERP_URL && API_KEY && API_SECRET);
+  return isConfigured();
 }
 
 /** Auth header: token <key>:<secret> (Frappe standard) */
 function authHeader(): string {
-  return `token ${API_KEY}:${API_SECRET}`;
+  const c = getErpConfig();
+  return `token ${c.apiKey}:${c.apiSecret}`;
 }
 
 /** Build absolute URL for ERPNext endpoint */
 function erpUrl(path: string, params?: Record<string, string | number | undefined>): string {
-  const url = new URL(`${ERP_URL.replace(/\/$/, "")}${path}`);
+  const c = getErpConfig();
+  const url = new URL(`${c.url.replace(/\/$/, "")}${path}`);
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       if (v !== undefined) url.searchParams.set(k, String(v));
     }
   }
   return url.toString();
+}
+
+/** Get warehouse from config (for Delivery Note creation) */
+function getWarehouse(): string {
+  return getErpConfig().warehouse;
+}
+
+/** Get company from config (for Sales Order + Stock Entry creation) */
+function getCompany(): string {
+  return getErpConfig().company;
 }
 
 /**
@@ -356,7 +368,7 @@ async function createAndSubmitDeliveryNote(
       against_sales_order: soName,
       // Link to SO item (so_dn maintains the connection)
       so_detail: it.name,
-      warehouse: "Stores - S", // default warehouse
+      warehouse: getWarehouse(), // from config (default: Stores - S)
     }));
 
     const dnPayload: Record<string, unknown> = {

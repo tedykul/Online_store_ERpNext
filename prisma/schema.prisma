@@ -410,3 +410,20 @@ model ProductVariant {
 
   @@index([productId])
 }
+
+// ============================================================
+// Integration Config — stores ERPNext + other integration
+// settings in DB (editable via admin UI, no env restart needed).
+// ============================================================
+// Keys: erpnext_url, erpnext_api_key, erpnext_api_secret,
+//       erpnext_warehouse, erpnext_company, erpnext_site
+// isSecret=true → value is encrypted (AES-256-CBC) before save
+// ============================================================
+model IntegrationConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  isSecret  Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
