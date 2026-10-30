@@ -4,13 +4,21 @@ import { createOrder } from "@/lib/orders";
 import { createPayment } from "@/lib/payments";
 import { estimateDelivery } from "@/lib/delivery";
 import { syncAllFromErpnext } from "@/lib/erpnext-sync";
+import { validateCoupon, redeemCoupon } from "@/lib/coupons";
 import type { CheckoutPayload } from "@/types/grocery";
 
 export const dynamic = "force-dynamic";
 
+// ============================================================
 // POST /api/checkout
-// Creates Sales Order in ERPNext (or mock) + Order record in Prisma
-// for tracking. Returns trackingId for customer.
+// ============================================================
+// Creates Sales Order in ERPNext (or mock) + Order record in
+// Prisma for tracking. Optional couponCode is validated server-
+// side; on success the discount is applied and the coupon is
+// redeemed (usage incremented) AFTER the order is created.
+// Returns trackingId for customer.
+// ============================================================
+
 export async function POST(req: NextRequest) {
   try {
     const payload: CheckoutPayload = await req.json();
@@ -29,7 +37,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Create Sales Order in ERPNext (or mock)
+    // 1. Calculate subtotal + shipping
+    const subtotal = payload.items.reduce(
+      (sum, i) => sum + i.product.price * i.quantity,
+      0
+    );
+    const FREE_SHIPPING_THRESHOLD = 50000;
+    const baseFreeShipping =
+      subtotal >= FREE_SHIPPING_THRESHOLD || payload.deliveryMethod === "pickup";
+    const baseShipping = baseFreeShipping ? 0 : 9000;
+
+    // 2. Validate coupon (if provided). Re-run server-side even
+    //    though the UI already validated — never trust the client.
+    let discount = 0;
+    let couponCode: string | null = null;
+    let couponId: string | null = null;
+    let freeShipping = baseFreeShipping;
+
+    if (payload.couponCode) {
+      const result = await validateCoupon(payload.couponCode, {
+        subtotal,
+        email: payload.customer.email || null,
+        phone: payload.customer.phone || null,
+        items: payload.items.map((i) => ({
+          itemCode: i.product.itemCode,
+          category: i.product.category,
+        })),
+      });
+      if (!result.valid) {
+        return NextResponse.json(
+          { success: false, message: `Kupon tidak valid: ${result.message}` },
+          { status: 400 }
+        );
+      }
+      discount = result.discountAmount;
+      freeShipping = baseFreeShipping || result.freeShipping;
+      couponCode = result.coupon?.code ?? payload.couponCode.toUpperCase();
+      couponId = result.coupon?.id ?? null;
+    }
+
+    const shipping = freeShipping ? 0 : baseShipping;
+    const total = Math.max(0, subtotal - discount + shipping);
+
+    // 3. Create Sales Order in ERPNext (or mock). Pass discount
+    //    so ERPNext SO carries the reduced grand total.
     const erpResult = await createSalesOrder({
       customerName: payload.customer.name,
       email: payload.customer.email,
@@ -44,27 +95,17 @@ export async function POST(req: NextRequest) {
       })),
       deliveryMethod: payload.deliveryMethod,
       paymentMethod: payload.paymentMethod,
+      discount,
     });
 
     if (!erpResult.success) {
       return NextResponse.json(erpResult, { status: 500 });
     }
 
-    // 2. Calculate pricing for Order record
-    const subtotal = payload.items.reduce(
-      (sum, i) => sum + i.product.price * i.quantity,
-      0
-    );
-    const FREE_SHIPPING_THRESHOLD = 50000;
-    const freeShipping =
-      subtotal >= FREE_SHIPPING_THRESHOLD || payload.deliveryMethod === "pickup";
-    const shipping = freeShipping ? 0 : 9000;
-    const total = subtotal + shipping;
-
-    // 3. Estimate delivery time
+    // 4. Estimate delivery time
     const estimate = estimateDelivery(payload.deliveryMethod);
 
-    // 4. Create Order record in Prisma for tracking
+    // 5. Create Order record in Prisma for tracking
     const order = await createOrder({
       customerName: payload.customer.name,
       customerEmail: payload.customer.email,
@@ -75,6 +116,8 @@ export async function POST(req: NextRequest) {
       items: payload.items,
       subtotal,
       shipping,
+      discount,
+      couponCode,
       total,
       deliveryMethod: payload.deliveryMethod,
       paymentMethod: payload.paymentMethod,
@@ -82,7 +125,22 @@ export async function POST(req: NextRequest) {
       estimatedDelivery: estimate.earliestDate.toISOString(),
     });
 
-    // 5. Create payment record (mock gateway)
+    // 6. Redeem coupon (best-effort, after order success).
+    //    Increments usedCount + inserts CouponUsage for anti-abuse.
+    if (couponId && couponCode) {
+      redeemCoupon({
+        couponId,
+        code: couponCode,
+        orderId: order.id,
+        email: payload.customer.email || null,
+        phone: payload.customer.phone || null,
+        discount,
+      }).catch((err) => {
+        console.warn("[checkout] redeemCoupon failed (non-blocking):", err.message);
+      });
+    }
+
+    // 7. Create payment record (mock gateway)
     const payment = await createPayment(
       order.id,
       order.trackingId,
@@ -90,10 +148,7 @@ export async function POST(req: NextRequest) {
       total
     );
 
-    // 6. Sync product stock from ERPNext (non-blocking, background)
-    // After checkout, ERPNext stock is reduced (via Delivery Note submit).
-    // We sync back to SayurLogi DB so storefront shows updated stock.
-    // This is fire-and-forget — don't block checkout response.
+    // 8. Sync product stock from ERPNext (non-blocking, background)
     if (!erpResult.mock) {
       syncAllFromErpnext()
         .then((result) => {
@@ -122,6 +177,13 @@ export async function POST(req: NextRequest) {
         message: payment.message,
       } : undefined,
       mock: erpResult.mock,
+      pricing: {
+        subtotal,
+        discount,
+        shipping,
+        total,
+        couponCode,
+      },
       estimatedDelivery: {
         dateLabel: estimate.dateLabel,
         timeWindow: estimate.timeWindow,

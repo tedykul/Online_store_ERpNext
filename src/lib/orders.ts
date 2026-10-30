@@ -85,6 +85,10 @@ interface CreateOrderInput {
   subtotal: number;
   shipping: number;
   total: number;
+  /// Discount applied (IDR). Defaults to 0. Stored on Order row.
+  discount?: number;
+  /// Coupon code applied (snapshot). Stored on Order row for display.
+  couponCode?: string;
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "cod" | "transfer" | "ewallet";
   erpSalesOrderName?: string;
@@ -104,6 +108,10 @@ export interface OrderWithItems {
   subtotal: number;
   shipping: number;
   total: number;
+  /// Discount applied (IDR). 0 if none.
+  discount: number;
+  /// Coupon code applied (snapshot). null if none.
+  couponCode: string | null;
   deliveryMethod: string;
   paymentMethod: string;
   status: OrderStatus;
@@ -135,6 +143,8 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderWithIte
       total: input.total,
       deliveryMethod: input.deliveryMethod,
       paymentMethod: input.paymentMethod,
+      discount: input.discount ?? 0,
+      couponCode: input.couponCode ?? null,
       status: "pending",
       erpSalesOrderName: input.erpSalesOrderName || null,
       estimatedDelivery: input.estimatedDelivery || null,
@@ -236,6 +246,8 @@ function serializeOrder(order: any): OrderWithItems {
     subtotal: order.subtotal,
     shipping: order.shipping,
     total: order.total,
+    discount: order.discount ?? 0,
+    couponCode: order.couponCode ?? null,
     deliveryMethod: order.deliveryMethod,
     paymentMethod: order.paymentMethod,
     status: order.status as OrderStatus,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package } from "lucide-react";
+import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package, Ticket, X } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
 import type { CheckoutResponse } from "@/types/grocery";
@@ -42,15 +42,95 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer" | "ewallet">("cod");
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponFreeShipping, setCouponFreeShipping] = useState(false);
+  const [couponValidating, setCouponValidating] = useState(false);
+  const [couponApplied, setCouponApplied] = useState(false);
+
   const items = useCartStore((s) => s.items);
   const totalPrice = useCartStore((s) => s.getTotalPrice());
   const clear = useCartStore((s) => s.clear);
   const closeCart = useCartStore((s) => s.closeCart);
 
   const FREE_SHIPPING_THRESHOLD = 50000;
-  const freeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD || deliveryMethod === "pickup";
-  const shipping = freeShipping ? 0 : 9000;
-  const grandTotal = totalPrice + shipping;
+  const baseFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD || deliveryMethod === "pickup";
+  const baseShipping = baseFreeShipping ? 0 : 9000;
+  const freeShipping = baseFreeShipping || couponFreeShipping;
+  const shipping = freeShipping ? 0 : baseShipping;
+  const grandTotal = Math.max(0, totalPrice - couponDiscount + shipping);
+
+  // Reset coupon when cart changes (items or qty) — stale discount
+  // would be misleading. We keep the input text so the user can
+  // re-apply, but clear the applied discount.
+  const cartSig = items.map((i) => `${i.product.id}:${i.quantity}`).join("|");
+  const prevCartSig = useRef(cartSig);
+  useEffect(() => {
+    if (prevCartSig.current !== cartSig && couponApplied) {
+      setCouponApplied(false);
+      setCouponCode(null);
+      setCouponDiscount(0);
+      setCouponFreeShipping(false);
+    }
+    prevCartSig.current = cartSig;
+  }, [cartSig, couponApplied]);
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) {
+      toast.error("Masukkan kode kupon dulu");
+      return;
+    }
+    if (!form.email && !form.phone) {
+      toast.error("Isi email atau telepon dulu sebelum pakai kupon");
+      return;
+    }
+    setCouponValidating(true);
+    try {
+      const res = await fetch("/api/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          subtotal: totalPrice,
+          email: form.email || null,
+          phone: form.phone || null,
+          items: items.map((i) => ({
+            itemCode: i.product.itemCode,
+            category: i.product.category,
+          })),
+        }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponApplied(true);
+        setCouponCode(data.couponCode);
+        setCouponDiscount(data.discountAmount || 0);
+        setCouponFreeShipping(!!data.freeShipping);
+        toast.success(data.message || "Kupon diterapkan!");
+      } else {
+        setCouponApplied(false);
+        setCouponCode(null);
+        setCouponDiscount(0);
+        setCouponFreeShipping(false);
+        toast.error(data.message || "Kupon tidak valid");
+      }
+    } catch {
+      toast.error("Gagal validasi kupon");
+    } finally {
+      setCouponValidating(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponApplied(false);
+    setCouponCode(null);
+    setCouponDiscount(0);
+    setCouponFreeShipping(false);
+    setCouponInput("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +150,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
           deliveryMethod,
           paymentMethod,
           total: grandTotal,
+          ...(couponApplied && couponCode ? { couponCode } : {}),
         }),
       });
       const data: CheckoutResponse = await res.json();
@@ -77,8 +158,13 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
       if (data.success) {
         setStep("success");
         clear();
+        // Reset coupon state after successful checkout
+        setCouponApplied(false);
+        setCouponCode(null);
+        setCouponDiscount(0);
+        setCouponFreeShipping(false);
+        setCouponInput("");
         toast.success("Pesanan berhasil dibuat!");
-        // Trigger parent to re-fetch products (stock update) after ERPNext sync
         if (onCheckoutSuccess) onCheckoutSuccess();
       } else {
         setStep("form");
@@ -93,7 +179,6 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const handleClose = (open: boolean) => {
     onOpenChange(open);
     if (!open) {
-      // reset after close animation
       setTimeout(() => {
         setStep("form");
         setResult(null);
@@ -288,6 +373,73 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                   </RadioGroup>
                 </section>
 
+                {/* ============ Section: Coupon — elevated card ============ */}
+                <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-card via-card to-muted p-4 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-violet-500" />
+                  <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500 text-white text-[10px]">4</span>
+                    Kupon Diskon
+                  </h3>
+                  {couponApplied && couponCode ? (
+                    <div className="flex items-center justify-between rounded-lg border border-violet-500/30 bg-violet-500/5 p-2.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Ticket className="h-4 w-4 text-violet-600 dark:text-violet-400 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">{couponCode}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {couponFreeShipping
+                              ? "Gratis ongkir"
+                              : `Hemat ${formatIDR(couponDiscount)}`}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-muted-foreground hover:text-destructive shrink-0"
+                        aria-label="Hapus kupon"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Ticket className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                          placeholder="WELCOME10"
+                          disabled={couponValidating}
+                          className="pl-9 h-10 uppercase text-sm font-mono"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleApplyCoupon();
+                            }
+                          }}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={couponValidating || !couponInput.trim()}
+                        variant="secondary"
+                        className="h-10 px-4"
+                      >
+                        {couponValidating ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Pakai"
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                  <p className="mt-2 text-[10px] text-muted-foreground">
+                    Isi email/telepon dulu sebelum validasi kupon (anti penyalahgunaan).
+                  </p>
+                </section>
+
                 {/* ============ Order summary — elevated card ============ */}
                 <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/8 via-primary/5 to-card p-4 ring-1 ring-primary/20 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_8px_24px_-12px_rgba(0,0,0,0.15)]">
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
@@ -307,6 +459,12 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                     <span>Subtotal</span>
                     <span className="font-medium">{formatIDR(totalPrice)}</span>
                   </div>
+                  {couponApplied && couponDiscount > 0 && (
+                    <div className="flex justify-between text-xs text-violet-600 dark:text-violet-400">
+                      <span>Diskon ({couponCode})</span>
+                      <span className="font-bold">-{formatIDR(couponDiscount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs text-foreground/70">
                     <span>Ongkir</span>
                     <span className={freeShipping ? "text-primary font-bold" : "font-medium"}>

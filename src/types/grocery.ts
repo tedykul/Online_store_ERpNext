@@ -75,6 +75,8 @@ export interface CheckoutPayload {
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "cod" | "transfer" | "ewallet";
   total: number;
+  /// Optional coupon code applied at checkout. Validated server-side.
+  couponCode?: string;
 }
 
 export interface CheckoutResponse {

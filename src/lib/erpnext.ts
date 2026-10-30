@@ -236,6 +236,10 @@ export async function createSalesOrder(payload: {
   items: { itemCode: string; qty: number; rate: number }[];
   deliveryMethod: string;
   paymentMethod: string;
+  /// Discount applied (IDR, off grand total). 0 = no discount.
+  /// Sent to ERPNext as `discount_amount` on the Sales Order
+  /// (apply_discount_on = "Grand Total"). Ignored in mock mode.
+  discount?: number;
 }): Promise<{
   success: boolean;
   salesOrderName?: string;
@@ -284,6 +288,13 @@ export async function createSalesOrder(payload: {
       // Custom fields (optional — requires custom fields in ERPNext Sales Order)
       ...(payload.notes ? { additional_notes: payload.notes } : {}),
     };
+
+    // Apply coupon discount at SO level (ERPNext supports
+    // discount_amount on Grand Total). Only when > 0.
+    if (payload.discount && payload.discount > 0) {
+      soPayload.apply_discount_on = "Grand Total";
+      soPayload.discount_amount = payload.discount;
+    }
 
     // Step 4: Create Sales Order via Frappe REST API
     // Use longer timeout (15s) because checkout flow has multiple API calls
