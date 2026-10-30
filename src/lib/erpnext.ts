@@ -274,11 +274,12 @@ export async function createSalesOrder(payload: {
     };
 
     // Step 4: Create Sales Order via Frappe REST API
+    // Use longer timeout (15s) because checkout flow has multiple API calls
     const url = erpUrl("/api/resource/Sales Order");
     const res = await fetchWithTimeout(url, {
       method: "POST",
       body: JSON.stringify(soPayload),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const errText = await res.text();
@@ -320,10 +321,11 @@ export async function createSalesOrder(payload: {
 // ============================================================
 async function submitDoc(doc: Record<string, unknown>): Promise<void> {
   const url = erpUrl("/api/method/frappe.client.submit");
+  // Submit can be slow (validates + writes to DB) — use 15s timeout
   const res = await fetchWithTimeout(url, {
     method: "POST",
     body: JSON.stringify({ doc }),
-  });
+  }, 15000);
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Submit failed (${res.status}): ${errText.substring(0, 200)}`);
@@ -371,7 +373,7 @@ async function createAndSubmitDeliveryNote(
     const createRes = await fetchWithTimeout(createUrl, {
       method: "POST",
       body: JSON.stringify(dnPayload),
-    });
+    }, 15000);
 
     if (!createRes.ok) {
       const errText = await createRes.text();
@@ -442,7 +444,7 @@ async function ensureAddress(
     const res = await fetchWithTimeout(url, {
       method: "POST",
       body: JSON.stringify(addressPayload),
-    });
+    }, 15000);
 
     if (!res.ok) {
       const errText = await res.text();
@@ -480,7 +482,7 @@ async function ensureCustomer(payload: {
       fields: JSON.stringify(["name", "links"]),
       limit_page_length: 1,
     });
-    const res = await fetchWithTimeout(url);
+    const res = await fetchWithTimeout(url, {}, 15000);
     if (res.ok) {
       const json = await res.json();
       const contact = json.data?.[0];
@@ -505,7 +507,7 @@ async function ensureCustomer(payload: {
   const res = await fetchWithTimeout(custUrl, {
     method: "POST",
     body: JSON.stringify(custPayload),
-  });
+  }, 15000);
   if (!res.ok) {
     const errText = await res.text();
     throw new Error(`Gagal membuat customer: ${errText}`);
