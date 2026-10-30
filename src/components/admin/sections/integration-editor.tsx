@@ -108,7 +108,7 @@ export function IntegrationEditor() {
 
       // Then test
       const res = await adminFetch<{ success: boolean; connected: boolean; ping?: string; authUser?: string; error?: string; message?: string }>(
-        "/api/admin/integration/test",
+        "/api/admin/integration/test-connection",
         { method: "POST" }
       );
 
