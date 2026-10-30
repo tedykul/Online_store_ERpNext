@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { updateOrderStatus, getOrderById, type OrderStatus } from "@/lib/orders";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/audit";
+import { notifyOrderStatusChanged } from "@/lib/wa-notification";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
       action: "update",
       target: `order:${order.trackingId}:status:${newStatus}`,
       success: true,
+    });
+
+    // WhatsApp notification (best-effort, non-blocking). Sends
+    // status-change message to customer if WA enabled.
+    notifyOrderStatusChanged(id, newStatus).catch((err) => {
+      console.warn("[admin/orders] WA notify failed (non-blocking):", err.message);
     });
 
     return NextResponse.json({ success: true, order });

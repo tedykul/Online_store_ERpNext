@@ -614,6 +614,8 @@ function WaSection() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testPhone, setTestPhone] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -650,6 +652,39 @@ function WaSection() {
       toast.error(err.message || "Gagal menyimpan");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTestWa = async () => {
+    if (!testPhone.trim()) {
+      toast.error("Isi nomor telepon untuk test");
+      return;
+    }
+    setTesting(true);
+    try {
+      // Save first so test uses latest config
+      await adminFetch("/api/admin/integration", {
+        method: "POST",
+        body: JSON.stringify({
+          wa_provider: form.provider,
+          wa_api_key: form.apiKey,
+          wa_sender: form.sender,
+          wa_enabled: form.enabled,
+        }),
+      });
+      const res = await adminFetch<{ success: boolean; message: string }>(
+        "/api/admin/integration/test-wa",
+        { method: "POST", body: JSON.stringify({ phone: testPhone.trim() }) }
+      );
+      if (res.success) {
+        toast.success("Test WA terkirim! Cek HP Anda.");
+      } else {
+        toast.error(res.message || "Test WA gagal");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Test WA gagal");
+    } finally {
+      setTesting(false);
     }
   };
 
@@ -755,6 +790,33 @@ function WaSection() {
               {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
               Simpan Konfigurasi WhatsApp
             </Button>
+
+            {/* Test WA */}
+            <div className="rounded-lg border border-border/60 p-2.5 space-y-2">
+              <Label className="text-[11px] font-medium text-muted-foreground">Test kirim WA</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={testPhone}
+                  onChange={(e) => setTestPhone(e.target.value)}
+                  placeholder="0812xxxxxxx"
+                  disabled={testing || !form.enabled || form.provider === "mock"}
+                  className="h-8 text-xs"
+                />
+                <Button
+                  onClick={handleTestWa}
+                  disabled={testing || !form.enabled || form.provider === "mock"}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3 text-xs shrink-0"
+                >
+                  {testing ? <Loader2 className="h-3 w-3 animate-spin" /> : <MessageCircle className="h-3 w-3 mr-1" />}
+                  Test
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Simpan config dulu, lalu kirim test ke nomor Anda untuk verifikasi.
+              </p>
+            </div>
 
             <div className="rounded-lg bg-secondary/50 p-2.5 text-[10px] text-muted-foreground space-y-1">
               <p><strong className="text-foreground">Fonnte:</strong> Daftar di fonnte.com. Token dari menu API. Biaya ~Rp 500/1000 msg.</p>

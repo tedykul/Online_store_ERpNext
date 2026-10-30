@@ -6,6 +6,7 @@ import { estimateDelivery } from "@/lib/delivery";
 import { syncAllFromErpnext } from "@/lib/erpnext-sync";
 import { validateCoupon, redeemCoupon } from "@/lib/coupons";
 import { verifyCustomerAuth } from "@/lib/customer-auth";
+import { notifyOrderCreated } from "@/lib/wa-notification";
 import type { CheckoutPayload } from "@/types/grocery";
 
 export const dynamic = "force-dynamic";
@@ -153,6 +154,12 @@ export async function POST(req: NextRequest) {
       payload.paymentMethod,
       total
     );
+
+    // 8. WhatsApp notification (best-effort, non-blocking). Sends
+    //    order-created message to customer if WA enabled.
+    notifyOrderCreated(order.id).catch((err) => {
+      console.warn("[checkout] WA notifyOrderCreated failed (non-blocking):", err.message);
+    });
 
     // 9. Sync product stock from ERPNext (non-blocking, background)
     if (!erpResult.mock) {
