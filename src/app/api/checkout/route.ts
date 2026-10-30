@@ -3,6 +3,7 @@ import { createSalesOrder } from "@/lib/erpnext";
 import { createOrder } from "@/lib/orders";
 import { createPayment } from "@/lib/payments";
 import { estimateDelivery } from "@/lib/delivery";
+import { syncAllFromErpnext } from "@/lib/erpnext-sync";
 import type { CheckoutPayload } from "@/types/grocery";
 
 export const dynamic = "force-dynamic";
@@ -88,6 +89,20 @@ export async function POST(req: NextRequest) {
       payload.paymentMethod,
       total
     );
+
+    // 6. Sync product stock from ERPNext (non-blocking, background)
+    // After checkout, ERPNext stock is reduced (via Delivery Note submit).
+    // We sync back to SayurLogi DB so storefront shows updated stock.
+    // This is fire-and-forget — don't block checkout response.
+    if (!erpResult.mock) {
+      syncAllFromErpnext()
+        .then((result) => {
+          console.log(`[checkout] Post-checkout sync: ${result.synced} products updated`);
+        })
+        .catch((err) => {
+          console.warn("[checkout] Post-checkout sync failed (non-blocking):", err.message);
+        });
+    }
 
     return NextResponse.json({
       success: true,
