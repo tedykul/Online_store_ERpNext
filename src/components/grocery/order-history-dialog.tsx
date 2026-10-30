@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Search, Loader2, Package, Clock, AlertCircle, History,
+  Search, Loader2, Package, Clock, AlertCircle, History, ShoppingCart,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatIDR } from "@/lib/mock-data";
@@ -18,8 +18,10 @@ import {
   ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, ORDER_STATUS_ICONS,
   type OrderStatus,
 } from "@/lib/orders";
+import { useCartStore } from "@/lib/store/cart";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { Product } from "@/types/grocery";
 
 interface OrderHistoryDialogProps {
   open: boolean;
@@ -34,7 +36,7 @@ interface HistoryOrder {
   customerName: string;
   status: OrderStatus;
   total: number;
-  items: Array<{ product: { emoji: string; name: string }; quantity: number }>;
+  items: Array<{ product: Product; quantity: number }>;
   deliveryMethod: string;
   paymentMethod: string;
   createdAt: string;
@@ -47,6 +49,34 @@ export function OrderHistoryDialog({ open, onOpenChange, onTrackOrder }: OrderHi
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<HistoryOrder[] | null>(null);
   const [error, setError] = useState("");
+
+  const addItemToCart = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
+
+  // ============================================================
+  // Reorder — add all items from a past order to the cart.
+  // ============================================================
+  // Uses the snapshot product data from the order. The cart store
+  // caps quantity at product.stock (from snapshot). At checkout,
+  // the server re-validates prices + stock against the live DB,
+  // so stale snapshot data is caught there.
+  // ============================================================
+  const handleReorder = (order: HistoryOrder) => {
+    let added = 0;
+    for (const item of order.items) {
+      if (item.product && item.product.id) {
+        addItemToCart(item.product, item.quantity);
+        added++;
+      }
+    }
+    if (added > 0) {
+      toast.success(`${added} produk ditambahkan ke keranjang`);
+      onOpenChange(false);
+      setTimeout(() => openCart(), 200);
+    } else {
+      toast.error("Tidak ada produk yang bisa dipesan ulang");
+    }
+  };
 
   useEffect(() => {
     if (!open) {
@@ -179,20 +209,32 @@ export function OrderHistoryDialog({ open, onOpenChange, onTrackOrder }: OrderHi
                       })}</span>
                     </div>
                   </div>
-                  {onTrackOrder && (
+                  <div className="flex gap-1 shrink-0">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        onTrackOrder(order.trackingId);
-                        onOpenChange(false);
-                      }}
-                      className="h-7 text-xs shrink-0"
+                      onClick={() => handleReorder(order)}
+                      className="h-7 text-xs"
+                      title="Pesan ulang semua item dari pesanan ini"
                     >
-                      <Package className="h-3 w-3 mr-1" />
-                      Lacak
+                      <ShoppingCart className="h-3 w-3 mr-1" />
+                      Pesan Lagi
                     </Button>
-                  )}
+                    {onTrackOrder && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          onTrackOrder(order.trackingId);
+                          onOpenChange(false);
+                        }}
+                        className="h-7 text-xs"
+                      >
+                        <Package className="h-3 w-3 mr-1" />
+                        Lacak
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}
