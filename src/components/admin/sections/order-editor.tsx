@@ -22,6 +22,7 @@ import {
   AdminCard,
   AdminEmptyState,
 } from "../admin-ui";
+import { Pagination } from "../pagination";
 
 // ============================================================
 // OrderEditor — admin order management (list + update status).
@@ -31,11 +32,18 @@ interface OrderListResponse {
   success: boolean;
   orders: OrderWithItems[];
   total: number;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
 }
+
+const ORDERS_PER_PAGE = 10;
 
 export function OrderEditor() {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -47,22 +55,34 @@ export function OrderEditor() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ limit: "50" });
+      const params = new URLSearchParams({ limit: String(ORDERS_PER_PAGE), page: String(page) });
       if (filterStatus !== "all") params.set("status", filterStatus);
       if (search.trim()) params.set("search", search.trim());
       const res = await adminFetch<OrderListResponse>(`/api/admin/orders?${params}`);
       setOrders(res.orders || []);
       setTotal(res.total || 0);
+      setTotalPages(res.totalPages || 1);
     } catch (err: any) {
       setError(err.message || "Gagal memuat data");
     } finally {
       setLoading(false);
     }
-  }, [filterStatus, search]);
+  }, [filterStatus, search, page]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Reset to page 1 when filter or search changes
+  const handleFilterChange = (value: string) => {
+    setFilterStatus(value);
+    setPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     setUpdatingId(orderId);
@@ -126,7 +146,7 @@ export function OrderEditor() {
 
       {/* Filters */}
       <div className="mb-4 flex flex-wrap gap-2">
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
+        <Select value={filterStatus} onValueChange={handleFilterChange}>
           <SelectTrigger className="w-[180px] h-9 rounded-lg text-xs">
             <Filter className="h-3.5 w-3.5 mr-1" />
             <SelectValue />
@@ -145,7 +165,7 @@ export function OrderEditor() {
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Cari tracking ID, nama, telepon..."
             className="h-9 pl-9 rounded-lg text-xs"
           />
@@ -339,6 +359,17 @@ export function OrderEditor() {
             ))}
           </AnimatePresence>
         </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && total > 0 && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          limit={ORDERS_PER_PAGE}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
