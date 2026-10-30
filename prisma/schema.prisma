@@ -391,6 +391,40 @@ model OrderReview {
 }
 
 // ============================================================
+// SharedWishlist — shareable wishlist snapshot (public link).
+// ============================================================
+// Customer clicks "Share" in the wishlist sheet → we create a
+// snapshot of the current items (JSON of product essentials) +
+// mint a random 10-char token. The recipient opens
+//   /?wishlist=<token>
+// and sees a read-only dialog with the items + "add all to
+// cart" / "save to my wishlist" actions.
+//
+// token: 10-char base32 (uppercase, unambiguous chars). Unique.
+// itemsJson: JSON array of SharedWishlistItem (id, name, price,
+//   emoji, image, unit, itemCode, category — enough to render +
+//   re-add to cart without re-fetching).
+// title: optional custom name (default "Wishlist dari SayurLogi")
+// expiresAt: 30 days from creation (auto-cleanup). Null = never.
+// viewCount: incremented each time the link is opened.
+// ============================================================
+
+model SharedWishlist {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  title     String   @default("Wishlist dari SayurLogi")
+  itemsJson String
+  viewCount Int      @default(0)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+// ============================================================
 // Coupon — discount code system (customer-input codes).
 // ============================================================
 // Dual-layer with ERPNext Pricing Rule:

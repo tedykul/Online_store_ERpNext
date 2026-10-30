@@ -11,7 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Heart, Trash2, ShoppingCart, Plus } from "lucide-react";
+import { Heart, Trash2, ShoppingCart, Plus, Share2, Loader2, Copy, Check } from "lucide-react";
+import { useState } from "react";
 import { useWishlistStore } from "@/lib/store/wishlist";
 import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
@@ -28,6 +29,9 @@ interface WishlistSheetProps {
 export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
   const { items, isOpen, closeWishlist, remove, clear } = useWishlistStore();
   const addItem = useCartStore((s) => s.addItem);
+  const [sharing, setSharing] = useState(false);
+  const [sharedUrl, setSharedUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleMoveToCart = (product: Product) => {
     if (product.stock <= 0) {
@@ -41,6 +45,59 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
   const handleRemove = (productId: string, name: string) => {
     remove(productId);
     toast.success(`${name} dihapus dari wishlist`);
+  };
+
+  // ============================================================
+  // Share — snapshot current items to DB, get a public link.
+  // ============================================================
+  const handleShare = async () => {
+    if (items.length === 0) {
+      toast.error("Wishlist kosong — tidak ada yang dibagikan");
+      return;
+    }
+    setSharing(true);
+    try {
+      const payload = items.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        emoji: p.emoji,
+        image: p.image ?? null,
+        unit: p.unit,
+        itemCode: p.itemCode,
+        category: p.category,
+      }));
+      const res = await fetch("/api/wishlist/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: payload }),
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        const absoluteUrl = `${window.location.origin}${data.url}`;
+        setSharedUrl(absoluteUrl);
+        setCopied(false);
+        toast.success("Link wishlist dibuat! Bagikan ke teman.");
+      } else {
+        toast.error(data.message || "Gagal membuat link");
+      }
+    } catch {
+      toast.error("Koneksi gagal");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!sharedUrl) return;
+    try {
+      await navigator.clipboard.writeText(sharedUrl);
+      setCopied(true);
+      toast.success("Link disalin ke clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Gagal menyalin. Copy manual: " + sharedUrl);
+    }
   };
 
   return (
@@ -167,10 +224,52 @@ export function WishlistSheet({ onProductClick }: WishlistSheetProps) {
 
         {/* Footer */}
         {items.length > 0 && (
-          <SheetFooter className="border-t border-border/60 p-4 shrink-0">
-            <p className="mb-2 text-center text-xs text-muted-foreground">
+          <SheetFooter className="border-t border-border/60 p-4 shrink-0 space-y-2">
+            <p className="text-center text-xs text-muted-foreground">
               {items.length} produk tersimpan. Klik <Plus className="inline h-3 w-3" /> untuk pindahkan ke keranjang.
             </p>
+
+            {/* Share link block — shown after user clicks Share */}
+            {sharedUrl ? (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={sharedUrl}
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs font-mono truncate"
+                  aria-label="Link wishlist"
+                />
+                <Button
+                  onClick={handleCopyLink}
+                  size="sm"
+                  variant={copied ? "default" : "secondary"}
+                  className="h-9 px-3"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span className="ml-1 text-xs">{copied ? "Disalin" : "Salin"}</span>
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={handleShare}
+                disabled={sharing}
+                variant="outline"
+                className="h-10 w-full rounded-xl text-sm"
+              >
+                {sharing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Membuat link...
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Bagikan Wishlist
+                  </>
+                )}
+              </Button>
+            )}
+
             <Button
               onClick={closeWishlist}
               className="h-11 w-full rounded-xl text-sm shadow-md"

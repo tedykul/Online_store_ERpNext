@@ -30,6 +30,8 @@ import { useWishlistStore } from "@/lib/store/wishlist";
 import { AdminOverlay } from "@/components/admin/admin-overlay";
 import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog";
 import { OrderHistoryDialog } from "@/components/grocery/order-history-dialog";
+import { SharedWishlistDialog } from "@/components/grocery/shared-wishlist-dialog";
+import { Suspense } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Product, Category } from "@/types/grocery";
 import type { PageContent } from "@/lib/page-content";
@@ -309,6 +311,12 @@ export function HomeClient({ content }: HomeClientProps) {
 
       {/* Admin overlay (hidden by default, Ctrl+Shift+A or footer button) */}
       <AdminOverlay open={adminOpen} onOpenChange={setAdminOpen} />
+
+      {/* Shared wishlist dialog — opens when ?wishlist=<token> is present.
+          Wrapped in Suspense because useSearchParams requires it. */}
+      <Suspense fallback={null}>
+        <SharedWishlistDialog />
+      </Suspense>
     </div>
   );
 }
