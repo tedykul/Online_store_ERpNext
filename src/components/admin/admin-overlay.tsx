@@ -7,7 +7,7 @@ import {
   X, Lock, Loader2, AlertCircle, LogOut, Mail, UserCog,
   Home, Sparkles, Phone, HelpCircle, Users, MessageSquare,
   Layers, PanelBottom, PanelTop, ScrollText, Package, Palette,
-  ShoppingCart, LayoutDashboard,
+  ShoppingCart, LayoutDashboard, Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ import { ProductEditor } from "./sections/product-editor";
 import { UserEditor } from "./sections/user-editor";
 import { HeaderEditor } from "./sections/header-editor";
 import { DashboardEditor } from "./sections/dashboard-editor";
+import { IntegrationEditor } from "./sections/integration-editor";
 import { toast } from "sonner";
 
 // ============================================================
@@ -80,7 +81,8 @@ type Tab =
   | "footer"
   | "branding"
   | "users"
-  | "audit";
+  | "audit"
+  | "integration";
 
 interface TabDef {
   id: Tab;
@@ -105,6 +107,7 @@ const TABS: TabDef[] = [
   { id: "branding", label: "Branding", icon: Palette },
   { id: "users", label: "Users", icon: UserCog, adminOnly: true },
   { id: "audit", label: "Audit Log", icon: ScrollText },
+  { id: "integration", label: "Integrasi", icon: Link2 },
 ];
 
 function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
@@ -288,6 +291,7 @@ function AdminOverlayInner({ open, onOpenChange }: AdminOverlayProps) {
                   {activeTab === "branding" && <BrandSettingsEditor />}
                   {activeTab === "users" && <UserEditor />}
                   {activeTab === "audit" && <AuditLogViewer />}
+                  {activeTab === "integration" && <IntegrationEditor />}
                 </div>
               </div>
             </div>
