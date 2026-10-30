@@ -4,11 +4,20 @@ import { useState, useEffect } from "react";
 import {
   Loader2, Save, Plug, CheckCircle2, XCircle, Eye, EyeOff,
   RefreshCw, Link2, KeyRound, Building2, Warehouse, Globe,
+  CreditCard, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AdminSectionHeading,
   AdminCard,
@@ -382,6 +391,380 @@ export function IntegrationEditor() {
           </div>
         </div>
       </AdminCard>
+
+      {/* ============================================================ */}
+      {/* Midtrans payment gateway section                              */}
+      {/* ============================================================ */}
+      <MidtransSection />
+
+      {/* ============================================================ */}
+      {/* WhatsApp notification section                                 */}
+      {/* ============================================================ */}
+      <WaSection />
     </div>
+  );
+}
+
+// ============================================================
+// MidtransSection — payment gateway config + enable/disable.
+// ============================================================
+// When enabled + serverKey set, checkout creates a real Snap
+// transaction. When disabled, checkout falls back to mock
+// payment (COD/VA mock). Toggle saves credits during dev.
+// ============================================================
+
+interface MidtransForm {
+  environment: "sandbox" | "production";
+  serverKey: string;
+  clientKey: string;
+  enabled: boolean;
+}
+
+function MidtransSection() {
+  const [form, setForm] = useState<MidtransForm>({
+    environment: "sandbox",
+    serverKey: "",
+    clientKey: "",
+    enabled: false,
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showServerKey, setShowServerKey] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    adminFetch<{ success: boolean; midtrans: MidtransForm }>(
+      "/api/admin/integration"
+    )
+      .then((res) => {
+        if (cancelled) return;
+        if (res.midtrans) setForm(res.midtrans);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await adminFetch("/api/admin/integration", {
+        method: "POST",
+        body: JSON.stringify({
+          midtrans_environment: form.environment,
+          midtrans_server_key: form.serverKey,
+          midtrans_client_key: form.clientKey,
+          midtrans_enabled: form.enabled,
+        }),
+      });
+      toast.success("Konfigurasi Midtrans disimpan");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menyimpan");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleEnabled = async (enabled: boolean) => {
+    setForm({ ...form, enabled });
+    // Save immediately so toggle takes effect
+    try {
+      await adminFetch("/api/admin/integration", {
+        method: "POST",
+        body: JSON.stringify({ midtrans_enabled: enabled }),
+      });
+      toast.success(enabled ? "Midtrans diaktifkan" : "Midtrans dinonaktifkan");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal toggle");
+      setForm({ ...form, enabled: !enabled }); // revert
+    }
+  };
+
+  return (
+    <AdminCard>
+      <div className="p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <CreditCard className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                Midtrans Payment Gateway
+                {form.enabled && form.serverKey ? (
+                  <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px]">Aktif</Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[10px]">Nonaktif</Badge>
+                )}
+              </h3>
+              <p className="text-[11px] text-muted-foreground">VA, e-wallet, card, QRIS — real payment processing</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs text-muted-foreground">Enable</Label>
+            <Switch
+              checked={form.enabled}
+              onCheckedChange={toggleEnabled}
+              disabled={loading}
+              aria-label="Aktifkan Midtrans"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Memuat konfigurasi...
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <AdminField label="Environment" hint="Sandbox untuk dev/testing, Production untuk live">
+              <Select
+                value={form.environment}
+                onValueChange={(v) => setForm({ ...form, environment: v as "sandbox" | "production" })}
+                disabled={!form.enabled}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sandbox">Sandbox (dev/test)</SelectItem>
+                  <SelectItem value="production">Production (live)</SelectItem>
+                </SelectContent>
+              </Select>
+            </AdminField>
+
+            <AdminField label="Server Key" required hint="Dari Midtrans dashboard → Settings → Access Keys. Disimpan terenkripsi.">
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type={showServerKey ? "text" : "password"}
+                  value={form.serverKey}
+                  onChange={(e) => setForm({ ...form, serverKey: e.target.value })}
+                  placeholder="SB-Mid-server-xxxxx"
+                  disabled={!form.enabled}
+                  className="pl-9 pr-9 font-mono text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowServerKey(!showServerKey)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showServerKey ? "Sembunyikan" : "Tampilkan"}
+                >
+                  {showServerKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </AdminField>
+
+            <AdminField label="Client Key" hint="Dari Midtrans dashboard. Public — dipakai Snap.js di frontend.">
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  value={form.clientKey}
+                  onChange={(e) => setForm({ ...form, clientKey: e.target.value })}
+                  placeholder="SB-Mid-client-xxxxx"
+                  disabled={!form.enabled}
+                  className="pl-9 font-mono text-xs"
+                />
+              </div>
+            </AdminField>
+
+            <Button onClick={handleSave} disabled={saving} size="sm" className="w-full">
+              {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+              Simpan Konfigurasi Midtrans
+            </Button>
+
+            <div className="rounded-lg bg-secondary/50 p-2.5 text-[10px] text-muted-foreground space-y-1">
+              <p><strong className="text-foreground">Cara dapat keys:</strong> Daftar di dashboard.midtrans.com → Settings → Access Keys.</p>
+              <p><strong className="text-foreground">Webhook:</strong> Set notification URL ke <code>https://domain-anda.com/api/payments/midtrans/webhook</code> di Midtrans dashboard.</p>
+              <p><strong className="text-foreground">Saat nonaktif:</strong> Checkout otomatis pakai mock payment (COD/VA mock).</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </AdminCard>
+  );
+}
+
+// ============================================================
+// WaSection — WhatsApp notification config + enable/disable.
+// ============================================================
+// Supports Fonnte (cheap) + Wablas (reliable) + Mock (dev log).
+// When enabled + provider != mock + apiKey set, notifications
+// fire on order events (created, confirmed, out_for_delivery,
+// delivered). When disabled, no WA sent (saves credits).
+// ============================================================
+
+interface WaForm {
+  provider: "fonnte" | "wablas" | "mock";
+  apiKey: string;
+  sender: string;
+  enabled: boolean;
+}
+
+function WaSection() {
+  const [form, setForm] = useState<WaForm>({
+    provider: "mock",
+    apiKey: "",
+    sender: "",
+    enabled: false,
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    adminFetch<{ success: boolean; wa: WaForm }>(
+      "/api/admin/integration"
+    )
+      .then((res) => {
+        if (cancelled) return;
+        if (res.wa) setForm(res.wa);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await adminFetch("/api/admin/integration", {
+        method: "POST",
+        body: JSON.stringify({
+          wa_provider: form.provider,
+          wa_api_key: form.apiKey,
+          wa_sender: form.sender,
+          wa_enabled: form.enabled,
+        }),
+      });
+      toast.success("Konfigurasi WhatsApp disimpan");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menyimpan");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleEnabled = async (enabled: boolean) => {
+    setForm({ ...form, enabled });
+    try {
+      await adminFetch("/api/admin/integration", {
+        method: "POST",
+        body: JSON.stringify({ wa_enabled: enabled }),
+      });
+      toast.success(enabled ? "Notifikasi WhatsApp diaktifkan" : "Notifikasi WhatsApp dinonaktifkan");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal toggle");
+      setForm({ ...form, enabled: !enabled });
+    }
+  };
+
+  return (
+    <AdminCard>
+      <div className="p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <MessageCircle className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                Notifikasi WhatsApp
+                {form.enabled && form.provider !== "mock" && form.apiKey ? (
+                  <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px]">Aktif</Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[10px]">Nonaktif</Badge>
+                )}
+              </h3>
+              <p className="text-[11px] text-muted-foreground">Kirim WA otomatis saat status order berubah</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs text-muted-foreground">Enable</Label>
+            <Switch
+              checked={form.enabled}
+              onCheckedChange={toggleEnabled}
+              disabled={loading}
+              aria-label="Aktifkan WhatsApp"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Memuat konfigurasi...
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <AdminField label="Provider" hint="Fonnte (termurah), Wablas (lebih reliable), Mock (dev log tanpa kirim)">
+              <Select
+                value={form.provider}
+                onValueChange={(v) => setForm({ ...form, provider: v as WaForm["provider"] })}
+                disabled={!form.enabled}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mock">Mock (dev, tidak kirim)</SelectItem>
+                  <SelectItem value="fonnte">Fonnte</SelectItem>
+                  <SelectItem value="wablas">Wablas</SelectItem>
+                </SelectContent>
+              </Select>
+            </AdminField>
+
+            <AdminField label="API Key / Token" required={form.provider !== "mock"} hint="Dari dashboard provider. Disimpan terenkripsi.">
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type={showApiKey ? "text" : "password"}
+                  value={form.apiKey}
+                  onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+                  placeholder={form.provider === "fonnte" ? "Fonnte token" : form.provider === "wablas" ? "Wablas token" : "Tidak perlu (mock)"}
+                  disabled={!form.enabled || form.provider === "mock"}
+                  className="pl-9 pr-9 font-mono text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showApiKey ? "Sembunyikan" : "Tampilkan"}
+                >
+                  {showApiKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </AdminField>
+
+            <AdminField label="Sender / Device ID" hint="Nomor pengirim (Wablas) atau Device ID (Fonnte). Opsional untuk beberapa provider.">
+              <Input
+                value={form.sender}
+                onChange={(e) => setForm({ ...form, sender: e.target.value })}
+                placeholder="628xxx atau device-id"
+                disabled={!form.enabled || form.provider === "mock"}
+                className="text-xs"
+              />
+            </AdminField>
+
+            <Button onClick={handleSave} disabled={saving} size="sm" className="w-full">
+              {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+              Simpan Konfigurasi WhatsApp
+            </Button>
+
+            <div className="rounded-lg bg-secondary/50 p-2.5 text-[10px] text-muted-foreground space-y-1">
+              <p><strong className="text-foreground">Fonnte:</strong> Daftar di fonnte.com. Token dari menu API. Biaya ~Rp 500/1000 msg.</p>
+              <p><strong className="text-foreground">Wablas:</strong> Daftar di console.wablas.com. Token dari menu API.</p>
+              <p><strong className="text-foreground">Saat nonaktif:</strong> Tidak ada WA dikirim (hemat credit). Status order tetap update di dashboard.</p>
+              <p><strong className="text-foreground">Trigger:</strong> Order dibuat, dikonfirmasi, dikirim, selesai.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </AdminCard>
   );
 }

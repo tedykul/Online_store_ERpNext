@@ -66,7 +66,50 @@ export const ERP_KEYS = {
   COMPANY: "erpnext_company",
 } as const;
 
-const SECRET_KEYS = new Set([ERP_KEYS.API_SECRET]);
+// ============================================================
+// Midtrans config keys — payment gateway integration.
+// ============================================================
+// environment: "sandbox" | "production"
+//   sandbox    → use Snap sandbox URL (app.sandbox.midtrans.com)
+//   production → use Snap production URL (app.midtrans.com)
+// serverKey  → from Midtrans dashboard (per env). SECRET.
+// clientKey  → from Midtrans dashboard (per env). Public (used
+//              by Snap.js on the frontend).
+// enabled    → "true" | "false". Master toggle. When false,
+//              checkout falls back to mock payment flow.
+// ============================================================
+
+export const MIDTRANS_KEYS = {
+  ENVIRONMENT: "midtrans_environment",
+  SERVER_KEY: "midtrans_server_key",
+  CLIENT_KEY: "midtrans_client_key",
+  ENABLED: "midtrans_enabled",
+} as const;
+
+// ============================================================
+// WhatsApp gateway config keys — order notifications.
+// ============================================================
+// provider: "fonnte" | "wablas" | "mock"
+//   fonnte → https://api.fonnte.com/send-message
+//   wablas → https://console.wablas.com/api/send-message
+//   mock   → log to console (dev, no real send)
+// apiKey  → provider API token. SECRET.
+// sender  → sender phone (Wablas) or token (Fonnte). Provider-specific.
+// enabled → master toggle. When false, no WA sent (saves credits).
+// ============================================================
+
+export const WA_KEYS = {
+  PROVIDER: "wa_provider",
+  API_KEY: "wa_api_key",
+  SENDER: "wa_sender",
+  ENABLED: "wa_enabled",
+} as const;
+
+const SECRET_KEYS = new Set([
+  ERP_KEYS.API_SECRET,
+  MIDTRANS_KEYS.SERVER_KEY,
+  WA_KEYS.API_KEY,
+]);
 
 // In-memory cache
 let cachedConfig: ErpConfig | null = null;
@@ -172,4 +215,85 @@ export async function getAllConfigForDisplay(): Promise<Record<string, { value: 
 export function isConfigured(): boolean {
   const c = getErpConfig();
   return Boolean(c.url && c.apiKey && c.apiSecret);
+}
+
+// ============================================================
+// Midtrans config — read from DB on demand (no in-memory cache,
+// payment config changes are infrequent + we want fresh values).
+// ============================================================
+
+export interface MidtransConfig {
+  environment: "sandbox" | "production";
+  serverKey: string;
+  clientKey: string;
+  enabled: boolean;
+}
+
+export async function getMidtransConfig(): Promise<MidtransConfig> {
+  const rows = await db.integrationConfig.findMany({
+    where: { key: { startsWith: "midtrans_" } },
+  });
+  const map: Record<string, string> = {};
+  rows.forEach((r) => {
+    map[r.key] = r.isSecret ? decrypt(r.value) : r.value;
+  });
+  const environment = (map[MIDTRANS_KEYS.ENVIRONMENT] === "production" ? "production" : "sandbox") as
+    | "sandbox"
+    | "production";
+  return {
+    environment,
+    serverKey: map[MIDTRANS_KEYS.SERVER_KEY] || "",
+    clientKey: map[MIDTRANS_KEYS.CLIENT_KEY] || "",
+    enabled: map[MIDTRANS_KEYS.ENABLED] === "true",
+  };
+}
+
+/** Snap base URL based on environment. */
+export function midtransSnapBaseUrl(env: "sandbox" | "production"): string {
+  return env === "production"
+    ? "https://app.midtrans.com/snap/v1/transactions"
+    : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+}
+
+/** Is Midtrans enabled AND configured (has serverKey)? */
+export async function isMidtransEnabled(): Promise<boolean> {
+  const c = await getMidtransConfig();
+  return c.enabled && Boolean(c.serverKey);
+}
+
+// ============================================================
+// WhatsApp gateway config
+// ============================================================
+
+export interface WaConfig {
+  provider: "fonnte" | "wablas" | "mock";
+  apiKey: string;
+  sender: string;
+  enabled: boolean;
+}
+
+export async function getWaConfig(): Promise<WaConfig> {
+  const rows = await db.integrationConfig.findMany({
+    where: { key: { startsWith: "wa_" } },
+  });
+  const map: Record<string, string> = {};
+  rows.forEach((r) => {
+    map[r.key] = r.isSecret ? decrypt(r.value) : r.value;
+  });
+  const providerRaw = map[WA_KEYS.PROVIDER] || "mock";
+  const provider = (
+    providerRaw === "fonnte" || providerRaw === "wablas" ? providerRaw : "mock"
+  ) as "fonnte" | "wablas" | "mock";
+  return {
+    provider,
+    apiKey: map[WA_KEYS.API_KEY] || "",
+    sender: map[WA_KEYS.SENDER] || "",
+    enabled: map[WA_KEYS.ENABLED] === "true",
+  };
+}
+
+/** Is WA enabled AND configured (has apiKey + provider != mock)? */
+export async function isWaEnabled(): Promise<boolean> {
+  const c = await getWaConfig();
+  return c.enabled && c.provider !== "mock" && Boolean(c.apiKey);
 }
