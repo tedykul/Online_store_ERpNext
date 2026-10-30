@@ -25,6 +25,9 @@ import {
   AdminEmptyState,
   DeleteButton,
 } from "../admin-ui";
+import { Pagination } from "../pagination";
+
+const PRODUCTS_PER_PAGE = 10;
 
 // ============================================================
 // ProductEditor — WooCommerce-style product management.
@@ -161,6 +164,7 @@ export function ProductEditor() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [page, setPage] = useState(1);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -218,6 +222,21 @@ export function ProductEditor() {
     return list;
   }, [products, filterCategory, filterPublished, search]);
 
+  // Paginated slice of filtered results (client-side pagination)
+  const totalFiltered = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PRODUCTS_PER_PAGE));
+  // Clamp page if filtered results shrink (e.g. after filter change)
+  const currentPage = Math.min(page, totalPages);
+  const paginatedFiltered = useMemo(() => {
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filtered.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  // Reset page to 1 when filter/search changes
+  useEffect(() => {
+    setPage(1);
+  }, [filterCategory, filterPublished, search]);
+
   // Dynamic category list — derived from actual products in DB.
   // This ensures the filter dropdown always matches real data (e.g.
   // "Bumbu dapur", "Makanan Beku" from ERPNext sync), instead of a
@@ -253,15 +272,15 @@ export function ProductEditor() {
   }, [products]);
 
   const allFilteredSelected =
-    filtered.length > 0 && filtered.every((p) => selected.has(p.id));
+    paginatedFiltered.length > 0 && paginatedFiltered.every((p) => selected.has(p.id));
 
   const toggleSelectAll = () => {
     setSelected((prev) => {
       const next = new Set(prev);
       if (allFilteredSelected) {
-        filtered.forEach((p) => next.delete(p.id));
+        paginatedFiltered.forEach((p) => next.delete(p.id));
       } else {
-        filtered.forEach((p) => next.add(p.id));
+        paginatedFiltered.forEach((p) => next.add(p.id));
       }
       return next;
     });
@@ -634,12 +653,12 @@ export function ProductEditor() {
               ) : (
                 <Square className="h-3.5 w-3.5" />
               )}
-              Pilih semua ({filtered.length})
+              Pilih semua ({paginatedFiltered.length} di halaman ini)
             </button>
           </div>
 
           <AnimatePresence>
-            {filtered.map((p, i) => (
+            {paginatedFiltered.map((p, i) => (
               <motion.div
                 key={p.id}
                 layout
@@ -852,6 +871,17 @@ export function ProductEditor() {
             ))}
           </AnimatePresence>
         </div>
+      )}
+
+      {/* Pagination (client-side on filtered results) */}
+      {!loading && totalFiltered > PRODUCTS_PER_PAGE && (
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          total={totalFiltered}
+          limit={PRODUCTS_PER_PAGE}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
