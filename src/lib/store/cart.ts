@@ -29,6 +29,8 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
 
       addItem: (product, qty = 1) => {
+        // Block add if out of stock
+        if (product.stock <= 0) return;
         const items = get().items;
         const existing = items.find((i) => i.product.id === product.id);
         if (existing) {
