@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getErpConfig } from "@/lib/integration-config";
 
 // ============================================================
 // ERPNext Image Proxy
@@ -6,11 +7,10 @@ import { NextRequest, NextResponse } from "next/server";
 // Proxies images stored in ERPNext's /files/ folder so they can
 // be served on the SayurLogi storefront (same-origin, no CORS).
 //
-// ERPNext stores uploaded files in:
-//   - public/files/  (is_private=0, accessible without auth)
-//   - private/files/ (is_private=1, requires auth)
-//
-// We pass auth token anyway so both public + private work.
+// Reads ERPNext config (URL + API key + secret) from DB
+// (IntegrationConfig table) — same source as the admin panel
+// settings, NOT from .env. This ensures the proxy works whether
+// ERPNext was configured via admin UI or env vars.
 //
 // Browser caches the response for 30 days (immutable), so the
 // first load per image = 1 proxy request; subsequent loads are
@@ -20,36 +20,43 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const ERP_URL = process.env.ERPNEXT_URL || "";
-const API_KEY = process.env.ERPNEXT_API_KEY || "";
-const API_SECRET = process.env.ERPNEXT_API_SECRET || "";
-
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  const segments = params.path || [];
-  if (segments.length === 0) {
+  const { path: segments } = await params;
+  if (!segments || segments.length === 0) {
     return new NextResponse("Not found", { status: 404 });
   }
 
   const imagePath = segments.join("/");
-  const erpUrl = `${ERP_URL}/files/${imagePath}`;
+
+  // Read ERPNext config from DB (admin panel config), not env
+  const config = await getErpConfig();
+  if (!config.url) {
+    return new NextResponse("ERPNext not configured", { status: 503 });
+  }
+
+  // Build ERPNext file URL
+  const erpBaseUrl = config.url.replace(/\/$/, "");
+  const erpUrl = `${erpBaseUrl}/files/${imagePath}`;
 
   try {
     const res = await fetch(erpUrl, {
       headers: {
-        Authorization: `token ${API_KEY}:${API_SECRET}`,
+        Authorization: `token ${config.apiKey}:${config.apiSecret}`,
         Accept: "image/*",
       },
+      // 10s timeout — image fetch shouldn't block too long
+      signal: AbortSignal.timeout(10000),
     });
 
     if (!res.ok) {
+      console.error(`[erp-image] fetch failed: ${res.status} for ${erpUrl}`);
       return new NextResponse("Image not found", { status: 404 });
     }
 
-    const contentType =
-      res.headers.get("content-type") || "image/png";
+    const contentType = res.headers.get("content-type") || "image/png";
     const buffer = await res.arrayBuffer();
 
     return new NextResponse(buffer, {
@@ -59,7 +66,8 @@ export async function GET(
         "X-Content-Type-Options": "nosniff",
       },
     });
-  } catch {
+  } catch (err: any) {
+    console.error("[erp-image] error:", err.message);
     return new NextResponse("Error fetching image", { status: 500 });
   }
 }
