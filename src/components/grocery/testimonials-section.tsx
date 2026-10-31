@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { motion } from "framer-motion";
 import { Star, Quote, Heart, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -387,12 +388,8 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
           </p>
         </div>
 
-        {/* ============ Desktop: 3-col grid (unchanged) ============ */}
-        <div className="mt-10 hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {items.map((t, i) => (
-            <TestimonialCard key={t.name} testimonial={t} index={i} />
-          ))}
-        </div>
+        {/* ============ Desktop/Tablet: Embla carousel (3/2/1 cards per slide) ============ */}
+        <DesktopTestimonialCarousel items={items} />
 
         {/* Trust strip */}
         <motion.div
@@ -500,5 +497,127 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
         </Badge>
       </div>
     </motion.div>
+  );
+}
+
+// ============================================================
+// DesktopTestimonialCarousel — embla-based responsive slider.
+// ============================================================
+// 3 cards per slide on desktop (lg+), 2 on tablet (md), hidden
+// on mobile (mobile uses the existing 1-card carousel above).
+// Features: arrow nav, dots, auto-play 5s, pause on hover.
+// ============================================================
+
+function DesktopTestimonialCarousel({ items }: { items: TestimonialItem[] }) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: "start",
+    slidesToScroll: 1,
+  });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+  const [paused, setPaused] = useState(false);
+  const autoplayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track selected slide + scroll snaps for dots
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    // embla init requires syncing React state with the carousel
+    // engine. setState here is intentional + safe (runs once per
+    // embla instance, not on every render).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setScrollSnaps(emblaApi.scrollSnapList());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // Auto-play 5s, pause on hover
+  useEffect(() => {
+    if (!emblaApi || paused || items.length === 0) return;
+    autoplayRef.current = setInterval(() => {
+      emblaApi.scrollNext();
+    }, 5000);
+    return () => {
+      if (autoplayRef.current) clearInterval(autoplayRef.current);
+    };
+  }, [emblaApi, paused, items.length]);
+
+  const scrollTo = useCallback(
+    (index: number) => emblaApi?.scrollTo(index),
+    [emblaApi]
+  );
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      className="mt-10 hidden md:block"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Carousel viewport */}
+      <div className="relative">
+        <div ref={emblaRef} className="overflow-hidden">
+          <div className="flex">
+            {items.map((t, i) => (
+              <div
+                key={`${t.name}-${i}`}
+                className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0 pl-5"
+              >
+                <TestimonialCard testimonial={t} index={i} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Arrow nav — left */}
+        <button
+          onClick={scrollPrev}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/90 shadow-lg ring-1 ring-border hover:bg-background hover:scale-110 transition-all"
+          aria-label="Sebelumnya"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+
+        {/* Arrow nav — right */}
+        <button
+          onClick={scrollNext}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background/90 shadow-lg ring-1 ring-border hover:bg-background hover:scale-110 transition-all"
+          aria-label="Berikutnya"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Dots indicator */}
+      <div className="mt-5 flex items-center justify-center gap-1.5">
+        {scrollSnaps.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => scrollTo(i)}
+            className={cn(
+              "h-2 rounded-full transition-all",
+              selectedIndex === i ? "w-6 bg-primary" : "w-2 bg-border hover:bg-muted-foreground/40"
+            )}
+            aria-label={`Ke slide ${i + 1}`}
+            aria-current={selectedIndex === i}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
