@@ -63,12 +63,12 @@ export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi", o
           className="flex shrink-0 items-center gap-2 rounded-xl p-1 -m-1 transition-colors hover:bg-accent/50"
           aria-label={`${brandName} beranda`}
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20 md:h-10 md:w-10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20 md:h-10 md:w-10">
             <Leaf className="h-4 w-4 md:h-5 md:w-5" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
             <span className="text-base font-bold tracking-tight text-foreground md:text-lg">{brandName}</span>
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Sayur & Buah Segar</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Sayur & Buah Segar</span>
           </div>
         </a>
 
@@ -106,7 +106,7 @@ export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi", o
             {wishlistCount > 0 && (
               <Badge
                 variant="secondary"
-                className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-white text-[9px] font-bold ring-2 ring-background"
+                className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold ring-2 ring-background"
               >
                 {wishlistCount}
               </Badge>
@@ -128,7 +128,7 @@ export function Header({ searchQuery, onSearchChange, brandName = "SayurLogi", o
             {totalItems > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -top-1.5 -right-1.5 h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold ring-2 ring-background"
+                className="absolute -top-1.5 -right-1.5 h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full text-xs font-bold ring-2 ring-background"
               >
                 {totalItems}
               </Badge>

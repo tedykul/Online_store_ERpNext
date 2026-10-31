@@ -87,7 +87,7 @@ export function PromoBanner({
             {icon ?? <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />}
             <span className="font-bold text-orange-700 dark:text-orange-400">{title}</span>
             <span className="text-muted-foreground">{description}</span>
-            <span className="inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+            <span className="inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
               25% OFF
             </span>
             <button

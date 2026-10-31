@@ -52,7 +52,7 @@ export function BestSellerCarousel({ products, onOpenDetail }: BestSellerCarouse
             <span className="text-xs text-muted-foreground">{bestSellers.length} produk</span>
           </div>
         </div>
-        <span className="flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-[9px] font-bold text-orange-600">
+        <span className="flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-[10px] font-bold text-orange-600">
           🔥 Laris
         </span>
       </div>
@@ -79,7 +79,7 @@ export function BestSellerCarousel({ products, onOpenDetail }: BestSellerCarouse
               {/* Image */}
               <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-secondary/30 to-secondary/5">
                 {discount > 0 && (
-                  <span className="absolute left-2 top-2 z-10 rounded-md bg-stone-900/90 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm backdrop-blur-sm">
+                  <span className="absolute left-2 top-2 z-10 rounded-md bg-stone-900/90 px-1.5 py-0.5 text-xs font-bold text-white shadow-sm backdrop-blur-sm">
                     -{discount}%
                   </span>
                 )}
@@ -97,25 +97,25 @@ export function BestSellerCarousel({ products, onOpenDetail }: BestSellerCarouse
                   {product.name}
                 </h3>
                 {rating > 0 && (
-                  <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                     <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                     <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
                   </div>
                 )}
                 {/* Urgency: "Terjual X" — drives conversion */}
-                <span className="text-[9px] font-medium text-orange-600/80">
+                <span className="text-[10px] font-medium text-orange-600/80">
                   Terjual {Math.floor(product.stock * 3.7) + 120}
                 </span>
                 <div className="mt-0.5 flex items-end justify-between gap-1.5">
                   <div className="flex min-w-0 flex-col">
                     {product.oldPrice && (
-                      <span className="text-[10px] text-muted-foreground/50 line-through leading-none">
+                      <span className="text-xs text-muted-foreground/50 line-through leading-none">
                         {formatIDR(product.oldPrice)}
                       </span>
                     )}
                     <div className="flex items-baseline gap-0.5">
                       <span className="text-sm font-extrabold text-primary leading-none">{formatIDR(product.price)}</span>
-                      <span className="text-[9px] text-muted-foreground">/{product.unit}</span>
+                      <span className="text-[10px] text-muted-foreground">/{product.unit}</span>
                     </div>
                   </div>
                   <span

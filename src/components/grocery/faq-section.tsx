@@ -116,7 +116,7 @@ export function FaqSection({ faqs: dbFaqs, onOpenContactSheet }: FaqSectionProps
     >
       <div className="mx-auto max-w-4xl px-4 py-8 md:py-24">
         {/* Mobile: compact label (no heading/legend) */}
-        <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground md:hidden">
+        <p className="mb-3 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground md:hidden">
           FAQ
         </p>
 
@@ -153,7 +153,7 @@ export function FaqSection({ faqs: dbFaqs, onOpenContactSheet }: FaqSectionProps
             {Object.values(CATEGORY_META).map((cat) => (
               <span
                 key={cat.label}
-                className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-[11px] font-medium text-muted-foreground ring-1 ring-border/50"
+                className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border/50"
               >
                 <span className={cn("h-1.5 w-1.5 rounded-full", cat.accent)} />
                 {cat.label}

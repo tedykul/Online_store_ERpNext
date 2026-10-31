@@ -171,7 +171,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
         </motion.div>
 
         {/* Mobile: compact section label (replaces full heading) */}
-        <p className="mb-3 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground md:hidden">
+        <p className="mb-3 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground md:hidden">
           Hubungi Kami
         </p>
 
@@ -220,7 +220,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
 
                   {/* Label + value */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       {info.label}
                     </p>
                     <p
@@ -245,7 +245,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
             <div className="group relative mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-4 ring-1 ring-primary/20 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
               <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
                   <Lightbulb className="h-4 w-4" />
                 </div>
                 <div className="flex-1">
@@ -420,7 +420,7 @@ function SuccessState({ onReset }: { onReset: () => void }) {
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
         className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-4 ring-primary/10"
       >
-        <CheckCircle2 className="h-9 w-9 text-primary" />
+        <CheckCircle2 className="h-10 w-10 text-primary" />
       </motion.div>
       <div>
         <h3 className="text-xl font-bold">Pesan Terkirim! 🎉</h3>

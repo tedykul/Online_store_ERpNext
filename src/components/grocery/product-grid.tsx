@@ -139,7 +139,7 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
       {/* End-of-list indicator — shows when all products are loaded */}
       {!hasMore && products.length > INITIAL_COUNT && (
         <div className="flex items-center justify-center py-4">
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             ✓ Semua {products.length} produk telah ditampilkan
           </span>
         </div>

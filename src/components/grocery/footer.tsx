@@ -84,7 +84,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
     <footer className="mt-auto border-t border-border/60 bg-secondary/30">
       {/* ============ Newsletter strip — elevated card (desktop only, mobile hidden for lighter footer) ============ */}
       <div className="hidden md:block mx-auto max-w-7xl px-4 pt-8">
-        <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Newsletter</p>
+        <p className="mb-2 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Newsletter</p>
         <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-card p-5 ring-1 ring-primary/20 shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)] md:p-6">
           <div className="absolute inset-x-0 top-0 h-1.5 bg-primary" />
           <div className="grid items-center gap-4 md:grid-cols-2">
@@ -111,12 +111,12 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-3.5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
             <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
             <div className="flex items-center gap-2.5 mb-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
                 <Leaf className="h-4.5 w-4.5" />
               </div>
               <div className="flex-1">
                 <span className="text-base font-bold block leading-tight">{brandName}</span>
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
               </div>
               {/* Trust badges inline right */}
               <div className="flex gap-1">
@@ -142,7 +142,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             </div>
             <div>
               <span className="text-lg font-bold block leading-tight">{brandName}</span>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{tagline}</span>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">{tagline}</span>
             </div>
           </div>
           <p className="text-sm text-foreground/70 leading-relaxed">{brandTextLong}</p>
@@ -150,7 +150,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             {TRUST_BADGES.map((badge) => {
               const Icon = badge.icon;
               return (
-                <span key={badge.label} className="inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-[10px] font-semibold text-foreground ring-1 ring-border/50">
+                <span key={badge.label} className="inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-xs font-semibold text-foreground ring-1 ring-border/50">
                   <Icon className="h-3 w-3 text-primary" />
                   {badge.label}
                 </span>
@@ -160,7 +160,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
           {socialLinks.length > 0 && (
             <div className="flex gap-2 pt-1">
               {socialLinks.map(({ Icon, label, url }) => (
-                <a key={label} href={url!} target="_blank" rel="noopener noreferrer" aria-label={`${brandName} di ${label}`} title={label} className="flex h-9 w-9 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border/50 transition-all hover:bg-primary hover:text-primary-foreground hover:ring-primary hover:-translate-y-0.5">
+                <a key={label} href={url!} target="_blank" rel="noopener noreferrer" aria-label={`${brandName} di ${label}`} title={label} className="flex h-10 w-10 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border/50 transition-all hover:bg-primary hover:text-primary-foreground hover:ring-primary hover:-translate-y-0.5">
                   <Icon className="h-4 w-4" />
                 </a>
               ))}
@@ -313,13 +313,13 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
         <div className="md:hidden">
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-card to-muted/50 p-3.5 ring-1 ring-border shadow-[0_2px_4px_rgba(0,0,0,0.05),0_8px_24px_-8px_rgba(0,0,0,0.18)]">
             <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <CreditCard className="h-3 w-3 text-primary" />
               Metode Pembayaran
             </p>
             <div className="grid grid-cols-4 gap-1.5">
               {PAYMENT_METHODS.map((method) => (
-                <span key={method} className="flex items-center justify-center rounded-md bg-background px-1 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border/60 shadow-sm text-center">
+                <span key={method} className="flex items-center justify-center rounded-md bg-background px-1 py-1.5 text-xs font-bold text-foreground ring-1 ring-border/60 shadow-sm text-center">
                   {method}
                 </span>
               ))}
@@ -334,7 +334,7 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
           </div>
           <div className="flex flex-wrap gap-1.5">
             {PAYMENT_METHODS.map((method) => (
-              <span key={method} className="rounded-md bg-background px-2.5 py-1.5 text-[10px] font-bold text-foreground ring-1 ring-border shadow-sm">
+              <span key={method} className="rounded-md bg-background px-2.5 py-1.5 text-xs font-bold text-foreground ring-1 ring-border shadow-sm">
                 {method}
               </span>
             ))}

@@ -66,7 +66,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
       id="tentang"
       className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-primary/5 via-background to-background"
     >
-      <div className="mx-auto max-w-5xl px-4 py-10 md:py-20">
+      <div className="mx-auto max-w-5xl px-4 py-7 md:py-20">
         {/* Heading — centered, single column */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -141,7 +141,7 @@ export function AboutSection({ content }: AboutSectionProps = {}) {
               <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-xl font-extrabold text-transparent md:text-2xl">
                 {stat.value}
               </span>
-              <span className="text-[11px] text-muted-foreground md:text-xs">{stat.label}</span>
+              <span className="text-xs text-muted-foreground md:text-xs">{stat.label}</span>
             </motion.div>
           ))}
         </motion.div>

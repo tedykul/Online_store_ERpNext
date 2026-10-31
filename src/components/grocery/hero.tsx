@@ -135,8 +135,8 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="rounded-full px-7 h-12 text-base border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400 dark:hover:bg-orange-950/30"
+              variant="secondary"
+              className="rounded-full px-7 h-12 text-base bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-200 dark:border-orange-800"
               onClick={handleViewPromo}
             >
               {ctaSecondary}

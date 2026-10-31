@@ -274,7 +274,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
       id="testimoni"
       className="scroll-mt-24 border-y border-border/40 bg-gradient-to-b from-background via-secondary/20 to-background"
     >
-      <div className="mx-auto max-w-7xl px-4 py-10 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 py-7 md:py-24">
         {/* Heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -326,7 +326,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
                 {stat.value}
               </span>
               <span className="text-sm font-semibold">{stat.label}</span>
-              <span className="text-[11px] text-muted-foreground">{stat.subtext}</span>
+              <span className="text-xs text-muted-foreground">{stat.subtext}</span>
             </motion.div>
           ))}
         </motion.div>
@@ -383,7 +383,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
             ))}
           </div>
           {/* Swipe hint */}
-          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+          <p className="mt-2 text-center text-xs text-muted-foreground">
             Geser untuk lihat lebih
           </p>
         </div>
@@ -492,7 +492,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
             {role} · {location}
           </p>
         </div>
-        <Badge variant="secondary" className="shrink-0 text-[10px] font-medium bg-primary/10 text-primary hover:bg-primary/15">
+        <Badge variant="secondary" className="shrink-0 text-xs font-medium bg-primary/10 text-primary hover:bg-primary/15">
           ✓ Verified
         </Badge>
       </div>
