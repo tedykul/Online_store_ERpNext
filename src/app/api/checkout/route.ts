@@ -7,6 +7,7 @@ import { syncAllFromErpnext } from "@/lib/erpnext-sync";
 import { validateCoupon, redeemCoupon } from "@/lib/coupons";
 import { verifyCustomerAuth } from "@/lib/customer-auth";
 import { notifyOrderCreated } from "@/lib/wa-notification";
+import { db } from "@/lib/db";
 import { bookSlot, isSchedulingEnabled } from "@/lib/delivery-slots";
 import type { CheckoutPayload } from "@/types/grocery";
 
@@ -39,6 +40,41 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // 0. Validate cart items against DB — remove stale/unpublished
+    //    products (e.g. items deleted from ERPNext but still in cart).
+    //    This prevents "Item not found" errors from ERPNext during
+    //    Sales Order creation. Recalculate subtotal from valid items only.
+    const cartItemCodes = payload.items.map((i) => i.product.itemCode).filter(Boolean);
+    const validProducts = cartItemCodes.length > 0
+      ? await db.product.findMany({
+          where: { itemCode: { in: cartItemCodes }, published: true },
+          select: { itemCode: true, price: true, name: true },
+        })
+      : [];
+    const validProductMap = new Map(validProducts.map((p) => [p.itemCode, p]));
+
+    // Filter payload.items: keep only those that exist + are published in DB
+    const originalItemCount = payload.items.length;
+    payload.items = payload.items.filter((i) => {
+      const dbProduct = validProductMap.get(i.product.itemCode);
+      if (!dbProduct) return false; // stale item — remove from cart
+      // Update price from DB (in case cart has stale price)
+      i.product.price = dbProduct.price;
+      return true;
+    });
+
+    if (payload.items.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Produk di keranjang tidak tersedia lagi. Silakan refresh halaman dan pilih produk lain." },
+        { status: 400 }
+      );
+    }
+
+    const removedCount = originalItemCount - payload.items.length;
+    const removedWarning = removedCount > 0
+      ? ` (${removedCount} produk tidak tersedia telah dihapus dari pesanan)`
+      : "";
 
     // 1. Calculate subtotal + shipping
     const subtotal = payload.items.reduce(
@@ -204,7 +240,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: erpResult.message,
+      message: erpResult.message + removedWarning,
       salesOrderName: erpResult.salesOrderName,
       trackingId: order.trackingId,
       orderId: order.id,
