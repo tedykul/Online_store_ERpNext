@@ -4,17 +4,15 @@ import { getErpConfig } from "@/lib/integration-config";
 // ============================================================
 // ERPNext Image Proxy
 // ============================================================
-// Proxies images stored in ERPNext's /files/ folder so they can
-// be served on the SayurLogi storefront (same-origin, no CORS).
+// Proxies images stored in ERPNext's /files/ or /private/files/
+// folder so they can be served on the SayurLogi storefront
+// (same-origin, no CORS).
 //
 // Reads ERPNext config (URL + API key + secret) from DB
 // (IntegrationConfig table) — same source as the admin panel
-// settings, NOT from .env. This ensures the proxy works whether
-// ERPNext was configured via admin UI or env vars.
+// settings.
 //
-// Browser caches the response for 30 days (immutable), so the
-// first load per image = 1 proxy request; subsequent loads are
-// served from browser cache.
+// Browser caches the response for 30 days (immutable).
 // ============================================================
 
 export const dynamic = "force-dynamic";
@@ -37,9 +35,32 @@ export async function GET(
     return new NextResponse("ERPNext not configured", { status: 503 });
   }
 
-  // Build ERPNext file URL
   const erpBaseUrl = config.url.replace(/\/$/, "");
-  const erpUrl = `${erpBaseUrl}/files/${imagePath}`;
+
+  // ============================================================
+  // Determine the correct ERPNext URL based on path.
+  // ============================================================
+  // If the original image path in ERPNext was "/private/files/xxx",
+  // the sync logic (erpnext-sync.ts) would have rewritten it to
+  // "/api/erp-image/private/files/xxx".
+  // So segments[0] = "private", segments[1] = "files".
+  //
+  // For public files: segments[0] = "files" (or just the filename
+  // if sync didn't prepend "files/"). We handle both.
+  // ============================================================
+  let erpUrl: string;
+  
+  // Reconstruct the path as ERPNext expects it
+  if (segments[0] === "private" && segments[1] === "files") {
+    // Private file: /private/files/xxx.jpg
+    erpUrl = `${erpBaseUrl}/private/files/${segments.slice(2).join("/")}`;
+  } else if (segments[0] === "files") {
+    // Public file: /files/xxx.jpg
+    erpUrl = `${erpBaseUrl}/files/${segments.slice(1).join("/")}`;
+  } else {
+    // Fallback: treat as public file directly
+    erpUrl = `${erpBaseUrl}/files/${imagePath}`;
+  }
 
   try {
     const res = await fetch(erpUrl, {
@@ -47,7 +68,6 @@ export async function GET(
         Authorization: `token ${config.apiKey}:${config.apiSecret}`,
         Accept: "image/*",
       },
-      // 10s timeout — image fetch shouldn't block too long
       signal: AbortSignal.timeout(10000),
     });
 

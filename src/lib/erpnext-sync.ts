@@ -54,8 +54,13 @@ export async function syncAllFromErpnext(): Promise<SyncResult> {
       // the storefront can serve them same-origin without CORS issues.
       const rewrittenImage = (() => {
         if (!p.image) return null;
+        // Handle both public (/files/...) and private (/private/files/...) images.
+        // ERPNext stores private files at /private/files/ which require auth.
+        if (p.image.startsWith("/private/files/")) {
+          return `/api/erp-image${p.image}`;
+        }
         if (p.image.startsWith("/files/")) {
-          return `/api/erp-image${p.image.replace(/^\/files\//, "/")}`;
+          return `/api/erp-image${p.image}`;
         }
         return p.image;
       })();
