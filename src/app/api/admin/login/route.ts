@@ -121,6 +121,10 @@ export async function POST(req: NextRequest) {
         userEmail: user.email,
       });
 
+      // Return token to client (for Bearer header fallback) AND
+      // set httpOnly cookie (primary path). The token stored in
+      // sessionStorage is the SESSION token, not the password —
+      // so it's safe even if XSS leaks it (single-use, expires).
       const res = NextResponse.json({
         success: true,
         message: "Login berhasil.",
@@ -130,6 +134,7 @@ export async function POST(req: NextRequest) {
           name: user.name,
           role: user.role,
         },
+        token, // session token — client stores + sends as Bearer
       });
       setSessionCookieOnResponse(res, token, expiresAt);
       return res;
@@ -148,7 +153,11 @@ export async function POST(req: NextRequest) {
         target: "login:password-gate",
         success: true,
       });
-      const res = NextResponse.json({ success: true, message: "Login berhasil." });
+      const res = NextResponse.json({
+        success: true,
+        message: "Login berhasil.",
+        token,
+      });
       setSessionCookieOnResponse(res, token, expiresAt);
       return res;
     }

@@ -6,30 +6,30 @@ import {
 } from "@/lib/session";
 
 // ============================================================
-// Admin auth — session-cookie based, with a password-gate
-// fallback for dev/legacy callers.
+// Admin auth — dual auth: session cookie + Bearer session token.
 // ============================================================
-// Primary path: login route mints a Session row + sets the
-// admin_session httpOnly cookie. verifyAuth() reads the cookie,
-// looks up the Session, and returns the linked User's real
-// id/email/role. This fixes Mode 1 (email+password login) so
-// every request is identified as the actual user, with the
-// correct role for the permissions matrix.
+// Two parallel paths, both backed by the Session table:
 //
-// Fallback: a Bearer token equal to the ADMIN_PASSWORD env var
-// is still accepted for backwards compatibility (scripts, dev
-// curl, etc.). It authenticates as an anonymous password-gate
-// admin (role "admin", no userId).
+// 1. Cookie path (preferred): browser auto-sends admin_session
+//    httpOnly cookie. verifyAuth reads it → Session row → User.
+//
+// 2. Bearer token path (fallback / robust): client explicitly
+//    sends Authorization: Bearer <session-token>. verifyAuth
+//    reads it → Session row → User. This path survives cases
+//    where the cookie isn't sent (e.g. service worker intercept,
+//    cross-origin, Safari ITP, certain proxy setups).
+//
+// Both paths look up the SAME Session table, so a token from
+// login is valid in either form. Login route sets the cookie
+// AND returns the token to the client for storage in
+// sessionStorage (NOT the password — the session token).
+//
+// Legacy password-gate (Bearer = ADMIN_PASSWORD env) is kept
+// for dev curl/scripts only. Production should disable it.
 // ============================================================
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 
-// ============================================================
-// Production safety — warn if the legacy password-gate fallback
-// is active in production. For prod, prefer Mode 1 (email +
-// password via User table) only. Set ADMIN_PASSWORD="" (empty)
-// in production .env to fully disable the bearer fallback.
-// ============================================================
 if (process.env.NODE_ENV === "production" && ADMIN_PASSWORD) {
   console.warn(
     "[admin-auth] WARNING: ADMIN_PASSWORD is set in production. " +
@@ -57,70 +57,101 @@ export interface AuthResult {
 }
 
 // ============================================================
+// resolveSession → AuthResult — shared logic for cookie + bearer.
+// ============================================================
+// Given a valid SessionPayload, look up the linked User (if any)
+// and return the AuthResult. Anonymous password-gate sessions
+// (userId null) use the snapshotted email + role from the row.
+// ============================================================
+
+async function resolveSession(session: {
+  id: string;
+  userId: string | null;
+  email: string | null;
+  role: string;
+  method: string;
+}): Promise<AuthResult | null> {
+  // Real user session (Mode 1)
+  if (session.userId) {
+    const user = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, email: true, name: true, role: true, active: true },
+    });
+    if (user && user.active) {
+      return {
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        method: "session",
+      };
+    }
+    // User deleted/disabled — session invalid. Best-effort delete.
+    await db.session.delete({ where: { id: session.id } }).catch(() => {});
+    return null;
+  }
+  // Anonymous password-gate session (legacy mode)
+  return {
+    userId: "",
+    email: session.email || "admin@password-gate",
+    name: null,
+    role: session.role,
+    method: "password_gate",
+  };
+}
+
+// ============================================================
 // verifyAuth — the single entry point for "is this request
 // authenticated, and as whom?"
 // ============================================================
-// 1. Read admin_session cookie → Session row → linked User.
-//    Returns the real user's id/email/role (method "session").
-// 2. If no cookie, fall back to Bearer ADMIN_PASSWORD env.
-//    Returns anonymous admin (method "password_gate").
-// 3. Otherwise null.
-//
-// Expired/cleaned sessions are handled inside getSessionByToken.
+// Check order:
+//   1. Cookie admin_session → Session → User
+//   2. Bearer <session-token> → Session → User  (robust fallback)
+//   3. Bearer <ADMIN_PASSWORD env>  (legacy dev/scripts only)
+//   4. null
 // ============================================================
 
 export async function verifyAuth(): Promise<AuthResult | null> {
-  // 1. Session cookie path (preferred).
-  const token = await readSessionToken();
-  if (token) {
-    const session = await getSessionByToken(token);
+  // 1. Cookie path (preferred).
+  const cookieToken = await readSessionToken();
+  if (cookieToken) {
+    const session = await getSessionByToken(cookieToken);
     if (session) {
-      // Resolve the linked User (if any) for fresh id/email/name/role.
-      if (session.userId) {
-        const user = await db.user.findUnique({
-          where: { id: session.userId },
-          select: { id: true, email: true, name: true, role: true, active: true },
-        });
-        if (user && user.active) {
-          return {
-            userId: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            method: "session",
-          };
-        }
-        // User deleted/disabled — session is invalid. Best-effort delete.
-        await db.session.delete({ where: { id: session.id } }).catch(() => {});
-        return null;
-      }
-      // Anonymous password-gate session (legacy mode). Use snapshotted
-      // email + role from the session row.
-      return {
-        userId: "",
-        email: session.email || "admin@password-gate",
-        name: null,
-        role: session.role,
-        method: "password_gate",
-      };
+      const result = await resolveSession(session);
+      if (result) return result;
     }
   }
 
-  // 2. Bearer fallback (legacy / dev / scripts).
-  if (ADMIN_PASSWORD) {
-    const headersList = await headers();
-    const auth = headersList.get("authorization") || "";
-    if (auth.startsWith("Bearer ")) {
-      const bearer = auth.slice(7).trim();
-      if (safeCompare(bearer, ADMIN_PASSWORD)) {
-        return {
-          userId: "",
-          email: "admin@password-gate",
-          name: null,
-          role: "admin",
-          method: "password_gate",
-        };
+  // 2. Bearer session-token path (robust fallback). The token
+  //    stored in sessionStorage by admin-client is the SAME
+  //    session token that's in the cookie. This handles cases
+  //    where the cookie isn't sent (service worker, ITP, etc).
+  const headersList = await headers();
+  const authHeader = headersList.get("authorization") || "";
+  if (authHeader.startsWith("Bearer ")) {
+    const bearer = authHeader.slice(7).trim();
+
+    // 2a. Try treating bearer as a session token (primary fallback).
+    //     Session tokens are 64-char hex. ADMIN_PASSWORD is typically
+    //    short ("admin123"). Quick length check avoids a DB hit for
+    //    the common dev case.
+    if (bearer.length >= 32 && /^[a-f0-9]+$/i.test(bearer)) {
+      const session = await getSessionByToken(bearer);
+      if (session) {
+        const result = await resolveSession(session);
+        if (result) return result;
       }
+    }
+
+    // 2b. Legacy: bearer = ADMIN_PASSWORD env (dev/scripts only).
+    if (ADMIN_PASSWORD && safeCompare(bearer, ADMIN_PASSWORD)) {
+      return {
+        userId: "",
+        email: "admin@password-gate",
+        name: null,
+        role: "admin",
+        method: "password_gate",
+      };
     }
   }
 
