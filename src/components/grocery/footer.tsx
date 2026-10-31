@@ -38,7 +38,11 @@ const TRUST_BADGES = [
 ];
 
 // Payment methods — text labels styled as chips (no external image deps)
-const PAYMENT_METHODS = ["BCA", "Mandiri", "BNI", "BRI", "GoPay", "OVO", "DANA", "ShopeePay", "COD"];
+const PAYMENT_METHODS = [
+  { group: "Transfer Bank", items: ["BCA", "Mandiri", "BNI", "BRI"] },
+  { group: "E-Wallet", items: ["GoPay", "OVO", "DANA", "ShopeePay"] },
+  { group: "Lainnya", items: ["COD"] },
+];
 
 /**
  * Footer — bottom of page.
@@ -318,11 +322,13 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
               Metode Pembayaran
             </p>
             <div className="grid grid-cols-4 gap-1.5">
-              {PAYMENT_METHODS.map((method) => (
-                <span key={method} className="flex items-center justify-center rounded-md bg-background px-1 py-1.5 text-xs font-bold text-foreground ring-1 ring-border/60 shadow-sm text-center">
-                  {method}
-                </span>
-              ))}
+              {PAYMENT_METHODS.map((group) =>
+                group.items.map((method) => (
+                  <span key={method} className="flex items-center justify-center rounded-md bg-background px-1.5 py-1.5 text-xs font-bold text-foreground ring-1 ring-border/60 shadow-sm text-center">
+                    {method}
+                  </span>
+                ))
+              )}
             </div>
           </div>
         </div>

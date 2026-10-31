@@ -86,13 +86,13 @@ export function PromoBanner({
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 px-4 py-2.5 text-center text-sm pr-10 relative">
             {icon ?? <Sparkles className="h-4 w-4 text-orange-500 shrink-0" />}
             <span className="font-bold text-orange-700 dark:text-orange-400">{title}</span>
-            <span className="text-muted-foreground">{description}</span>
+            <span className="hidden sm:inline text-muted-foreground">{description}</span>
             <span className="inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
               25% OFF
             </span>
             <button
               onClick={handleDismiss}
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-background hover:text-foreground active:scale-90"
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-all hover:bg-background hover:text-foreground active:scale-90"
               aria-label="Tutup promo"
               title="Tutup promo"
             >

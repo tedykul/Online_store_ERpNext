@@ -175,7 +175,7 @@ export function ContactSection({ content }: ContactSectionProps = {}) {
           Hubungi Kami
         </p>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-5 lg:gap-12 md:mt-12">
+        <div className="mt-6 grid gap-3 lg:grid-cols-5 lg:gap-12 md:mt-12">
           {/* ============ Left: Contact info cards ============ */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
