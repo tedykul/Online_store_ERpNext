@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { TrustBadges } from "./trust-badges";
 import { CheckoutSteps } from "./checkout-steps";
 import { DeliveryEstimateDisplay } from "./delivery-estimate";
+import { DeliverySlotPicker } from "./delivery-slot-picker";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -42,6 +43,10 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   });
   const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer" | "ewallet">("cod");
+
+  // Delivery slot state (when scheduling enabled)
+  const [deliverySlotId, setDeliverySlotId] = useState<string | null>(null);
+  const [deliverySlotLabel, setDeliverySlotLabel] = useState<string | null>(null);
 
   // Prefill form when customer is logged in (default address/name/phone).
   // Only prefill empty fields — don't overwrite if customer already typed.
@@ -180,6 +185,9 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
         setCouponDiscount(0);
         setCouponFreeShipping(false);
         setCouponInput("");
+        // Reset delivery slot
+        setDeliverySlotId(null);
+        setDeliverySlotLabel(null);
         toast.success("Pesanan berhasil dibuat!");
         if (onCheckoutSuccess) onCheckoutSuccess();
       } else {
@@ -348,6 +356,19 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                   <div className="mt-2">
                     <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
                   </div>
+
+                  {/* Delivery slot picker — only renders when scheduling enabled */}
+                  {deliveryMethod === "delivery" && (
+                    <div className="mt-3 rounded-lg border border-cyan-500/30 bg-cyan-500/5 p-2.5">
+                      <DeliverySlotPicker
+                        selectedSlotId={deliverySlotId}
+                        onSelect={(slot) => {
+                          setDeliverySlotId(slot?.slotId ?? null);
+                          setDeliverySlotLabel(slot?.displayLabel ?? null);
+                        }}
+                      />
+                    </div>
+                  )}
                 </section>
 
                 {/* ============ Section: Payment method — elevated card ============ */}

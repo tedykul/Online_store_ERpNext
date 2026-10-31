@@ -287,6 +287,17 @@ export function OrderTrackingDialog({ open, onOpenChange, initialTrackingId }: O
               </div>
             )}
 
+            {/* Delivery slot (if selected at checkout) */}
+            {order.deliverySlotLabel && (
+              <div className="flex items-center gap-2 rounded-lg bg-cyan-500/5 p-3 text-xs ring-1 ring-cyan-500/20">
+                <Clock className="h-4 w-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                <div>
+                  <p className="font-medium text-cyan-700 dark:text-cyan-300">Slot Pengiriman</p>
+                  <p className="text-muted-foreground">{order.deliverySlotLabel}</p>
+                </div>
+              </div>
+            )}
+
             {/* Review form (only for delivered orders) */}
             {order.status !== "cancelled" && (
               <OrderReviewForm trackingId={order.trackingId} orderStatus={order.status} />
