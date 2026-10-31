@@ -339,11 +339,13 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             <span className="text-xs font-bold uppercase tracking-wider text-foreground">Metode Pembayaran</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {PAYMENT_METHODS.map((method) => (
-              <span key={method} className="rounded-md bg-background px-2.5 py-1.5 text-xs font-bold text-foreground ring-1 ring-border shadow-sm">
-                {method}
-              </span>
-            ))}
+            {PAYMENT_METHODS.map((group) =>
+              group.items.map((method) => (
+                <span key={method} className="rounded-md bg-background px-2.5 py-1.5 text-xs font-bold text-foreground ring-1 ring-border shadow-sm">
+                  {method}
+                </span>
+              ))
+            )}
           </div>
         </div>
       </div>
