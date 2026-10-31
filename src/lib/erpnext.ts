@@ -102,6 +102,7 @@ export async function fetchProducts(category?: string): Promise<{
         "item_group",
         "stock_uom",
         "image",
+        "standard_rate",
       ]),
       filters: JSON.stringify(filters),
       limit_page_length: 200,
@@ -112,10 +113,16 @@ export async function fetchProducts(category?: string): Promise<{
     const json = await res.json();
     const items: any[] = json.data || [];
 
-    // Fetch price for each item (Item Price doctype)
+    // Fetch price for each item. Primary: standard_rate from Item
+    // doctype (directly available, no separate API call). Fall back
+    // to Item Price doctype if standard_rate is 0 or missing.
     const products: Product[] = await Promise.all(
       items.map(async (it) => {
-        const price = await fetchItemPrice(it.name);
+        let price = it.standard_rate ?? 0;
+        if (!price || price <= 0) {
+          // Use item_code (not Item.name) for Item Price filter.
+          price = (await fetchItemPrice(it.item_code || it.name)) ?? 0;
+        }
         const stock = await fetchItemStock(it.name);
         return {
           id: it.name,
@@ -123,10 +130,10 @@ export async function fetchProducts(category?: string): Promise<{
           name: it.item_name || it.name,
           description: it.description || "",
           category: it.item_group || "Lainnya",
-          price: price ?? 0,
+          price: price,
           unit: it.stock_uom || "pcs",
           stock,
-          emoji: "🛒", // ERPNext has no emoji; use generic
+          emoji: "🛒",
           image: it.image || undefined,
         };
       })
@@ -142,11 +149,16 @@ export async function fetchProducts(category?: string): Promise<{
   }
 }
 
-/** Get selling rate from Item Price (Selling, Standard) */
-async function fetchItemPrice(itemName: string): Promise<number | null> {
+/** Get selling rate from Item Price (Selling, any price list). */
+async function fetchItemPrice(itemCode: string): Promise<number | null> {
   try {
+    // Filter by item_code (not Item.name) — Item Price links to
+    // Item via item_code field. Also filter selling=1 to get the
+    // selling price (not buying). No price_list filter — we accept
+    // the first selling price found (admin should set one standard
+    // selling price list in ERPNext).
     const url = erpUrl("/api/resource/Item Price", {
-      filters: JSON.stringify([["item_code", "=", itemName], ["selling", "=", 1]]),
+      filters: JSON.stringify([["item_code", "=", itemCode], ["selling", "=", 1]]),
       fields: JSON.stringify(["price_list_rate"]),
       limit_page_length: 1,
     });
