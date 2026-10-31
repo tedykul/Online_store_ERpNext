@@ -77,6 +77,8 @@ export interface CheckoutPayload {
   total: number;
   /// Optional coupon code applied at checkout. Validated server-side.
   couponCode?: string;
+  /// Optional delivery slot ID (when scheduling enabled). Validated server-side.
+  deliverySlotId?: string;
 }
 
 export interface CheckoutResponse {

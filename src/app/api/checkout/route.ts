@@ -7,6 +7,7 @@ import { syncAllFromErpnext } from "@/lib/erpnext-sync";
 import { validateCoupon, redeemCoupon } from "@/lib/coupons";
 import { verifyCustomerAuth } from "@/lib/customer-auth";
 import { notifyOrderCreated } from "@/lib/wa-notification";
+import { bookSlot, isSchedulingEnabled } from "@/lib/delivery-slots";
 import type { CheckoutPayload } from "@/types/grocery";
 
 export const dynamic = "force-dynamic";
@@ -104,12 +105,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(erpResult, { status: 500 });
     }
 
-    // 4. Estimate delivery time
+    // 4. Estimate delivery time (default fallback)
     const estimate = estimateDelivery(payload.deliveryMethod);
 
     // 5. Resolve customer account (if logged in). Guest checkout
     //    still works (customerId stays null).
     const customerAuth = await verifyCustomerAuth();
+
+    // 5b. Book delivery slot (if scheduling enabled + slot provided).
+    //     Pickup orders don't need a slot. Falls back to default
+    //     estimate if scheduling disabled or no slot selected.
+    let deliverySlotId: string | null = null;
+    let deliverySlotLabel: string | null = null;
+    let estimatedDelivery = estimate.earliestDate.toISOString();
+
+    if (payload.deliveryMethod === "delivery" && payload.deliverySlotId) {
+      const schedulingEnabled = await isSchedulingEnabled();
+      if (schedulingEnabled) {
+        try {
+          const slot = await bookSlot(payload.deliverySlotId);
+          deliverySlotId = slot.id;
+          deliverySlotLabel = slot.displayLabel;
+          // Override estimatedDelivery with slot's end hour on slot's date
+          const slotDate = new Date(slot.date + "T00:00:00");
+          slotDate.setHours(slot.endHour, 0, 0, 0);
+          estimatedDelivery = slotDate.toISOString();
+        } catch (err: any) {
+          return NextResponse.json(
+            { success: false, message: `Slot tidak valid: ${err.message}` },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // 6. Create Order record in Prisma for tracking
     const order = await createOrder({
@@ -128,8 +156,10 @@ export async function POST(req: NextRequest) {
       deliveryMethod: payload.deliveryMethod,
       paymentMethod: payload.paymentMethod,
       erpSalesOrderName: erpResult.salesOrderName,
-      estimatedDelivery: estimate.earliestDate.toISOString(),
+      estimatedDelivery,
       customerId: customerAuth?.customerId,
+      deliverySlotId,
+      deliverySlotLabel,
     });
 
     // 7. Redeem coupon (best-effort, after order success).

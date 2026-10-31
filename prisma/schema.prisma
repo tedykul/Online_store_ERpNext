@@ -250,6 +250,10 @@ model SiteSetting {
   topBarShipping          String?
   topBarBadge             String?
   footerCopyrightText     String?
+  /// Delivery scheduling master toggle. When true, checkout shows
+  /// a slot picker (pagi/siang/sore). When false, checkout uses
+  /// the default estimate (same as before scheduling existed).
+  deliverySchedulingEnabled Boolean @default(false)
 
   updatedAt DateTime @updatedAt
 }
@@ -379,6 +383,12 @@ model Order {
   erpSalesOrderName String?
   /// Estimated delivery time (ISO string)
   estimatedDelivery String?
+  /// Delivery slot ID (when scheduling enabled). Null = no slot
+  /// selected (scheduling disabled or pickup).
+  deliverySlotId   String?
+  /// Delivery slot label snapshot (e.g. "Sen, 3 Nov 09:00-12:00")
+  /// so order display works even if the slot row is later deleted.
+  deliverySlotLabel String?
   /// JSON array of {status, timestamp} for history tracking
   statusHistoryJson String?
   createdAt       DateTime @default(now())
@@ -665,6 +675,46 @@ model ProductVariant {
 //       erpnext_warehouse, erpnext_company, erpnext_site
 // isSecret=true → value is encrypted (AES-256-CBC) before save
 // ============================================================
+
+// ============================================================
+// DeliverySlot — delivery time slots for scheduling.
+// ============================================================
+// Default slots generated daily: Pagi (09-12), Siang (12-15),
+// Sore (15-18). Admin can:
+//   - enable/disable scheduling (SiteSetting.deliverySchedulingEnabled)
+//   - block specific dates (blockedDates JSON array of ISO dates)
+//   - set maxOrders per slot (auto-closes when full)
+//   - set sameDayCutoffHour (orders before X can pick today)
+//
+// Slots are generated on-demand for the next 7 days. The
+// currentOrders count is maintained atomically when an order is
+// placed (increment) or cancelled (decrement).
+// ============================================================
+
+model DeliverySlot {
+  id            String   @id @default(cuid())
+  /// ISO date "YYYY-MM-DD" (the day of this slot)
+  date          String
+  /// Slot window start hour (9, 12, or 15)
+  startHour     Int
+  /// Slot window end hour (12, 15, or 18)
+  endHour       Int
+  /// Label: "Pagi" | "Siang" | "Sore"
+  label         String
+  /// Max orders for this slot. 0 = no limit.
+  maxOrders     Int      @default(20)
+  /// Current booked orders (incremented on checkout, decremented on cancel)
+  currentOrders Int      @default(0)
+  /// Admin can manually close a slot (e.g. kurir absen)
+  closed        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([date, startHour])
+  @@index([date])
+  @@index([closed])
+}
+
 model IntegrationConfig {
   id        String   @id @default(cuid())
   key       String   @unique

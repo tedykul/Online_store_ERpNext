@@ -92,6 +92,10 @@ interface CreateOrderInput {
   /// Customer account link (null for guest checkout). When set,
   /// the order shows up in the customer's order history.
   customerId?: string | null;
+  /// Delivery slot ID (when scheduling enabled). Null = no slot.
+  deliverySlotId?: string | null;
+  /// Delivery slot label snapshot (e.g. "Sen, 3 Nov 09:00-12:00").
+  deliverySlotLabel?: string | null;
   deliveryMethod: "delivery" | "pickup";
   paymentMethod: "cod" | "transfer" | "ewallet";
   erpSalesOrderName?: string;
@@ -117,6 +121,10 @@ export interface OrderWithItems {
   couponCode: string | null;
   /// Customer account link (null for guest checkout).
   customerId: string | null;
+  /// Delivery slot ID (null if no slot selected).
+  deliverySlotId: string | null;
+  /// Delivery slot label snapshot.
+  deliverySlotLabel: string | null;
   deliveryMethod: string;
   paymentMethod: string;
   status: OrderStatus;
@@ -151,6 +159,8 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderWithIte
       discount: input.discount ?? 0,
       couponCode: input.couponCode ?? null,
       customerId: input.customerId ?? null,
+      deliverySlotId: input.deliverySlotId ?? null,
+      deliverySlotLabel: input.deliverySlotLabel ?? null,
       status: "pending",
       erpSalesOrderName: input.erpSalesOrderName || null,
       estimatedDelivery: input.estimatedDelivery || null,
@@ -255,6 +265,8 @@ function serializeOrder(order: any): OrderWithItems {
     discount: order.discount ?? 0,
     couponCode: order.couponCode ?? null,
     customerId: order.customerId ?? null,
+    deliverySlotId: order.deliverySlotId ?? null,
+    deliverySlotLabel: order.deliverySlotLabel ?? null,
     deliveryMethod: order.deliveryMethod,
     paymentMethod: order.paymentMethod,
     status: order.status as OrderStatus,
