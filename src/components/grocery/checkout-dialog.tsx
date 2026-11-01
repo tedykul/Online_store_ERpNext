@@ -20,6 +20,7 @@ import { CheckoutSteps } from "./checkout-steps";
 import { DeliveryEstimateDisplay } from "./delivery-estimate";
 import { DeliverySlotPicker } from "./delivery-slot-picker";
 import { GojekShippingCalculator } from "./gojek-shipping-calculator";
+import { BiteshipCourierPicker } from "./biteship-courier-picker";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -43,7 +44,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
     city: "",
     notes: "",
   });
-  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup" | "gojek">("delivery");
+  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup" | "gojek" | "biteship">("delivery");
   const [deliveryZones, setDeliveryZones] = useState<{id:string;name:string;fee:number;freeShippingMin:number}[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   const [selectedZone, setSelectedZone] = useState<{id:string;name:string;fee:number;freeShippingMin:number} | null>(null);
@@ -56,6 +57,11 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const [gojekFee, setGojekFee] = useState(0);
   const [gojekDistance, setGojekDistance] = useState(0);
   const [gojekAddress, setGojekAddress] = useState("");
+  // Biteship shipping state (multi-courier)
+  const [biteshipFee, setBiteshipFee] = useState(0);
+  const [biteshipCourier, setBiteshipCourier] = useState("");
+  const [biteshipService, setBiteshipService] = useState("");
+  const [biteshipAddress, setBiteshipAddress] = useState("");
 
   // Fetch delivery zones on mount
   useEffect(() => {
@@ -108,6 +114,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const calculatedShipping = (() => {
     if (deliveryMethod === "pickup") return 0;
     if (deliveryMethod === "gojek") return gojekFee;
+    if (deliveryMethod === "biteship") return biteshipFee;
     if (deliveryMethod === "delivery" && selectedZone) {
       // Free shipping if subtotal meets zone minimum
       if (selectedZone.freeShippingMin > 0 && totalPrice >= selectedZone.freeShippingMin) return 0;
@@ -231,6 +238,11 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
         setGojekFee(0);
         setGojekDistance(0);
         setGojekAddress("");
+        // Reset biteship
+        setBiteshipFee(0);
+        setBiteshipCourier("");
+        setBiteshipService("");
+        setBiteshipAddress("");
         toast.success("Pesanan berhasil dibuat!");
         if (onCheckoutSuccess) onCheckoutSuccess();
       } else {
@@ -378,8 +390,8 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                   </h3>
                   <RadioGroup
                     value={deliveryMethod}
-                    onValueChange={(v) => setDeliveryMethod(v as "delivery" | "pickup" | "gojek")}
-                    className="grid grid-cols-3 gap-2"
+                    onValueChange={(v) => setDeliveryMethod(v as "delivery" | "pickup" | "gojek" | "biteship")}
+                    className="grid grid-cols-2 gap-2 sm:grid-cols-4"
                   >
                     <RadioCard
                       value="delivery"
@@ -393,6 +405,13 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                       icon={<Bike className="h-4 w-4" />}
                       title="Gojek"
                       desc={deliveryMethod === "gojek" && gojekFee > 0 ? formatIDR(gojekFee) : "Hitung ongkir"}
+                      accent="cyan"
+                    />
+                    <RadioCard
+                      value="biteship"
+                      icon={<Truck className="h-4 w-4" />}
+                      title="Kurir"
+                      desc={deliveryMethod === "biteship" && biteshipFee > 0 ? formatIDR(biteshipFee) : "Pilih kurir"}
                       accent="cyan"
                     />
                     <RadioCard
@@ -448,6 +467,21 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                           setGojekFee(fee);
                           setGojekDistance(dist);
                           setGojekAddress(addr);
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Biteship courier picker (multi-courier) */}
+                  {deliveryMethod === "biteship" && (
+                    <div className="mt-3 rounded-lg bg-cyan-500/5 p-2.5 ring-1 ring-cyan-500/20">
+                      <BiteshipCourierPicker
+                        items={items.map((i) => ({ name: i.product.name, quantity: i.quantity, price: i.product.price }))}
+                        onShippingChange={(fee, courier, service, addr) => {
+                          setBiteshipFee(fee);
+                          setBiteshipCourier(courier);
+                          setBiteshipService(service);
+                          setBiteshipAddress(addr);
                         }}
                       />
                     </div>
