@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description: metaDescription,
-    keywords: ["grocery", "sayur", "buah", "online", "segar", "ERPNext", "toko online"],
+    keywords: ["grocery", "sayur", "buah", "online", "segar", "toko online", "belanja sayur"],
     authors: [{ name: brandName }],
     icons: {
       icon: "/logo.svg",

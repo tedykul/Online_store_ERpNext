@@ -600,7 +600,7 @@ function LoadingView() {
       <Loader2 className="h-10 w-10 animate-spin text-primary" />
       <div className="text-center">
         <p className="font-semibold">Memproses pesanan...</p>
-        <p className="text-sm text-muted-foreground">Membuat Sales Order di ERPNext</p>
+        <p className="text-sm text-muted-foreground">Memproses pesanan Anda...</p>
       </div>
     </div>
   );
@@ -750,14 +750,10 @@ function SuccessView({
         {/* ERP order number */}
         <div className="rounded-xl border border-border/60 bg-secondary/30 p-4">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">No. Pesanan ERP</span>
+            <span className="text-muted-foreground">No. Pesanan</span>
             <span className="font-mono font-bold text-primary text-xs">{result.salesOrderName}</span>
           </div>
-          {result.mock && (
-            <div className="mt-2 rounded-md bg-amber-100 px-2 py-1 text-[11px] font-medium text-amber-700">
-              ⚠️ Mode mock — set ERPNext terhubung untuk pesanan asli
-            </div>
-          )}
+          {/* Mock warning hidden from customer — admin sees it in dashboard */}
         </div>
 
         {/* Estimated delivery/pickup time */}
