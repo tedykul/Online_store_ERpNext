@@ -51,6 +51,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const [selectedZone, setSelectedZone] = useState<{id:string;name:string;fee:number;freeShippingMin:number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer" | "ewallet">("cod");
   const [phoneWarning, setPhoneWarning] = useState("");
+  const [emailWarning, setEmailWarning] = useState("");
 
   // Delivery slot state (when scheduling enabled)
   const [deliverySlotId, setDeliverySlotId] = useState<string | null>(null);
@@ -368,10 +369,24 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                         <Input
                           type="email"
                           value={form.email}
-                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                              setEmailWarning("Format email belum benar");
+                            } else {
+                              setEmailWarning("");
+                            }
+                            setForm({ ...form, email: val });
+                          }}
                           placeholder="budi@email.com"
-                          className="h-10"
+                          className={cn("h-10", emailWarning && "border-amber-500/50 ring-1 ring-amber-500/20")}
                         />
+                        {emailWarning && (
+                          <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+                            <AlertCircle className="h-3 w-3 shrink-0" />
+                            {emailWarning}
+                          </p>
+                        )}
                       </Field>
                     </div>
                     <Field label="Alamat Pengiriman" required>

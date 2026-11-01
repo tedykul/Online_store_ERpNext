@@ -105,6 +105,7 @@ function LoginForm({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [emailWarning, setEmailWarning] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,12 +144,27 @@ function LoginForm({
           <Input
             type="email"
             value={email}
-            onChange={(e) => { setEmail(e.target.value); if (error) setError(""); }}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                setEmailWarning("Format email belum benar");
+              } else {
+                setEmailWarning("");
+              }
+              setEmail(val);
+              if (error) setError("");
+            }}
             placeholder="kamu@email.com"
             disabled={loading}
-            className="pl-9 h-10"
+            className={cn("pl-9 h-10", emailWarning && "border-amber-500/50 ring-1 ring-amber-500/20")}
             autoFocus
           />
+          {emailWarning && (
+            <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+              <AlertCircle className="h-3 w-3 shrink-0" />
+              {emailWarning}
+            </p>
+          )}
         </div>
       </div>
       <div className="space-y-1.5">
@@ -202,6 +218,7 @@ function RegisterForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [phoneWarning, setPhoneWarning] = useState("");
+  const [emailWarning, setEmailWarning] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,11 +283,26 @@ function RegisterForm({
             <Input
               type="email"
               value={form.email}
-              onChange={(e) => { setForm({ ...form, email: e.target.value }); if (error) setError(""); }}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                  setEmailWarning("Format email belum benar");
+                } else {
+                  setEmailWarning("");
+                }
+                setForm({ ...form, email: val });
+                if (error) setError("");
+              }}
               placeholder="kamu@email.com"
               disabled={loading}
-              className="pl-9 h-10"
+              className={cn("pl-9 h-10", emailWarning && "border-amber-500/50 ring-1 ring-amber-500/20")}
             />
+            {emailWarning && (
+              <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+                <AlertCircle className="h-3 w-3 shrink-0" />
+                {emailWarning}
+              </p>
+            )}
           </div>
         </div>
         <div className="space-y-1.5">
