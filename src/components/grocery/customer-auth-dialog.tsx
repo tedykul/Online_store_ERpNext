@@ -280,11 +280,29 @@ function RegisterForm({
             <Input
               type="tel"
               value={form.phone}
-              onChange={(e) => { setForm({ ...form, phone: e.target.value }); if (error) setError(""); }}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (/[^0-9]/.test(raw)) {
+                  setPhoneWarning("Nomor telepon hanya boleh angka");
+                } else {
+                  setPhoneWarning("");
+                }
+                const cleaned = raw.replace(/[^0-9]/g, "").slice(0, 15);
+                setForm({ ...form, phone: cleaned });
+                if (error) setError("");
+              }}
               placeholder="0812xxxxxxx"
               disabled={loading}
-              className="pl-9 h-10"
+              className={cn("pl-9 h-10", phoneWarning && "border-amber-500/50 ring-1 ring-amber-500/20")}
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
+            {phoneWarning && (
+              <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+                <AlertCircle className="h-3 w-3 shrink-0" />
+                {phoneWarning}
+              </p>
+            )}
           </div>
         </div>
       </div>
