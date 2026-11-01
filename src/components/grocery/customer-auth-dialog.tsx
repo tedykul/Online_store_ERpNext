@@ -207,6 +207,10 @@ function RegisterForm({
       setError("Nama, email, telepon, dan password wajib diisi");
       return;
     }
+    if (form.phone.length < 8 || form.phone.length > 15) {
+      setError("Nomor telepon tidak valid (8-15 digit)");
+      return;
+    }
     setLoading(true);
     setError("");
     try {

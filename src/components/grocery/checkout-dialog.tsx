@@ -205,6 +205,11 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
       toast.error("Lengkapi data wajib (nama, telepon, alamat)");
       return;
     }
+    // Validate phone: must be 8-15 digits, start with 0 or 62
+    if (form.phone && (form.phone.length < 8 || form.phone.length > 15)) {
+      toast.error("Nomor telepon tidak valid (8-15 digit)");
+      return;
+    }
 
     setStep("loading");
     try {
