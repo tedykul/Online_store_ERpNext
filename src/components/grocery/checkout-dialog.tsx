@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package, Ticket, X, Bike } from "lucide-react";
+import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package, Ticket, X, Bike, AlertCircle } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useCustomerStore } from "@/lib/store/customer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
