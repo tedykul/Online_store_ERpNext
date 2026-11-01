@@ -127,12 +127,17 @@ export async function geocodeAddress(address: string, apiKey: string): Promise<{
     clearTimeout(timeout);
 
     if (!res.ok) {
-      return { lat: 0, lng: 0, error: `Geocoding API error: ${res.status}` };
+      return { lat: 0, lng: 0, error: `HTTP ${res.status}` };
     }
 
     const data = await res.json();
-    if (data.status !== "OK" || !data.results?.[0]?.geometry?.location) {
-      return { lat: 0, lng: 0, error: "Alamat tidak ditemukan" };
+    // Return Google's actual status + error_message for debugging
+    if (data.status !== "OK") {
+      const detail = data.error_message || data.status;
+      return { lat: 0, lng: 0, error: detail };
+    }
+    if (!data.results?.[0]?.geometry?.location) {
+      return { lat: 0, lng: 0, error: "No results from Google" };
     }
 
     return {
@@ -140,7 +145,7 @@ export async function geocodeAddress(address: string, apiKey: string): Promise<{
       lng: data.results[0].geometry.location.lng,
     };
   } catch (err: any) {
-    return { lat: 0, lng: 0, error: "Gagal mencari alamat" };
+    return { lat: 0, lng: 0, error: err.message };
   }
 }
 

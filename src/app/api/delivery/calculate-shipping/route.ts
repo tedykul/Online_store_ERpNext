@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { calculateGojekShipping, getMapsSettings } from "@/lib/google-maps";
+import { calculateGojekShipping, getMapsSettings, geocodeAddress } from "@/lib/google-maps";
 
 export const dynamic = "force-dynamic";
 
@@ -7,12 +7,6 @@ export const dynamic = "force-dynamic";
 // POST /api/delivery/calculate-shipping
 // ============================================================
 // Body: { address: string } OR { lat: number, lng: number }
-// 
-// If address provided: server-side geocode via Google Geocoding
-// API → get lat/lng → calculate distance + fee.
-// If lat/lng provided: skip geocoding, direct distance calc.
-//
-// Returns: { success, fee, distanceKm, durationMin, error? }
 // ============================================================
 
 export async function POST(req: NextRequest) {
@@ -22,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     if (!settings.configured) {
       return NextResponse.json(
-        { success: false, message: "Google Maps belum dikonfigurasi. Hubungi admin." },
+        { success: false, message: `Google Maps belum dikonfigurasi. apiKey=${settings.apiKey ? "ada" : "kosong"} lat=${settings.storeLat} lng=${settings.storeLng}` },
         { status: 503 }
       );
     }
@@ -36,30 +30,17 @@ export async function POST(req: NextRequest) {
       lng = body.lng;
     } else if (typeof body.address === "string" && body.address.trim()) {
       // Geocode address server-side
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(body.address)}&components=country:ID&key=${settings.apiKey}`;
-      
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
-      const geoRes = await fetch(geocodeUrl, { signal: controller.signal });
-      clearTimeout(timeout);
+      const geoResult = await geocodeAddress(body.address.trim(), settings.apiKey);
 
-      if (!geoRes.ok) {
+      if (geoResult.error) {
         return NextResponse.json(
-          { success: false, message: "Gagal mencari alamat." },
+          { success: false, message: `Geocoding: ${geoResult.error}` },
           { status: 400 }
         );
       }
 
-      const geoData = await geoRes.json();
-      if (geoData.status !== "OK" || !geoData.results?.[0]?.geometry?.location) {
-        return NextResponse.json(
-          { success: false, message: "Alamat tidak ditemukan. Coba ketik lebih lengkap." },
-          { status: 400 }
-        );
-      }
-
-      lat = geoData.results[0].geometry.location.lat;
-      lng = geoData.results[0].geometry.location.lng;
+      lat = geoResult.lat;
+      lng = geoResult.lng;
     } else {
       return NextResponse.json(
         { success: false, message: "Alamat atau koordinat diperlukan." },
@@ -71,7 +52,7 @@ export async function POST(req: NextRequest) {
     const result = await calculateGojekShipping(lat, lng);
 
     if (result.error) {
-      return NextResponse.json({ success: false, message: result.error }, { status: 400 });
+      return NextResponse.json({ success: false, message: `Distance: ${result.error}` }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -81,6 +62,6 @@ export async function POST(req: NextRequest) {
       durationMin: result.durationMin,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, message: "Server error." }, { status: 500 });
+    return NextResponse.json({ success: false, message: `Server error: ${err.message}` }, { status: 500 });
   }
 }
