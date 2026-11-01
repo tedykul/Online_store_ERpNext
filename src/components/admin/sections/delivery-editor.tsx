@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DeliveryZoneEditor } from "./delivery-zone-editor";
 import { MapsSettingsEditor } from "./maps-settings-editor";
+import { BiteshipSettingsEditor } from "./biteship-settings-editor";
 
 // ============================================================
 // DeliveryEditor — admin manages delivery scheduling.
@@ -355,6 +356,9 @@ export function DeliveryEditor() {
 
       {/* Google Maps settings for Gojek */}
       <MapsSettingsEditor />
+
+      {/* Biteship settings (multi-courier) */}
+      <BiteshipSettingsEditor />
     </div>
   );
 }
