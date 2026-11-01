@@ -72,13 +72,15 @@ export interface CheckoutPayload {
     notes?: string;
   };
   items: CartItem[];
-  deliveryMethod: "delivery" | "pickup";
+  deliveryMethod: "delivery" | "pickup" | "gojek";
   paymentMethod: "cod" | "transfer" | "ewallet";
   total: number;
   /// Optional coupon code applied at checkout. Validated server-side.
   couponCode?: string;
   /// Optional delivery slot ID (when scheduling enabled). Validated server-side.
   deliverySlotId?: string;
+  /// Optional delivery zone ID (for internal delivery shipping calc).
+  deliveryZoneId?: string;
 }
 
 export interface CheckoutResponse {

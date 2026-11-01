@@ -8,6 +8,7 @@ import { validateCoupon, redeemCoupon } from "@/lib/coupons";
 import { verifyCustomerAuth } from "@/lib/customer-auth";
 import { notifyOrderCreated } from "@/lib/wa-notification";
 import { db } from "@/lib/db";
+import { calculateShipping } from "@/lib/delivery-zones";
 import { bookSlot, isSchedulingEnabled } from "@/lib/delivery-slots";
 import type { CheckoutPayload } from "@/types/grocery";
 
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
       0
     );
     const FREE_SHIPPING_THRESHOLD = 50000;
+    // Shipping calculation: use zone-based for "delivery", 0 for pickup/gojek
     const baseFreeShipping =
       subtotal >= FREE_SHIPPING_THRESHOLD || payload.deliveryMethod === "pickup";
     const baseShipping = baseFreeShipping ? 0 : 9000;
@@ -115,8 +117,16 @@ export async function POST(req: NextRequest) {
       couponId = result.coupon?.id ?? null;
     }
 
-    const shipping = freeShipping ? 0 : baseShipping;
-    const total = Math.max(0, subtotal - discount + shipping);
+    // Calculate shipping: zone-based for delivery, 0 for pickup/gojek
+    const shipping = await calculateShipping({
+      method: payload.deliveryMethod,
+      zoneId: payload.deliveryZoneId,
+      subtotal,
+      defaultFee: baseShipping,
+    });
+    // Apply coupon free shipping if applicable
+    const finalShipping = freeShipping ? 0 : shipping;
+    const total = Math.max(0, subtotal - discount + finalShipping);
 
     // 3. Create Sales Order in ERPNext (or mock). Pass discount
     //    so ERPNext SO carries the reduced grand total.
@@ -185,7 +195,7 @@ export async function POST(req: NextRequest) {
       customerNotes: payload.customer.notes,
       items: payload.items,
       subtotal,
-      shipping,
+      shipping: finalShipping,
       discount,
       couponCode,
       total,
@@ -196,6 +206,10 @@ export async function POST(req: NextRequest) {
       customerId: customerAuth?.customerId,
       deliverySlotId,
       deliverySlotLabel,
+      // Store delivery method + zone info in customerNotes if gojek
+      customerNotes: payload.deliveryMethod === "gojek" && payload.customer.notes
+        ? `[GOJEK] ${payload.customer.notes}`
+        : payload.customer.notes,
     });
 
     // 7. Redeem coupon (best-effort, after order success).

@@ -715,6 +715,38 @@ model DeliverySlot {
   @@index([closed])
 }
 
+
+// ============================================================
+// DeliveryZone — internal shipping zones with flat rates.
+// ============================================================
+// Admin defines areas they deliver to internally (e.g. BTP,
+// Telkomas, Makassar Pusat). Each zone has a flat shipping fee
+// + optional minimum order for free shipping.
+//
+// Checkout flow:
+//   1. Customer picks "Pengiriman Internal" → select zone
+//   2. System calculates shipping: zone.fee (or 0 if subtotal
+//      >= zone.freeShippingMin)
+//   3. If zone not selected → "Kirim via Gojek" (customer pays
+//      courier directly, system shipping = 0)
+// ============================================================
+
+model DeliveryZone {
+  id              String   @id @default(cuid())
+  /// Display name e.g. "BTP", "Telkomas", "Makassar Pusat"
+  name            String   @unique
+  /// Flat shipping fee in IDR
+  fee             Int      @default(0)
+  /// Minimum subtotal for free shipping. 0 = no free shipping.
+  freeShippingMin Int      @default(0)
+  /// Sort order for dropdown (lower = first)
+  order           Int      @default(0)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active])
+}
 model IntegrationConfig {
   id        String   @id @default(cuid())
   key       String   @unique
