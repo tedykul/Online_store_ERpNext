@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { DeliveryZoneEditor } from "./delivery-zone-editor";
 import { MapsSettingsEditor } from "./maps-settings-editor";
 import { BiteshipSettingsEditor } from "./biteship-settings-editor";
+import { SlotTemplateEditor } from "./slot-template-editor";
 
 // ============================================================
 // DeliveryEditor — admin manages delivery scheduling.
@@ -253,6 +254,9 @@ export function DeliveryEditor() {
           </div>
         </div>
       </AdminCard>
+
+      {/* Custom slot templates */}
+      <SlotTemplateEditor />
 
       {/* Slots list */}
       <AdminCard>

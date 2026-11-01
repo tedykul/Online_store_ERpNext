@@ -33,11 +33,55 @@ export interface SlotInfo {
   timeLabel: string;
 }
 
-const SLOT_TEMPLATES = [
+const DEFAULT_SLOT_TEMPLATES = [
   { startHour: 9, endHour: 12, label: "Pagi" },
   { startHour: 12, endHour: 15, label: "Siang" },
   { startHour: 15, endHour: 18, label: "Sore" },
 ] as const;
+
+export interface SlotTemplate {
+  startHour: number;
+  endHour: number;
+  label: string;
+}
+
+// ============================================================
+// getSlotTemplates — read from DB, fallback to default.
+// ============================================================
+// Stored as JSON in IntegrationConfig (key: delivery_slot_templates).
+// If empty or missing → use DEFAULT_SLOT_TEMPLATES (Pagi/Siang/Sore).
+// ============================================================
+
+export async function getSlotTemplates(): Promise<SlotTemplate[]> {
+  try {
+    const row = await db.integrationConfig.findUnique({
+      where: { key: "delivery_slot_templates" },
+    });
+    if (!row) return [...DEFAULT_SLOT_TEMPLATES];
+    const parsed = JSON.parse(row.value);
+    if (!Array.isArray(parsed) || parsed.length === 0) return [...DEFAULT_SLOT_TEMPLATES];
+    return parsed
+      .filter((t: any) => typeof t.startHour === "number" && typeof t.endHour === "number" && typeof t.label === "string")
+      .sort((a: SlotTemplate, b: SlotTemplate) => a.startHour - b.startHour);
+  } catch {
+    return [...DEFAULT_SLOT_TEMPLATES];
+  }
+}
+
+// ============================================================
+// setSlotTemplates — save custom templates to DB.
+// ============================================================
+
+export async function setSlotTemplates(templates: SlotTemplate[]): Promise<void> {
+  const clean = templates
+    .filter((t) => t.label.trim() && t.startHour >= 0 && t.startHour <= 23 && t.endHour > t.startHour && t.endHour <= 24)
+    .sort((a, b) => a.startHour - b.startHour);
+  await db.integrationConfig.upsert({
+    where: { key: "delivery_slot_templates" },
+    create: { key: "delivery_slot_templates", value: JSON.stringify(clean) },
+    update: { value: JSON.stringify(clean) },
+  });
+}
 
 const SAME_DAY_CUTOFF_HOUR = 13; // 13:00 WIB
 const DEFAULT_MAX_ORDERS = 20;
@@ -98,6 +142,7 @@ export async function generateAndListSlots(): Promise<SlotInfo[]> {
   if (!enabled) return [];
 
   const blockedDates = new Set(await getBlockedDates());
+  const templates = await getSlotTemplates();
   const now = new Date();
   const slots: SlotInfo[] = [];
 
@@ -114,7 +159,7 @@ export async function generateAndListSlots(): Promise<SlotInfo[]> {
     // Same-day cutoff: skip today if past 13:00
     if (dayOffset === 0 && now.getHours() >= SAME_DAY_CUTOFF_HOUR) continue;
 
-    for (const tmpl of SLOT_TEMPLATES) {
+    for (const tmpl of templates) {
       // Same-day: skip slots that already started
       if (dayOffset === 0 && now.getHours() >= tmpl.startHour) continue;
 
