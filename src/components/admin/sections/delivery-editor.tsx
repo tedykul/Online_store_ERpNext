@@ -19,6 +19,7 @@ import {
 } from "../admin-ui";
 import { cn } from "@/lib/utils";
 import { DeliveryZoneEditor } from "./delivery-zone-editor";
+import { MapsSettingsEditor } from "./maps-settings-editor";
 
 // ============================================================
 // DeliveryEditor — admin manages delivery scheduling.
@@ -351,6 +352,9 @@ export function DeliveryEditor() {
 
       {/* Zone management */}
       <DeliveryZoneEditor />
+
+      {/* Google Maps settings for Gojek */}
+      <MapsSettingsEditor />
     </div>
   );
 }
