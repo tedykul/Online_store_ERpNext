@@ -18,6 +18,7 @@ import {
   AdminEmptyState,
 } from "../admin-ui";
 import { cn } from "@/lib/utils";
+import { DeliveryZoneEditor } from "./delivery-zone-editor";
 
 // ============================================================
 // DeliveryEditor — admin manages delivery scheduling.
@@ -347,6 +348,9 @@ export function DeliveryEditor() {
         <p><strong className="text-foreground">Generate otomatis:</strong> Slot dibuat untuk 7 hari ke depan saat customer buka checkout</p>
         <p><strong className="text-foreground">Kapasitas penuh:</strong> Slot otomatis tidak bisa dipilih customer saat currentOrders ≥ maxOrders</p>
       </div>
+
+      {/* Zone management */}
+      <DeliveryZoneEditor />
     </div>
   );
 }
