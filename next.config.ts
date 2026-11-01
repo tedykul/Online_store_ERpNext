@@ -42,12 +42,12 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       // Next.js needs inline scripts + eval (especially in dev)
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      // Allow images from self, data URIs, HTTPS (ERPNext images)
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      // Allow images from self, data URIs, HTTPS (ERPNext + Google Maps)
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
-      // Allow fetch/XHR to self + HTTPS (ERPNext API, Midtrans)
+      // Allow fetch/XHR to self + HTTPS (ERPNext, Midtrans, Google Maps)
       "connect-src 'self' https:",
       "media-src 'self' data:",
       "frame-ancestors 'none'",
