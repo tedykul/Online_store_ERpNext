@@ -1,17 +1,11 @@
 import { db } from "@/lib/db";
+import { decrypt } from "@/lib/integration-config";
 
 // ============================================================
-// Google Maps — Distance Matrix API + settings management.
+// Google Maps — server-side geocoding + distance calculation.
 // ============================================================
-// Settings stored in IntegrationConfig table:
-//   google_maps_api_key  — API key (encrypted)
-//   store_latitude       — store lat (string)
-//   store_longitude      — store lng (string)
-//   gojek_base_fare      — base fare in IDR (string)
-//   gojek_per_km_rate    — per km rate in IDR (string)
-//
-// Distance Matrix API: server-side call to Google Maps to get
-// road distance between store + customer address.
+// All Google Maps API calls happen server-side (no client-side
+// JS). API key is stored encrypted in IntegrationConfig table.
 // ============================================================
 
 const KEYS = {
@@ -34,44 +28,55 @@ export interface MapsSettings {
 // ============================================================
 // getMapsSettings — read from DB (decrypt API key).
 // ============================================================
+// Safe: returns defaults if DB query fails or settings missing.
+// Never throws — always returns a valid MapsSettings object.
+// ============================================================
 
 export async function getMapsSettings(): Promise<MapsSettings> {
-  const rows = await db.integrationConfig.findMany({
-    where: { key: { in: Object.values(KEYS) } },
-  });
-  const map: Record<string, string> = {};
-  rows.forEach((r) => {
-    // API key is stored encrypted — need to decrypt
-    if (r.key === KEYS.API_KEY && r.isSecret) {
-      // Import decrypt from integration-config
-      // We'll handle this inline since we can't import async here
-      map[r.key] = r.value; // encrypted — will be decrypted below
-    } else {
-      map[r.key] = r.value;
-    }
-  });
+  try {
+    const rows = await db.integrationConfig.findMany({
+      where: { key: { in: Object.values(KEYS) } },
+    });
 
-  // Decrypt API key if encrypted
-  let apiKey = map[KEYS.API_KEY] || "";
-  if (apiKey && apiKey.includes(":")) {
-    // It's encrypted (iv:ciphertext format) — decrypt
-    const { decrypt } = await import("@/lib/integration-config");
-    apiKey = decrypt(apiKey);
+    const map: Record<string, string> = {};
+    rows.forEach((r) => {
+      if (r.key === KEYS.API_KEY && r.isSecret) {
+        // Decrypt the API key
+        try {
+          map[r.key] = decrypt(r.value);
+        } catch {
+          map[r.key] = r.value; // fallback: use raw value
+        }
+      } else {
+        map[r.key] = r.value;
+      }
+    });
+
+    const apiKey = map[KEYS.API_KEY] || "";
+    const storeLat = parseFloat(map[KEYS.STORE_LAT] || "");
+    const storeLng = parseFloat(map[KEYS.STORE_LNG] || "");
+    const baseFare = parseInt(map[KEYS.BASE_FARE] || "8000", 10);
+    const perKmRate = parseInt(map[KEYS.PER_KM] || "2000", 10);
+
+    return {
+      apiKey,
+      storeLat: isNaN(storeLat) ? 0 : storeLat,
+      storeLng: isNaN(storeLng) ? 0 : storeLng,
+      baseFare: isNaN(baseFare) ? 8000 : baseFare,
+      perKmRate: isNaN(perKmRate) ? 2000 : perKmRate,
+      configured: Boolean(apiKey && !isNaN(storeLat) && !isNaN(storeLng)),
+    };
+  } catch (err) {
+    // Return defaults if DB query fails
+    return {
+      apiKey: "",
+      storeLat: 0,
+      storeLng: 0,
+      baseFare: 8000,
+      perKmRate: 2000,
+      configured: false,
+    };
   }
-
-  const storeLat = parseFloat(map[KEYS.STORE_LAT] || "");
-  const storeLng = parseFloat(map[KEYS.STORE_LNG] || "");
-  const baseFare = parseInt(map[KEYS.BASE_FARE] || "8000", 10);
-  const perKmRate = parseInt(map[KEYS.PER_KM] || "2000", 10);
-
-  return {
-    apiKey,
-    storeLat: isNaN(storeLat) ? 0 : storeLat,
-    storeLng: isNaN(storeLng) ? 0 : storeLng,
-    baseFare: isNaN(baseFare) ? 8000 : baseFare,
-    perKmRate: isNaN(perKmRate) ? 2000 : perKmRate,
-    configured: Boolean(apiKey && !isNaN(storeLat) && !isNaN(storeLng)),
-  };
 }
 
 // ============================================================
@@ -85,10 +90,10 @@ export async function saveMapsSettings(opts: {
   baseFare?: number;
   perKmRate?: number;
 }): Promise<void> {
-  const { encrypt, setConfigValue } = await import("@/lib/integration-config");
+  const { setConfigValue } = await import("@/lib/integration-config");
 
   if (opts.apiKey !== undefined) {
-    await setConfigValue(KEYS.API_KEY, opts.apiKey, true); // encrypted
+    await setConfigValue(KEYS.API_KEY, opts.apiKey, true);
   }
   if (opts.storeLat !== undefined) {
     await setConfigValue(KEYS.STORE_LAT, String(opts.storeLat));
@@ -105,10 +110,42 @@ export async function saveMapsSettings(opts: {
 }
 
 // ============================================================
-// calculateDistance — Google Maps Distance Matrix API.
+// geocodeAddress — Google Geocoding API (address → lat/lng).
 // ============================================================
-// Takes destination lat/lng, returns distance in km + duration.
-// Uses store coordinates as origin.
+
+export async function geocodeAddress(address: string, apiKey: string): Promise<{
+  lat: number;
+  lng: number;
+  error?: string;
+}> {
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:ID&key=${apiKey}`;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      return { lat: 0, lng: 0, error: `Geocoding API error: ${res.status}` };
+    }
+
+    const data = await res.json();
+    if (data.status !== "OK" || !data.results?.[0]?.geometry?.location) {
+      return { lat: 0, lng: 0, error: "Alamat tidak ditemukan" };
+    }
+
+    return {
+      lat: data.results[0].geometry.location.lat,
+      lng: data.results[0].geometry.location.lng,
+    };
+  } catch (err: any) {
+    return { lat: 0, lng: 0, error: "Gagal mencari alamat" };
+  }
+}
+
+// ============================================================
+// calculateDistance — Google Distance Matrix API.
 // ============================================================
 
 export async function calculateDistance(destLat: number, destLng: number): Promise<{
@@ -132,7 +169,7 @@ export async function calculateDistance(destLat: number, destLng: number): Promi
     clearTimeout(timeout);
 
     if (!res.ok) {
-      return { distanceKm: 0, durationMin: 0, error: `Google Maps API error: ${res.status}` };
+      return { distanceKm: 0, durationMin: 0, error: `Distance Matrix API error: ${res.status}` };
     }
 
     const data = await res.json();
@@ -150,12 +187,12 @@ export async function calculateDistance(destLat: number, destLng: number): Promi
 
     return { distanceKm: Math.round(distanceKm * 10) / 10, durationMin };
   } catch (err: any) {
-    return { distanceKm: 0, durationMin: 0, error: err.message || "Koneksi gagal" };
+    return { distanceKm: 0, durationMin: 0, error: "Koneksi gagal" };
   }
 }
 
 // ============================================================
-// calculateGojekShipping — distance + tariff = fee.
+// calculateGojekShipping — geocode (if address) + distance + fee.
 // ============================================================
 
 export async function calculateGojekShipping(destLat: number, destLng: number): Promise<{
