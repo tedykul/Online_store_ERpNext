@@ -49,6 +49,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   const [selectedZone, setSelectedZone] = useState<{id:string;name:string;fee:number;freeShippingMin:number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer" | "ewallet">("cod");
+  const [phoneWarning, setPhoneWarning] = useState("");
 
   // Delivery slot state (when scheduling enabled)
   const [deliverySlotId, setDeliverySlotId] = useState<string | null>(null);

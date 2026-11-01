@@ -11,9 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, User, Mail, Phone, Lock, MapPin, UserPlus, LogIn } from "lucide-react";
+import { Loader2, User, Mail, Phone, Lock, MapPin, UserPlus, LogIn, AlertCircle } from "lucide-react";
 import { useCustomerStore } from "@/lib/store/customer";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import type { CustomerPublic } from "@/lib/customer-auth";
 
 // ============================================================
@@ -200,6 +201,7 @@ function RegisterForm({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [phoneWarning, setPhoneWarning] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
