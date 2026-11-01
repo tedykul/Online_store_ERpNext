@@ -19,6 +19,7 @@ import { TrustBadges } from "./trust-badges";
 import { CheckoutSteps } from "./checkout-steps";
 import { DeliveryEstimateDisplay } from "./delivery-estimate";
 import { DeliverySlotPicker } from "./delivery-slot-picker";
+import { GojekShippingCalculator } from "./gojek-shipping-calculator";
 
 interface CheckoutDialogProps {
   open: boolean;
@@ -51,6 +52,10 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   // Delivery slot state (when scheduling enabled)
   const [deliverySlotId, setDeliverySlotId] = useState<string | null>(null);
   const [deliverySlotLabel, setDeliverySlotLabel] = useState<string | null>(null);
+  // Gojek shipping state (Google Maps calculated)
+  const [gojekFee, setGojekFee] = useState(0);
+  const [gojekDistance, setGojekDistance] = useState(0);
+  const [gojekAddress, setGojekAddress] = useState("");
 
   // Fetch delivery zones on mount
   useEffect(() => {
@@ -101,7 +106,8 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
 
   // Calculate shipping based on delivery method + zone
   const calculatedShipping = (() => {
-    if (deliveryMethod === "pickup" || deliveryMethod === "gojek") return 0;
+    if (deliveryMethod === "pickup") return 0;
+    if (deliveryMethod === "gojek") return gojekFee;
     if (deliveryMethod === "delivery" && selectedZone) {
       // Free shipping if subtotal meets zone minimum
       if (selectedZone.freeShippingMin > 0 && totalPrice >= selectedZone.freeShippingMin) return 0;
@@ -221,6 +227,10 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
         // Reset delivery slot
         setDeliverySlotId(null);
         setDeliverySlotLabel(null);
+        // Reset gojek
+        setGojekFee(0);
+        setGojekDistance(0);
+        setGojekAddress("");
         toast.success("Pesanan berhasil dibuat!");
         if (onCheckoutSuccess) onCheckoutSuccess();
       } else {
@@ -382,7 +392,7 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                       value="gojek"
                       icon={<Bike className="h-4 w-4" />}
                       title="Gojek"
-                      desc="Bayar ke kurir"
+                      desc={deliveryMethod === "gojek" && gojekFee > 0 ? formatIDR(gojekFee) : "Hitung ongkir"}
                       accent="cyan"
                     />
                     <RadioCard
@@ -430,12 +440,16 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                     </div>
                   )}
 
-                  {/* Gojek info */}
+                  {/* Gojek shipping calculator (Google Maps) */}
                   {deliveryMethod === "gojek" && (
-                    <div className="mt-3 rounded-lg bg-emerald-500/5 p-2.5 ring-1 ring-emerald-500/20">
-                      <p className="text-[10px] text-muted-foreground">
-                        🛵 Ongkir Gojek dibayar langsung ke kurir saat pesanan tiba. Pastikan alamat lengkap + nomor HP aktif.
-                      </p>
+                    <div className="mt-3 rounded-lg bg-cyan-500/5 p-2.5 ring-1 ring-cyan-500/20">
+                      <GojekShippingCalculator
+                        onShippingChange={(fee, dist, addr) => {
+                          setGojekFee(fee);
+                          setGojekDistance(dist);
+                          setGojekAddress(addr);
+                        }}
+                      />
                     </div>
                   )}
 
