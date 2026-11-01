@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package, Ticket, X } from "lucide-react";
+import { Loader2, CheckCircle2, Truck, Store, CreditCard, Banknote, Wallet, Package, Ticket, X, Bike } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { useCustomerStore } from "@/lib/store/customer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatIDR } from "@/lib/mock-data";
 import type { CheckoutResponse } from "@/types/grocery";
 import { toast } from "sonner";
@@ -41,12 +42,32 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
     city: "",
     notes: "",
   });
-  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
+  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup" | "gojek">("delivery");
+  const [deliveryZones, setDeliveryZones] = useState<{id:string;name:string;fee:number;freeShippingMin:number}[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState<string>("");
+  const [selectedZone, setSelectedZone] = useState<{id:string;name:string;fee:number;freeShippingMin:number} | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "transfer" | "ewallet">("cod");
 
   // Delivery slot state (when scheduling enabled)
   const [deliverySlotId, setDeliverySlotId] = useState<string | null>(null);
   const [deliverySlotLabel, setDeliverySlotLabel] = useState<string | null>(null);
+
+  // Fetch delivery zones on mount
+  useEffect(() => {
+    fetch("/api/delivery/zones")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.zones)) {
+          setDeliveryZones(data.zones);
+          // Auto-select first zone if available
+          if (data.zones.length > 0) {
+            setSelectedZoneId(data.zones[0].id);
+            setSelectedZone(data.zones[0]);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Prefill form when customer is logged in (default address/name/phone).
   // Only prefill empty fields — don't overwrite if customer already typed.
@@ -77,10 +98,22 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
   const closeCart = useCartStore((s) => s.closeCart);
 
   const FREE_SHIPPING_THRESHOLD = 50000;
-  const baseFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD || deliveryMethod === "pickup";
-  const baseShipping = baseFreeShipping ? 0 : 9000;
+
+  // Calculate shipping based on delivery method + zone
+  const calculatedShipping = (() => {
+    if (deliveryMethod === "pickup" || deliveryMethod === "gojek") return 0;
+    if (deliveryMethod === "delivery" && selectedZone) {
+      // Free shipping if subtotal meets zone minimum
+      if (selectedZone.freeShippingMin > 0 && totalPrice >= selectedZone.freeShippingMin) return 0;
+      return selectedZone.fee;
+    }
+    // Fallback: default flat rate (backward compat)
+    return totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : 9000;
+  })();
+
+  const baseFreeShipping = calculatedShipping === 0;
   const freeShipping = baseFreeShipping || couponFreeShipping;
-  const shipping = freeShipping ? 0 : baseShipping;
+  const shipping = freeShipping ? 0 : calculatedShipping;
   const grandTotal = Math.max(0, totalPrice - couponDiscount + shipping);
 
   // Reset coupon when cart changes (items or qty) — stale discount
@@ -335,26 +368,79 @@ export function CheckoutDialog({ open, onOpenChange, onTrackOrder, onCheckoutSuc
                   </h3>
                   <RadioGroup
                     value={deliveryMethod}
-                    onValueChange={(v) => setDeliveryMethod(v as "delivery" | "pickup")}
-                    className="grid grid-cols-2 gap-2"
+                    onValueChange={(v) => setDeliveryMethod(v as "delivery" | "pickup" | "gojek")}
+                    className="grid grid-cols-3 gap-2"
                   >
                     <RadioCard
                       value="delivery"
                       icon={<Truck className="h-4 w-4" />}
                       title="Antar"
-                      desc={freeShipping ? "Gratis ongkir" : formatIDR(shipping)}
+                      desc={deliveryMethod === "delivery" && selectedZone ? (shipping === 0 ? "Gratis" : formatIDR(shipping)) : "Pilih area"}
+                      accent="cyan"
+                    />
+                    <RadioCard
+                      value="gojek"
+                      icon={<Bike className="h-4 w-4" />}
+                      title="Gojek"
+                      desc="Bayar ke kurir"
                       accent="cyan"
                     />
                     <RadioCard
                       value="pickup"
                       icon={<Store className="h-4 w-4" />}
-                      title="Ambil Sendiri"
+                      title="Ambil"
                       desc="Gratis"
                       accent="cyan"
                     />
                   </RadioGroup>
+
+                  {/* Zone selector — only for "delivery" method */}
+                  {deliveryMethod === "delivery" && (
+                    <div className="mt-3 space-y-2">
+                      {deliveryZones.length > 0 ? (
+                        <div className="space-y-1.5">
+                          <Label className="text-[11px] font-medium text-muted-foreground">Pilih Area Pengiriman</Label>
+                          <Select
+                            value={selectedZoneId}
+                            onValueChange={(v) => {
+                              setSelectedZoneId(v);
+                              const zone = deliveryZones.find((z) => z.id === v);
+                              setSelectedZone(zone || null);
+                            }}
+                          >
+                            <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Pilih area..." /></SelectTrigger>
+                            <SelectContent>
+                              {deliveryZones.map((zone) => (
+                                <SelectItem key={zone.id} value={zone.id} className="text-xs">
+                                  {zone.name} — {zone.fee === 0 ? "Gratis" : formatIDR(zone.fee)}
+                                  {zone.freeShippingMin > 0 ? ` (gratis ≥ ${formatIDR(zone.freeShippingMin)})` : ""}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {selectedZone && selectedZone.freeShippingMin > 0 && totalPrice < selectedZone.freeShippingMin && (
+                            <p className="text-[10px] text-muted-foreground">
+                              Belanja {formatIDR(selectedZone.freeShippingMin - totalPrice)} lagi untuk gratis ongkir!
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-muted-foreground">Tidak ada zona pengiriman aktif. Hubungi admin.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Gojek info */}
+                  {deliveryMethod === "gojek" && (
+                    <div className="mt-3 rounded-lg bg-emerald-500/5 p-2.5 ring-1 ring-emerald-500/20">
+                      <p className="text-[10px] text-muted-foreground">
+                        🛵 Ongkir Gojek dibayar langsung ke kurir saat pesanan tiba. Pastikan alamat lengkap + nomor HP aktif.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="mt-2">
-                    <DeliveryEstimateDisplay method={deliveryMethod} variant="card" />
+                    <DeliveryEstimateDisplay method={deliveryMethod === "gojek" ? "delivery" : deliveryMethod} variant="card" />
                   </div>
 
                   {/* Delivery slot picker — only renders when scheduling enabled */}
