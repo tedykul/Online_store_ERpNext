@@ -46,7 +46,7 @@ export function PromoCarousel({ products, onOpenDetail }: PromoCarouselProps) {
             <Flame className="h-4 w-4 text-orange-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <h2 className="text-base font-bold tracking-tight md:text-lg">Sedang Promo</h2>
+            <h2 className="text-base font-extrabold tracking-tight md:text-lg">Sedang Promo</h2>
             <span className="text-xs text-muted-foreground">{promos.length} produk</span>
           </div>
         </div>

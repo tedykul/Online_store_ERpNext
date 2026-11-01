@@ -51,7 +51,7 @@ function CategoryPill({
         "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-medium transition-all whitespace-nowrap min-h-[44px]",
         active
           ? "bg-primary text-primary-foreground shadow-sm"
-          : "bg-secondary text-foreground hover:bg-accent"
+          : "bg-secondary/60 text-foreground ring-1 ring-border/50 hover:bg-accent hover:ring-border"
       )}
     >
       <span className="text-sm">{emoji}</span>

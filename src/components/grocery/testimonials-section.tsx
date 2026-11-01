@@ -335,7 +335,7 @@ export function TestimonialsSection({ testimonials: dbTestimonials }: Testimonia
         <div className="mt-10 md:hidden">
           {/* Carousel header with arrows */}
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {activeIndex + 1} / {items.length}
             </span>
             <div className="flex gap-2">

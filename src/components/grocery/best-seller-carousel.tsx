@@ -48,7 +48,7 @@ export function BestSellerCarousel({ products, onOpenDetail }: BestSellerCarouse
             <TrendingUp className="h-4 w-4 text-orange-500" />
           </div>
           <div className="flex items-baseline gap-2">
-            <h2 className="text-base font-bold tracking-tight">Terlaris</h2>
+            <h2 className="text-base font-extrabold tracking-tight">Terlaris</h2>
             <span className="text-xs text-muted-foreground">{bestSellers.length} produk</span>
           </div>
         </div>

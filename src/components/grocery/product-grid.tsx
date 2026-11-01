@@ -68,7 +68,7 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5 xl:grid-cols-5">
         {Array.from({ length: 10 }).map((_, i) => (
           <div key={i} className="flex flex-col rounded-2xl bg-card">
             <Skeleton className="aspect-square w-full rounded-2xl" />
@@ -107,7 +107,7 @@ export function ProductGrid({ products, loading, source, onOpenDetail }: Product
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5 xl:grid-cols-5">
         {visibleProducts.map((p, i) => (
           <ProductCard key={p.id} product={p} index={i} onOpenDetail={onOpenDetail} />
         ))}

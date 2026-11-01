@@ -37,7 +37,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.3) }}
-      className="group relative flex flex-col rounded-2xl bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 hover:ring-1 hover:ring-primary/20"
+      className="group relative flex flex-col rounded-2xl bg-card shadow-sm ring-1 ring-border/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 hover:ring-primary/30"
     >
       {/* Image — photo-forward, no border, rounded top */}
       <div
