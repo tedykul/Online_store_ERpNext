@@ -72,6 +72,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Reject items with invalid price (0 or undefined)
+    const invalidPriceItems = payload.items.filter((i) => !i.product.price || i.product.price <= 0);
+    if (invalidPriceItems.length > 0) {
+      return NextResponse.json(
+        { success: false, message: "Ada produk dengan harga tidak valid (Rp 0). Hapus dari keranjang dan coba lagi." },
+        { status: 400 }
+      );
+    }
+
     const removedCount = originalItemCount - payload.items.length;
     const removedWarning = removedCount > 0
       ? ` (${removedCount} produk tidak tersedia telah dihapus dari pesanan)`

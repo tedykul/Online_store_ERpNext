@@ -92,7 +92,7 @@ export function serializeProduct(
     description: row.description || "",
     longDescription: row.longDescription || undefined,
     category: row.category || "Lainnya",
-    price: row.price ?? 0,
+    price: typeof row.price === "number" && row.price > 0 ? row.price : 0,
     oldPrice: row.oldPrice ?? undefined,
     unit: row.unit || "pcs",
     stock: typeof row.stock === "number" ? row.stock : 0,

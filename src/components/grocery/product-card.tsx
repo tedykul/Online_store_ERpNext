@@ -22,7 +22,7 @@ export function ProductCard({ product, index = 0, onOpenDetail }: ProductCardPro
   const updateQty = useCartStore((s) => s.updateQty);
 
   const inCart = items.find((i) => i.product.id === product.id);
-  const outOfStock = !product.stock || product.stock <= 0;
+  const outOfStock = !product.stock || product.stock <= 0 || !product.price || product.price <= 0;
   const discount =
     product.oldPrice && product.oldPrice > product.price
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
