@@ -87,10 +87,14 @@ function ProductDetailContent({
   product,
   onOpenChange,
   onBuyNow,
+  relatedProducts,
+  onSelectRelated,
 }: {
   product: Product;
   onOpenChange: (open: boolean) => void;
   onBuyNow?: () => void;
+  relatedProducts?: Product[];
+  onSelectRelated?: (product: Product) => void;
 }) {
   const [qty, setQty] = useState(1);
 
@@ -110,10 +114,10 @@ function ProductDetailContent({
   const effectiveUnit = selectedVariant?.unit ?? product.unit;
   const effectiveOutOfStock = effectiveStock <= 0;
   const discount =
-    product.oldPrice && product.oldPrice > product.price
-      ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+    effectiveOldPrice && effectiveOldPrice > effectivePrice
+      ? Math.round(((effectiveOldPrice - effectivePrice) / effectiveOldPrice) * 100)
       : 0;
-  const savings = product.oldPrice ? product.oldPrice - product.price : 0;
+  const savings = effectiveOldPrice ? effectiveOldPrice - effectivePrice : 0;
 
   const inCart = items.find((i) => i.product.id === product.id);
   // Dynamic rating from OrderReview (store-wide, fetched on mount)
