@@ -95,7 +95,7 @@ export function serializeProduct(
     price: row.price ?? 0,
     oldPrice: row.oldPrice ?? undefined,
     unit: row.unit || "pcs",
-    stock: row.stock ?? 0,
+    stock: typeof row.stock === "number" ? row.stock : 0,
     emoji: row.emoji || "🛒",
     image: row.image || undefined,
     organic: row.organic,
