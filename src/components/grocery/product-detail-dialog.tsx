@@ -35,7 +35,6 @@ import { formatIDR } from "@/lib/mock-data";
 import type { Product, ProductVariant } from "@/types/grocery";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { formatIDR } from "@/lib/mock-data";
 import { ProductImage } from "./product-image";
 
 interface ProductDetailDialogProps {
