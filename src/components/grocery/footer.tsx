@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Settings, Clock, ShieldCheck, Truck, CreditCard, ChevronDown, ChevronRight, HelpCircle } from "lucide-react";
+import { Leaf, Mail, Phone, MapPin, Facebook, Instagram, Twitter, ArrowUp, Send, Clock, ShieldCheck, Truck, CreditCard, ChevronDown, ChevronRight, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NewsletterForm } from "./newsletter-form";
 import { cn } from "@/lib/utils";
@@ -22,8 +22,6 @@ interface FooterProps {
     socialTiktok: string | null;
     socialWhatsapp: string | null;
   };
-  /** Open admin overlay. */
-  onOpenAdmin?: () => void;
   /** Open order tracking dialog. */
   onTrackOrder?: () => void;
   /** Open order history dialog. */
@@ -49,7 +47,7 @@ const PAYMENT_METHODS = [
  * Mobile: accordion collapsible sections (reduces cognitive load, bigger touch targets)
  * Desktop: 4-column grid (more real estate, no accordion needed)
  */
-export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: FooterProps = {}) {
+export function Footer({ content, onTrackOrder, onOrderHistory }: FooterProps = {}) {
   const brandName = content?.brandName ?? "SayurLogi";
   // Shortened brand text for mobile (1 line vs 3)
   const brandTextLong = content?.footerBrandText ?? "Marketplace sayur & buah segar langsung dari petani lokal. Mendukung ekonomi petani Indonesia.";
@@ -362,11 +360,6 @@ export function Footer({ content, onOpenAdmin, onTrackOrder, onOrderHistory }: F
             <a href="#faq" onClick={handleNavClick("faq")} className="hover:text-primary transition-colors">
               Privasi
             </a>
-            {onOpenAdmin && (
-              <Button variant="ghost" size="icon" onClick={onOpenAdmin} className="h-7 w-7 rounded-full hover:bg-primary hover:text-primary-foreground" aria-label="Buka admin dashboard" title="Admin (Ctrl+Shift+A)">
-                <Settings className="h-3.5 w-3.5" />
-              </Button>
-            )}
             <Button variant="ghost" size="icon" onClick={scrollToTop} className="h-7 w-7 rounded-full hover:bg-primary hover:text-primary-foreground" aria-label="Kembali ke atas" title="Kembali ke atas">
               <ArrowUp className="h-3.5 w-3.5" />
             </Button>
