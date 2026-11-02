@@ -115,8 +115,27 @@ function ProductDetailContent({
   const savings = product.oldPrice ? product.oldPrice - product.price : 0;
 
   const inCart = items.find((i) => i.product.id === product.id);
-  const rating = product.rating ?? 4.5;
-  const reviewCount = product.reviewCount ?? 0;
+  // Dynamic rating from OrderReview (store-wide, fetched on mount)
+  const [realRating, setRealRating] = useState<number | null>(null);
+  const [realReviewCount, setRealReviewCount] = useState<number>(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/reviews?aggregate=true&limit=1")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (cancelled || !data?.aggregate) return;
+        if (data.aggregate.count > 0) {
+          setRealRating(data.aggregate.average);
+          setRealReviewCount(data.aggregate.count);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [product.id]);
+
+  const rating = realRating ?? product.rating ?? 4.5;
+  const reviewCount = realReviewCount || product.reviewCount || 0;
   const hasReviews = reviewCount > 0;
 
   const handleAddToCart = () => {
