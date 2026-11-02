@@ -271,7 +271,8 @@ export function HomeClient({ content }: HomeClientProps) {
         <ContactSection content={content} />
       </main>
 
-      <Footer content={content} onTrackOrder={() => setTrackingOpen(true)} onOrderHistory={() => setHistoryOpen(true)}
+      <Footer
+        content={content}
         onTrackOrder={() => { setTrackingId(undefined); setTrackingOpen(true); }}
         onOrderHistory={() => setHistoryOpen(true)}
       />
