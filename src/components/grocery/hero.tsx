@@ -77,7 +77,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-balance md:text-6xl md:tracking-tighter"
+            className="font-display text-3xl font-extrabold leading-[1.15] tracking-tight text-balance md:text-6xl md:tracking-tighter"
           >
             <span className="font-bold text-muted-foreground">{titleA}</span>{" "}
             <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent font-black">
@@ -91,7 +91,7 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-md text-base text-foreground/75 leading-relaxed md:text-lg"
+            className="hidden max-w-md text-base text-foreground/75 leading-relaxed md:block md:text-lg"
           >
             {subtitle}
           </motion.p>
@@ -111,12 +111,12 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
               <span>· 5.000+ pelanggan</span>
             </span>
             <span className="hidden sm:inline text-border">|</span>
-            <span className="flex items-center gap-1">
+            <span className="hidden sm:flex items-center gap-1">
               <Clock className="h-3.5 w-3.5 text-orange-500" />
               <strong className="text-foreground">Antar 2 jam</strong>
             </span>
             <span className="hidden sm:inline text-border">|</span>
-            <span className="flex items-center gap-1">
+            <span className="hidden sm:flex items-center gap-1">
               <Truck className="h-3.5 w-3.5 text-primary" />
               <strong className="text-foreground">Gratis ongkir</strong> min. Rp50rb
             </span>
@@ -127,16 +127,16 @@ export function Hero({ onShopNow, onViewPromo, content }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-3 pt-1"
+            className="flex flex-wrap gap-2 pt-1 md:gap-3"
           >
-            <Button size="lg" className="rounded-full px-7 h-12 text-base shadow-lg shadow-orange-500/30 bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 group" onClick={onShopNow}>
+            <Button size="lg" className="rounded-full px-5 h-11 text-sm shadow-lg shadow-orange-500/30 bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 group md:px-7 md:h-12 md:text-base">
               {ctaPrimary}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button
               size="lg"
               variant="secondary"
-              className="rounded-full px-7 h-12 text-base bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-200 dark:border-orange-800"
+              className="rounded-full px-5 h-11 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-900/50 border border-orange-200 dark:border-orange-800 md:px-7 md:h-12 md:text-base"
               onClick={handleViewPromo}
             >
               {ctaSecondary}

@@ -32,6 +32,7 @@ import { OrderTrackingDialog } from "@/components/grocery/order-tracking-dialog"
 import { OrderHistoryDialog } from "@/components/grocery/order-history-dialog";
 import { SharedWishlistDialog } from "@/components/grocery/shared-wishlist-dialog";
 import { CustomerAuthDialog } from "@/components/grocery/customer-auth-dialog";
+import { StickyCartBar } from "@/components/grocery/sticky-cart-bar";
 import { useCustomerStore } from "@/lib/store/customer";
 import { Suspense } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -327,6 +328,9 @@ export function HomeClient({ content }: HomeClientProps) {
       <Suspense fallback={null}>
         <SharedWishlistDialog />
       </Suspense>
+
+      {/* Sticky mobile cart bar — shows when cart has items */}
+      <StickyCartBar />
 
       {/* Customer auth dialog (login/register) — controlled by useCustomerStore */}
       <CustomerAuthDialog />
