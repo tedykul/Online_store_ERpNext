@@ -74,6 +74,8 @@ export function ProductDetailDialog({
             product={product}
             onOpenChange={onOpenChange}
             onBuyNow={onBuyNow}
+            relatedProducts={relatedProducts}
+            onSelectRelated={onSelectRelated}
           />
         ) : null}
       </DialogContent>
