@@ -32,9 +32,10 @@ import {
 import { motion } from "framer-motion";
 import { useCartStore } from "@/lib/store/cart";
 import { formatIDR } from "@/lib/mock-data";
-import type { Product } from "@/types/grocery";
+import type { Product, ProductVariant } from "@/types/grocery";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { formatIDR } from "@/lib/mock-data";
 import { ProductImage } from "./product-image";
 
 interface ProductDetailDialogProps {
@@ -43,6 +44,10 @@ interface ProductDetailDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Called when user clicks "Beli Sekarang" (Buy Now). Optional. */
   onBuyNow?: () => void;
+  /** Related products for cross-sell ("Beli ini juga"). Optional. */
+  relatedProducts?: Product[];
+  /** Called when user clicks a related product. Optional. */
+  onSelectRelated?: (product: Product) => void;
 }
 
 /**
@@ -55,6 +60,8 @@ export function ProductDetailDialog({
   open,
   onOpenChange,
   onBuyNow,
+  relatedProducts,
+  onSelectRelated,
 }: ProductDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,6 +98,16 @@ function ProductDetailContent({
   const updateQty = useCartStore((s) => s.updateQty);
 
   const outOfStock = product.stock <= 0;
+  // Variant state
+  const variants = product.variants || [];
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  
+  // Effective price/stock (variant overrides if selected)
+  const effectivePrice = selectedVariant?.price ?? product.price;
+  const effectiveOldPrice = selectedVariant?.oldPrice ?? product.oldPrice;
+  const effectiveStock = selectedVariant?.stock ?? product.stock;
+  const effectiveUnit = selectedVariant?.unit ?? product.unit;
+  const effectiveOutOfStock = effectiveStock <= 0;
   const discount =
     product.oldPrice && product.oldPrice > product.price
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
@@ -104,7 +121,7 @@ function ProductDetailContent({
 
   const handleAddToCart = () => {
     if (inCart) {
-      const newQty = Math.min(inCart.quantity + qty, product.stock);
+      const newQty = Math.min(inCart.quantity + qty, effectiveStock);
       updateQty(product.id, newQty);
       toast.success(`Diperbarui — ${product.name} jadi ${newQty} di keranjang`);
     } else {
@@ -116,7 +133,7 @@ function ProductDetailContent({
 
   const handleBuyNow = () => {
     if (inCart) {
-      const newQty = Math.min(inCart.quantity + qty, product.stock);
+      const newQty = Math.min(inCart.quantity + qty, effectiveStock);
       updateQty(product.id, newQty);
     } else {
       addItem(product, qty);
@@ -218,7 +235,7 @@ function ProductDetailContent({
             <Separator orientation="vertical" className="h-4" />
             <span className="flex items-center gap-1 text-muted-foreground">
               <Package className="h-3.5 w-3.5" />
-              Stok: {product.stock} {product.unit}
+              Stok: {effectiveStock} {effectiveUnit}
             </span>
           </div>
           {/* Weight/unit specification — critical for grocery context */}
@@ -237,16 +254,16 @@ function ProductDetailContent({
             {/* Price — single savings message (was 2 redundant badges) */}
             <div className="flex items-end gap-3">
               <div className="flex flex-col">
-                {product.oldPrice && (
+                {effectiveOldPrice && (
                   <span className="text-sm font-medium text-foreground/60 line-through decoration-red-500/70 decoration-2">
-                    {formatIDR(product.oldPrice)}
+                    {formatIDR(effectiveOldPrice)}
                   </span>
                 )}
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-3xl font-extrabold text-primary">
-                    {formatIDR(product.price)}
+                    {formatIDR(effectivePrice)}
                   </span>
-                  <span className="text-sm text-muted-foreground">/{product.unit}</span>
+                  <span className="text-sm text-muted-foreground">/{effectiveUnit}</span>
                 </div>
               </div>
               {savings > 0 && (
@@ -271,6 +288,35 @@ function ProductDetailContent({
                   </Badge>
                 ))}
               </div>
+            )}
+
+            {/* Variant selector — pill buttons */}
+            {variants.length > 0 && (
+              <section>
+                <h3 className="mb-2 text-sm font-semibold">Pilih Varian</h3>
+                <div className="flex flex-wrap gap-2">
+                  {variants.map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => setSelectedVariant(v)}
+                      className={cn(
+                        "rounded-xl border px-3 py-2 text-xs font-semibold transition-all",
+                        selectedVariant?.id === v.id
+                          ? "border-primary bg-primary/10 text-primary ring-1 ring-primary"
+                          : v.stock <= 0
+                          ? "border-border/40 bg-muted/30 text-muted-foreground/50 cursor-not-allowed"
+                          : "border-border hover:border-primary/50 hover:bg-accent/50"
+                      )}
+                      disabled={v.stock <= 0}
+                    >
+                      {v.name}
+                      <span className="block text-[10px] font-normal text-muted-foreground">
+                        {v.stock <= 0 ? "Habis" : formatIDR(v.price)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* Long description — relaxed line-height for readability */}
@@ -330,11 +376,45 @@ function ProductDetailContent({
               </div>
             </section>
           </div>
+
+          {/* Related Products — "Beli ini juga" cross-sell */}
+          {relatedProducts && relatedProducts.length > 0 && onSelectRelated && (
+            <section className="border-t border-border/40 pt-4">
+              <h3 className="mb-3 text-sm font-semibold flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Beli Ini Juga
+              </h3>
+              <div className="flex gap-3 overflow-x-auto scrollbar-grocery pb-2">
+                {relatedProducts.slice(0, 6).map((rp) => (
+                  <button
+                    key={rp.id}
+                    onClick={() => onSelectRelated(rp)}
+                    className="group flex w-28 shrink-0 flex-col gap-1.5 text-left"
+                  >
+                    <div className="relative aspect-square overflow-hidden rounded-xl bg-secondary/30 ring-1 ring-border/50 transition-all group-hover:ring-primary/30">
+                      <ProductImage
+                        product={rp}
+                        emojiClassName="text-3xl"
+                        className="h-full w-full"
+                      />
+                      {rp.onSale && rp.oldPrice && (
+                        <span className="absolute left-1.5 top-1.5 rounded bg-stone-900/90 px-1 py-0.5 text-[8px] font-bold text-white">
+                          -{Math.round(((rp.oldPrice - rp.price) / rp.oldPrice) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    <p className="line-clamp-1 text-xs font-semibold leading-tight">{rp.name}</p>
+                    <p className="text-xs font-extrabold text-primary">{formatIDR(rp.price)}</p>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
         </ScrollArea>
 
         {/* Sticky footer: qty stepper + add to cart.
             On mobile, this is the critical conversion bar — always visible above fold. */}
-        {!outOfStock ? (
+        {!effectiveOutOfStock ? (
           <div className="sticky bottom-0 border-t border-border/60 bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/85 p-3 md:p-4 shrink-0 shadow-[0_-2px_8px_-4px_rgba(0,0,0,0.1)]">
             {inCart && (
               <div className="mb-2.5 flex items-center justify-between rounded-lg bg-primary/5 px-3 py-2 text-xs">
@@ -364,10 +444,10 @@ function ProductDetailContent({
                   </button>
                   <span className="min-w-8 text-center text-base font-bold tabular-nums md:min-w-10">{qty}</span>
                   <button
-                    onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
+                    onClick={() => setQty((q) => Math.min(effectiveStock, q + 1))}
                     className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-background transition-colors disabled:opacity-40 md:h-10 md:w-10"
                     aria-label="Tambah jumlah"
-                    disabled={qty >= product.stock}
+                    disabled={qty >= effectiveStock}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -396,7 +476,7 @@ function ProductDetailContent({
           <div className="sticky bottom-0 border-t border-border/60 bg-destructive/5 p-4 shrink-0">
             <div className="flex items-center justify-center gap-2 text-destructive font-semibold">
               <Package className="h-5 w-5" />
-              Maaf, produk ini sedang habis
+              Maaf, varian ini sedang habis
             </div>
           </div>
         )}

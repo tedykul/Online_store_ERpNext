@@ -290,6 +290,10 @@ export function HomeClient({ content }: HomeClientProps) {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         onBuyNow={() => setCheckoutOpen(true)}
+        relatedProducts={detailProduct ? products.filter((p) => p.category === detailProduct.category && p.id !== detailProduct.id).slice(0, 6) : []}
+        onSelectRelated={(p) => {
+          setDetailProduct(p);
+        }}
       />
       <WishlistSheet onProductClick={handleOpenDetail} />
       <ContactSheet

@@ -43,6 +43,18 @@ export interface Product {
   storageTip?: string;
   /** Origin region/city. Optional. */
   origin?: string;
+  /** Product variants (e.g. 250gr, 500gr, 1kg). Optional. */
+  variants?: ProductVariant[];
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  sku: string | null;
+  price: number;
+  oldPrice?: number | null;
+  stock: number;
+  unit: string;
 }
 
 export interface Category {
